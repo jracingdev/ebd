@@ -17,7 +17,7 @@ const kGroups = <String>[
 bool isDefaultGroup(String grupo) => kGroups.contains(grupo);
 
 /// Versão do formato de backup JSON.
-const kBackupVersion = 5;
+const kBackupVersion = 6;
 
 class Student extends Equatable {
   const Student({
@@ -284,6 +284,7 @@ class AttendancePerson extends Equatable {
     required this.nome,
     required this.presente,
     this.alunoId,
+    this.trouxeBiblia = false,
   });
 
   final String id;
@@ -291,12 +292,18 @@ class AttendancePerson extends Equatable {
   final bool presente;
   final String? alunoId;
 
+  /// Marca se o aluno trouxe a Bíblia na sessão.
+  final bool trouxeBiblia;
+
   factory AttendancePerson.fromJson(Map<String, dynamic> json) =>
       AttendancePerson(
         id: json['id'] as String,
         nome: json['nome'] as String,
         presente: json['presente'] as bool? ?? false,
         alunoId: json['alunoId'] as String? ?? json['aluno_id'] as String?,
+        trouxeBiblia: json['trouxeBiblia'] as bool? ??
+            json['trouxe_biblia'] as bool? ??
+            false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -304,17 +311,20 @@ class AttendancePerson extends Equatable {
         'nome': nome,
         'presente': presente,
         if (alunoId != null) 'alunoId': alunoId,
+        'trouxeBiblia': trouxeBiblia,
       };
 
-  AttendancePerson copyWith({bool? presente}) => AttendancePerson(
+  AttendancePerson copyWith({bool? presente, bool? trouxeBiblia}) =>
+      AttendancePerson(
         id: id,
         nome: nome,
         presente: presente ?? this.presente,
         alunoId: alunoId,
+        trouxeBiblia: trouxeBiblia ?? this.trouxeBiblia,
       );
 
   @override
-  List<Object?> get props => [id, nome, presente, alunoId];
+  List<Object?> get props => [id, nome, presente, alunoId, trouxeBiblia];
 }
 
 class AttendanceSession extends Equatable {
@@ -371,6 +381,7 @@ class AppBackup extends Equatable {
     required this.students,
     this.lessons = const [],
     this.customGroups = const [],
+    this.engagement = const {},
   });
 
   final int version;
@@ -382,6 +393,9 @@ class AppBackup extends Equatable {
   final List<Student> students;
   final List<Lesson> lessons;
   final List<String> customGroups;
+
+  /// Dados de sorteios / quiz / placar (mapa serializado).
+  final Map<String, dynamic> engagement;
 
   factory AppBackup.fromJson(Map<String, dynamic> json) => AppBackup(
         version: json['version'] as int? ?? kBackupVersion,
@@ -408,6 +422,9 @@ class AppBackup extends Equatable {
             .map((e) => e.toString())
             .where((g) => g.trim().isNotEmpty && !isDefaultGroup(g))
             .toList(),
+        engagement: json['engagement'] is Map
+            ? Map<String, dynamic>.from(json['engagement'] as Map)
+            : const {},
       );
 
   Map<String, dynamic> toJson() => {
@@ -420,6 +437,7 @@ class AppBackup extends Equatable {
         'students': students.map((e) => e.toJson()).toList(),
         'lessons': lessons.map((e) => e.toJson()).toList(),
         'customGroups': customGroups,
+        'engagement': engagement,
       };
 
   @override
@@ -433,6 +451,7 @@ class AppBackup extends Equatable {
         students,
         lessons,
         customGroups,
+        engagement,
       ];
 }
 

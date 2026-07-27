@@ -1,0 +1,2525 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "q001",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "Quem construiu a arca?",
+      "options": [
+        "Noé",
+        "Moisés",
+        "Abraão",
+        "Davi"
+      ],
+      "correct": 0,
+      "ref": "Gn 6"
+    },
+    {
+      "id": "q002",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "Quantos dias choveu no dilúvio?",
+      "options": [
+        "40",
+        "7",
+        "12",
+        "100"
+      ],
+      "correct": 0,
+      "ref": "Gn 7"
+    },
+    {
+      "id": "q003",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "Quem foi vendido pelos irmãos?",
+      "options": [
+        "José",
+        "Jacó",
+        "Isaque",
+        "Benjamim"
+      ],
+      "correct": 0,
+      "ref": "Gn 37"
+    },
+    {
+      "id": "q004",
+      "level": "facil",
+      "bookId": "exo",
+      "q": "Quem tirou Israel do Egito?",
+      "options": [
+        "Moisés",
+        "Josué",
+        "Arão",
+        "Samuel"
+      ],
+      "correct": 0,
+      "ref": "Êx 3"
+    },
+    {
+      "id": "q005",
+      "level": "facil",
+      "bookId": "exo",
+      "q": "O mar que Moisés atravessou foi o:",
+      "options": [
+        "Vermelho",
+        "Morto",
+        "Galileia",
+        "Jordão"
+      ],
+      "correct": 0,
+      "ref": "Êx 14"
+    },
+    {
+      "id": "q006",
+      "level": "facil",
+      "bookId": "exo",
+      "q": "Quantos mandamentos Deus deu a Moisés?",
+      "options": [
+        "10",
+        "7",
+        "12",
+        "5"
+      ],
+      "correct": 0,
+      "ref": "Êx 20"
+    },
+    {
+      "id": "q007",
+      "level": "facil",
+      "bookId": "jos",
+      "q": "Quem sucedeu Moisés?",
+      "options": [
+        "Josué",
+        "Calebe",
+        "Arão",
+        "Eli"
+      ],
+      "correct": 0,
+      "ref": "Js 1"
+    },
+    {
+      "id": "q008",
+      "level": "facil",
+      "bookId": "jui",
+      "q": "Quem derrotou Golias?",
+      "options": [
+        "Davi",
+        "Saul",
+        "Sansão",
+        "Gideão"
+      ],
+      "correct": 0,
+      "ref": "1Sm 17"
+    },
+    {
+      "id": "q009",
+      "level": "facil",
+      "bookId": "1sa",
+      "q": "Davi era:",
+      "options": [
+        "Pastor",
+        "Pescador",
+        "Carpinteiro",
+        "Faraó"
+      ],
+      "correct": 0,
+      "ref": "1Sm 16"
+    },
+    {
+      "id": "q010",
+      "level": "facil",
+      "bookId": "dan",
+      "q": "Quem foi lançado na cova dos leões?",
+      "options": [
+        "Daniel",
+        "Jonas",
+        "Pedro",
+        "Elias"
+      ],
+      "correct": 0,
+      "ref": "Dn 6"
+    },
+    {
+      "id": "q011",
+      "level": "facil",
+      "bookId": "jon",
+      "q": "Jonas foi engolido por um:",
+      "options": [
+        "Grande peixe",
+        "Leão",
+        "Dragão",
+        "Camelo"
+      ],
+      "correct": 0,
+      "ref": "Jn 1"
+    },
+    {
+      "id": "q012",
+      "level": "facil",
+      "bookId": "mat",
+      "q": "Onde Jesus nasceu?",
+      "options": [
+        "Belém",
+        "Nazaré",
+        "Jerusalém",
+        "Egito"
+      ],
+      "correct": 0,
+      "ref": "Mt 2"
+    },
+    {
+      "id": "q013",
+      "level": "facil",
+      "bookId": "mat",
+      "q": "Quem batizou Jesus?",
+      "options": [
+        "João Batista",
+        "Pedro",
+        "Paulo",
+        "Tiago"
+      ],
+      "correct": 0,
+      "ref": "Mt 3"
+    },
+    {
+      "id": "q014",
+      "level": "facil",
+      "bookId": "mat",
+      "q": "Quantos discípulos Jesus escolheu?",
+      "options": [
+        "12",
+        "10",
+        "7",
+        "70"
+      ],
+      "correct": 0,
+      "ref": "Mt 10"
+    },
+    {
+      "id": "q015",
+      "level": "facil",
+      "bookId": "joao",
+      "q": "Jesus ressuscitou no:",
+      "options": [
+        "Terceiro dia",
+        "Quinto dia",
+        "Sábado",
+        "Quarto dia"
+      ],
+      "correct": 0,
+      "ref": "Jo 20"
+    },
+    {
+      "id": "q016",
+      "level": "facil",
+      "bookId": "ato",
+      "q": "Quem escreveu Atos dos Apóstolos?",
+      "options": [
+        "Lucas",
+        "Paulo",
+        "Pedro",
+        "João"
+      ],
+      "correct": 0,
+      "ref": "Lc/At"
+    },
+    {
+      "id": "q017",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "O primeiro homem foi:",
+      "options": [
+        "Adão",
+        "Noé",
+        "Sete",
+        "Caim"
+      ],
+      "correct": 0,
+      "ref": "Gn 2"
+    },
+    {
+      "id": "q018",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "A primeira mulher foi:",
+      "options": [
+        "Eva",
+        "Sara",
+        "Rute",
+        "Maria"
+      ],
+      "correct": 0,
+      "ref": "Gn 2"
+    },
+    {
+      "id": "q019",
+      "level": "facil",
+      "bookId": "sal",
+      "q": "O livro com mais capítulos é:",
+      "options": [
+        "Salmos",
+        "Gênesis",
+        "Isaías",
+        "Mateus"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q020",
+      "level": "facil",
+      "bookId": "pro",
+      "q": "Provérbios ensina principalmente sobre:",
+      "options": [
+        "Sabedoria",
+        "Guerra",
+        "Genealogia",
+        "Sacrifícios"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q021",
+      "level": "facil",
+      "bookId": "rut",
+      "q": "Rute era da terra de:",
+      "options": [
+        "Moabe",
+        "Egito",
+        "Assíria",
+        "Babel"
+      ],
+      "correct": 0,
+      "ref": "Rt 1"
+    },
+    {
+      "id": "q022",
+      "level": "facil",
+      "bookId": "est",
+      "q": "Quem salvou o povo judeu no livro de Ester?",
+      "options": [
+        "Ester",
+        "Rute",
+        "Débora",
+        "Ana"
+      ],
+      "correct": 0,
+      "ref": "Et 4-7"
+    },
+    {
+      "id": "q023",
+      "level": "facil",
+      "bookId": "luc",
+      "q": "A parábola do filho pródigo está em:",
+      "options": [
+        "Lucas",
+        "Mateus",
+        "João",
+        "Marcos"
+      ],
+      "correct": 0,
+      "ref": "Lc 15"
+    },
+    {
+      "id": "q024",
+      "level": "facil",
+      "bookId": "mar",
+      "q": "O menor evangelho é:",
+      "options": [
+        "Marcos",
+        "João",
+        "Mateus",
+        "Lucas"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q025",
+      "level": "facil",
+      "bookId": "ap",
+      "q": "O último livro da Bíblia é:",
+      "options": [
+        "Apocalipse",
+        "Judas",
+        "Atos",
+        "Malaquias"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q026",
+      "level": "facil",
+      "bookId": "mal",
+      "q": "O último livro do AT é:",
+      "options": [
+        "Malaquias",
+        "Zacarias",
+        "Ageu",
+        "Daniel"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q027",
+      "level": "facil",
+      "bookId": "mat",
+      "q": "Jesus multiplicou pães e:",
+      "options": [
+        "Peixes",
+        "Uvas",
+        "Cordeiros",
+        "Mel"
+      ],
+      "correct": 0,
+      "ref": "Mt 14"
+    },
+    {
+      "id": "q028",
+      "level": "facil",
+      "bookId": "joao",
+      "q": "Lázaro era irmão de:",
+      "options": [
+        "Marta e Maria",
+        "Maria Madalena",
+        "Salomé",
+        "Ana"
+      ],
+      "correct": 0,
+      "ref": "Jo 11"
+    },
+    {
+      "id": "q029",
+      "level": "facil",
+      "bookId": "ato",
+      "q": "Saulo converteu-se no caminho de:",
+      "options": [
+        "Damasco",
+        "Jerusalém",
+        "Roma",
+        "Egito"
+      ],
+      "correct": 0,
+      "ref": "At 9"
+    },
+    {
+      "id": "q030",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "A torre de Babel representa:",
+      "options": [
+        "Orgulho humano",
+        "Sabedoria",
+        "Fé",
+        "Jeju"
+      ],
+      "correct": 0,
+      "ref": "Gn 11"
+    },
+    {
+      "id": "q031",
+      "level": "medio",
+      "bookId": "gen",
+      "q": "Abraão quase sacrificou:",
+      "options": [
+        "Isaque",
+        "Ismael",
+        "Jacó",
+        "José"
+      ],
+      "correct": 0,
+      "ref": "Gn 22"
+    },
+    {
+      "id": "q032",
+      "level": "medio",
+      "bookId": "gen",
+      "q": "Jacó teve quantos filhos?",
+      "options": [
+        "12",
+        "10",
+        "7",
+        "3"
+      ],
+      "correct": 0,
+      "ref": "Gn 35"
+    },
+    {
+      "id": "q033",
+      "level": "medio",
+      "bookId": "exo",
+      "q": "As pragas do Egito foram:",
+      "options": [
+        "10",
+        "7",
+        "12",
+        "3"
+      ],
+      "correct": 0,
+      "ref": "Êx 7-12"
+    },
+    {
+      "id": "q034",
+      "level": "medio",
+      "bookId": "num",
+      "q": "Quem falou com a jumenta?",
+      "options": [
+        "Balaão",
+        "Moisés",
+        "Josué",
+        "Coré"
+      ],
+      "correct": 0,
+      "ref": "Nm 22"
+    },
+    {
+      "id": "q035",
+      "level": "medio",
+      "bookId": "jos",
+      "q": "Quantas vezes Israel rodeou Jericó no sétimo dia?",
+      "options": [
+        "7",
+        "1",
+        "3",
+        "12"
+      ],
+      "correct": 0,
+      "ref": "Js 6"
+    },
+    {
+      "id": "q036",
+      "level": "medio",
+      "bookId": "jui",
+      "q": "Sansão era:",
+      "options": [
+        "Nazireu",
+        "Sacerdote",
+        "Rei",
+        "Profeta"
+      ],
+      "correct": 0,
+      "ref": "Jz 13"
+    },
+    {
+      "id": "q037",
+      "level": "medio",
+      "bookId": "1sa",
+      "q": "Samuel ungiu como primeiro rei:",
+      "options": [
+        "Saul",
+        "Davi",
+        "Salomão",
+        "Roboão"
+      ],
+      "correct": 0,
+      "ref": "1Sm 10"
+    },
+    {
+      "id": "q038",
+      "level": "medio",
+      "bookId": "1rs",
+      "q": "Salomão pediu a Deus:",
+      "options": [
+        "Sabedoria",
+        "Riqueza",
+        "Vingança",
+        "Exército"
+      ],
+      "correct": 0,
+      "ref": "1Rs 3"
+    },
+    {
+      "id": "q039",
+      "level": "medio",
+      "bookId": "2rs",
+      "q": "Quem foi arrebatado ao céu em um redemoinho?",
+      "options": [
+        "Elias",
+        "Eliseu",
+        "Enoque",
+        "Moisés"
+      ],
+      "correct": 0,
+      "ref": "2Rs 2"
+    },
+    {
+      "id": "q040",
+      "level": "medio",
+      "bookId": "nee",
+      "q": "Neemias reconstruiu os muros de:",
+      "options": [
+        "Jerusalém",
+        "Samaría",
+        "Babel",
+        "Nínive"
+      ],
+      "correct": 0,
+      "ref": "Ne 2-6"
+    },
+    {
+      "id": "q041",
+      "level": "medio",
+      "bookId": "jo",
+      "q": "Jó perdeu tudo, mas manteve:",
+      "options": [
+        "Fé em Deus",
+        "Seus filhos",
+        "Sua riqueza",
+        "Seu gado"
+      ],
+      "correct": 0,
+      "ref": "Jó 1-2"
+    },
+    {
+      "id": "q042",
+      "level": "medio",
+      "bookId": "isa",
+      "q": "Isaías profetizou o nascimento de um filho chamado:",
+      "options": [
+        "Emanuel",
+        "Josué",
+        "Davi",
+        "Samuel"
+      ],
+      "correct": 0,
+      "ref": "Is 7"
+    },
+    {
+      "id": "q043",
+      "level": "medio",
+      "bookId": "dan",
+      "q": "Os três hebreus na fornalha foram:",
+      "options": [
+        "Sadraque, Mesaque e Abede-Nego",
+        "Pedro, Tiago e João",
+        "Caim, Abel e Sete",
+        "Saul, Davi e Jônatas"
+      ],
+      "correct": 0,
+      "ref": "Dn 3"
+    },
+    {
+      "id": "q044",
+      "level": "medio",
+      "bookId": "ose",
+      "q": "Oséias casou-se com:",
+      "options": [
+        "Gômer",
+        "Rute",
+        "Ester",
+        "Raabe"
+      ],
+      "correct": 0,
+      "ref": "Os 1"
+    },
+    {
+      "id": "q045",
+      "level": "medio",
+      "bookId": "mat",
+      "q": "As bem-aventuranças estão no sermão:",
+      "options": [
+        "Do Monte",
+        "No barco",
+        "No templo",
+        "Em Cesaréia"
+      ],
+      "correct": 0,
+      "ref": "Mt 5"
+    },
+    {
+      "id": "q046",
+      "level": "medio",
+      "bookId": "mat",
+      "q": "Pedro negou Jesus quantas vezes?",
+      "options": [
+        "3",
+        "2",
+        "7",
+        "1"
+      ],
+      "correct": 0,
+      "ref": "Mt 26"
+    },
+    {
+      "id": "q047",
+      "level": "medio",
+      "bookId": "luc",
+      "q": "Zaqueu era:",
+      "options": [
+        "Publicano",
+        "Fariseu",
+        "Sacerdote",
+        "Soldado"
+      ],
+      "correct": 0,
+      "ref": "Lc 19"
+    },
+    {
+      "id": "q048",
+      "level": "medio",
+      "bookId": "joao",
+      "q": "Nicodemos visitou Jesus:",
+      "options": [
+        "De noite",
+        "De manhã",
+        "No templo",
+        "No Jordão"
+      ],
+      "correct": 0,
+      "ref": "Jo 3"
+    },
+    {
+      "id": "q049",
+      "level": "medio",
+      "bookId": "ato",
+      "q": "Pentecostes aconteceu em:",
+      "options": [
+        "Jerusalém",
+        "Roma",
+        "Antioquia",
+        "Éfeso"
+      ],
+      "correct": 0,
+      "ref": "At 2"
+    },
+    {
+      "id": "q050",
+      "level": "medio",
+      "bookId": "rom",
+      "q": "Romanos foi escrito por:",
+      "options": [
+        "Paulo",
+        "Pedro",
+        "João",
+        "Tiago"
+      ],
+      "correct": 0,
+      "ref": "Rm 1"
+    },
+    {
+      "id": "q051",
+      "level": "medio",
+      "bookId": "1co",
+      "q": "O capítulo do amor está em:",
+      "options": [
+        "1 Coríntios 13",
+        "Romanos 8",
+        "João 3",
+        "Salmos 23"
+      ],
+      "correct": 0,
+      "ref": "1Co 13"
+    },
+    {
+      "id": "q052",
+      "level": "medio",
+      "bookId": "ef",
+      "q": "Efésios fala da armadura de:",
+      "options": [
+        "Deus",
+        "Saul",
+        "Davi",
+        "Roma"
+      ],
+      "correct": 0,
+      "ref": "Ef 6"
+    },
+    {
+      "id": "q053",
+      "level": "medio",
+      "bookId": "fp",
+      "q": "Filipenses foi escrita da:",
+      "options": [
+        "Prisão",
+        "Igreja de Éfeso",
+        "Casa de Lídia",
+        "Sinagoga"
+      ],
+      "correct": 0,
+      "ref": "Fp 1"
+    },
+    {
+      "id": "q054",
+      "level": "medio",
+      "bookId": "hb",
+      "q": "Hebreus destaca Jesus como:",
+      "options": [
+        "Sumo sacerdote",
+        "Rei romano",
+        "Fariseu",
+        "Levita de Levi"
+      ],
+      "correct": 0,
+      "ref": "Hb 4-7"
+    },
+    {
+      "id": "q055",
+      "level": "medio",
+      "bookId": "tg",
+      "q": "Tiago diz que a fé sem obras é:",
+      "options": [
+        "Morta",
+        "Fraca",
+        "Inútil só às vezes",
+        "Perfeita"
+      ],
+      "correct": 0,
+      "ref": "Tg 2"
+    },
+    {
+      "id": "q056",
+      "level": "medio",
+      "bookId": "ap",
+      "q": "As cartas às igrejas em Apocalipse são:",
+      "options": [
+        "7",
+        "12",
+        "3",
+        "10"
+      ],
+      "correct": 0,
+      "ref": "Ap 2-3"
+    },
+    {
+      "id": "q057",
+      "level": "medio",
+      "bookId": "gen",
+      "q": "Melquisedeque era rei de:",
+      "options": [
+        "Salém",
+        "Sodoma",
+        "Egito",
+        "Ur"
+      ],
+      "correct": 0,
+      "ref": "Gn 14"
+    },
+    {
+      "id": "q058",
+      "level": "medio",
+      "bookId": "rut",
+      "q": "Boaz casou-se com:",
+      "options": [
+        "Rute",
+        "Noemi",
+        "Orfa",
+        "Raquel"
+      ],
+      "correct": 0,
+      "ref": "Rt 4"
+    },
+    {
+      "id": "q059",
+      "level": "medio",
+      "bookId": "1sa",
+      "q": "Jônatas era filho de:",
+      "options": [
+        "Saul",
+        "Davi",
+        "Samuel",
+        "Eli"
+      ],
+      "correct": 0,
+      "ref": "1Sm 18"
+    },
+    {
+      "id": "q060",
+      "level": "medio",
+      "bookId": "jon",
+      "q": "Jonas pregou em:",
+      "options": [
+        "Nínive",
+        "Babel",
+        "Tiro",
+        "Sidom"
+      ],
+      "correct": 0,
+      "ref": "Jn 3"
+    },
+    {
+      "id": "q061",
+      "level": "dificil",
+      "bookId": "gen",
+      "q": "Quantos anos viveu Matusalém?",
+      "options": [
+        "969",
+        "930",
+        "120",
+        "777"
+      ],
+      "correct": 0,
+      "ref": "Gn 5"
+    },
+    {
+      "id": "q062",
+      "level": "dificil",
+      "bookId": "exo",
+      "q": "O tabernáculo tinha o lugar santíssimo com:",
+      "options": [
+        "Arca da Aliança",
+        "Menorá só",
+        "Altar de bronze",
+        "Véu azul"
+      ],
+      "correct": 0,
+      "ref": "Êx 25-26"
+    },
+    {
+      "id": "q063",
+      "level": "dificil",
+      "bookId": "lev",
+      "q": "O Dia da Expiação é o:",
+      "options": [
+        "Yom Kippur / 10º do 7º mês",
+        "Páscoa",
+        "Pentecostes",
+        "Purim"
+      ],
+      "correct": 0,
+      "ref": "Lv 16"
+    },
+    {
+      "id": "q064",
+      "level": "dificil",
+      "bookId": "deu",
+      "q": "Deuteronômio significa:",
+      "options": [
+        "Segunda lei",
+        "Nova aliança",
+        "Cântico de Moisés",
+        "Livro dos juízes"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q065",
+      "level": "dificil",
+      "bookId": "jui",
+      "q": "Débora era:",
+      "options": [
+        "Profetisa e juíza",
+        "Rainha de Israel",
+        "Esposa de Saul",
+        "Irmã de Moisés"
+      ],
+      "correct": 0,
+      "ref": "Jz 4"
+    },
+    {
+      "id": "q066",
+      "level": "dificil",
+      "bookId": "1cr",
+      "q": "Quem organizou os levitas no templo?",
+      "options": [
+        "Davi",
+        "Salomão",
+        "Esdras",
+        "Samuel"
+      ],
+      "correct": 0,
+      "ref": "1Cr 23-25"
+    },
+    {
+      "id": "q067",
+      "level": "dificil",
+      "bookId": "2cr",
+      "q": "Josias encontrou o livro da Lei no:",
+      "options": [
+        "Templo",
+        "Palácio",
+        "Campo",
+        "Sinai"
+      ],
+      "correct": 0,
+      "ref": "2Cr 34"
+    },
+    {
+      "id": "q068",
+      "level": "dificil",
+      "bookId": "esd",
+      "q": "Esdras era:",
+      "options": [
+        "Sacerdote e escriba",
+        "Rei",
+        "General",
+        "Profeta de Judá só"
+      ],
+      "correct": 0,
+      "ref": "Ed 7"
+    },
+    {
+      "id": "q069",
+      "level": "dificil",
+      "bookId": "sal",
+      "q": "O Salmo 23 começa com:",
+      "options": [
+        "O Senhor é o meu pastor",
+        "Bem-aventurado o homem",
+        "Louva ao Senhor",
+        "Clama a mim"
+      ],
+      "correct": 0,
+      "ref": "Sl 23"
+    },
+    {
+      "id": "q070",
+      "level": "dificil",
+      "bookId": "ecl",
+      "q": "Eclesiastes conclui: teme a Deus e:",
+      "options": [
+        "Guarda os seus mandamentos",
+        "Busca riquezas",
+        "Foge do trabalho",
+        "Confia nos príncipes"
+      ],
+      "correct": 0,
+      "ref": "Ec 12"
+    },
+    {
+      "id": "q071",
+      "level": "dificil",
+      "bookId": "eze",
+      "q": "Ezequiel viu a visão do:",
+      "options": [
+        "Vale de ossos secos",
+        "Arbusto ardente",
+        "Escada ao céu",
+        "Trono de Salomão"
+      ],
+      "correct": 0,
+      "ref": "Ez 37"
+    },
+    {
+      "id": "q072",
+      "level": "dificil",
+      "bookId": "dan",
+      "q": "A escrita na parede foi:",
+      "options": [
+        "MENE, MENE, TEQUEL, PARSIM",
+        "JHWH",
+        "ICHTHYS",
+        "Shalom"
+      ],
+      "correct": 0,
+      "ref": "Dn 5"
+    },
+    {
+      "id": "q073",
+      "level": "dificil",
+      "bookId": "amo",
+      "q": "Amós era:",
+      "options": [
+        "Pastor de Tecoa",
+        "Sacerdote de Betel",
+        "Rei de Judá",
+        "Escriba de Esdras"
+      ],
+      "correct": 0,
+      "ref": "Am 1"
+    },
+    {
+      "id": "q074",
+      "level": "dificil",
+      "bookId": "hab",
+      "q": "Habacuque pergunta a Deus sobre:",
+      "options": [
+        "A injustiça",
+        "O dilúvio",
+        "O Êxodo",
+        "Jonas"
+      ],
+      "correct": 0,
+      "ref": "Hc 1"
+    },
+    {
+      "id": "q075",
+      "level": "dificil",
+      "bookId": "mat",
+      "q": "A genealogia de Mateus destaca:",
+      "options": [
+        "Jesus como Filho de Davi",
+        "Apenas os profetas",
+        "Os juízes",
+        "Os levitas"
+      ],
+      "correct": 0,
+      "ref": "Mt 1"
+    },
+    {
+      "id": "q076",
+      "level": "dificil",
+      "bookId": "luc",
+      "q": "Teófilo é mencionado em:",
+      "options": [
+        "Lucas e Atos",
+        "Mateus",
+        "João",
+        "Marcos"
+      ],
+      "correct": 0,
+      "ref": "Lc 1; At 1"
+    },
+    {
+      "id": "q077",
+      "level": "dificil",
+      "bookId": "joao",
+      "q": "O Logos (Verbo) está em:",
+      "options": [
+        "João 1",
+        "Mateus 5",
+        "Romanos 8",
+        "Apocalipse 1"
+      ],
+      "correct": 0,
+      "ref": "Jo 1"
+    },
+    {
+      "id": "q078",
+      "level": "dificil",
+      "bookId": "ato",
+      "q": "O concílio de Jerusalém tratou da:",
+      "options": [
+        "Circuncisão dos gentios",
+        "Construção do templo",
+        "Eleição de Matias",
+        "Prisão de Pedro"
+      ],
+      "correct": 0,
+      "ref": "At 15"
+    },
+    {
+      "id": "q079",
+      "level": "dificil",
+      "bookId": "gal",
+      "q": "Gálatas combate a:",
+      "options": [
+        "Justificação pela lei",
+        "Idolatria romana",
+        "Negação da ressurreição",
+        "Divisão de classes"
+      ],
+      "correct": 0,
+      "ref": "Gl 3"
+    },
+    {
+      "id": "q080",
+      "level": "dificil",
+      "bookId": "cl",
+      "q": "Colossenses combate a:",
+      "options": [
+        "Filosofia e tradições humanas",
+        "Preguiça",
+        "Guerra santa",
+        "Poligamia"
+      ],
+      "correct": 0,
+      "ref": "Cl 2"
+    },
+    {
+      "id": "q081",
+      "level": "dificil",
+      "bookId": "1tm",
+      "q": "Paulo instrui Timóteo sobre:",
+      "options": [
+        "Liderança na igreja",
+        "Construção de barcos",
+        "Coleta de impostos",
+        "Censos"
+      ],
+      "correct": 0,
+      "ref": "1Tm"
+    },
+    {
+      "id": "q082",
+      "level": "dificil",
+      "bookId": "2tm",
+      "q": "Paulo diz que toda Escritura é:",
+      "options": [
+        "Inspirada por Deus",
+        "Opcional",
+        "Só para judeus",
+        "Alegórica"
+      ],
+      "correct": 0,
+      "ref": "2Tm 3"
+    },
+    {
+      "id": "q083",
+      "level": "dificil",
+      "bookId": "1pe",
+      "q": "Pedro chama os crentes de:",
+      "options": [
+        "Pedras vivas",
+        "Soldados de César",
+        "Fariseus novos",
+        "Levitas"
+      ],
+      "correct": 0,
+      "ref": "1Pe 2"
+    },
+    {
+      "id": "q084",
+      "level": "dificil",
+      "bookId": "1jo",
+      "q": "1 João enfatiza:",
+      "options": [
+        "Amor e verdade",
+        "Genealogias",
+        "Sacrifícios de animais",
+        "Reis de Israel"
+      ],
+      "correct": 0,
+      "ref": "1Jo 4"
+    },
+    {
+      "id": "q085",
+      "level": "dificil",
+      "bookId": "jd",
+      "q": "Judas cita a disputa de Miguel com:",
+      "options": [
+        "Diabo pelo corpo de Moisés",
+        "Saul",
+        "Faraó",
+        "Golias"
+      ],
+      "correct": 0,
+      "ref": "Jd 9"
+    },
+    {
+      "id": "q086",
+      "level": "dificil",
+      "bookId": "ap",
+      "q": "A Nova Jerusalém desce de:",
+      "options": [
+        "Deus / do céu",
+        "Roma",
+        "Babel",
+        "Egito"
+      ],
+      "correct": 0,
+      "ref": "Ap 21"
+    },
+    {
+      "id": "q087",
+      "level": "dificil",
+      "bookId": "isa",
+      "q": "O servo sofredor está em Isaías:",
+      "options": [
+        "53",
+        "1",
+        "66",
+        "7"
+      ],
+      "correct": 0,
+      "ref": "Is 53"
+    },
+    {
+      "id": "q088",
+      "level": "dificil",
+      "bookId": "jer",
+      "q": "Jeremias é conhecido como o:",
+      "options": [
+        "Profeta chorão",
+        "Rei sábio",
+        "Juiz",
+        "Apóstolo"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q089",
+      "level": "dificil",
+      "bookId": "miq",
+      "q": "Miquéias profetizou o nascimento em:",
+      "options": [
+        "Belém",
+        "Nazaré",
+        "Hebrom",
+        "Silo"
+      ],
+      "correct": 0,
+      "ref": "Mq 5"
+    },
+    {
+      "id": "q090",
+      "level": "dificil",
+      "bookId": "zac",
+      "q": "Zacarias fala do rei que vem montado em:",
+      "options": [
+        "Jumento",
+        "Cavalo branco",
+        "Camelo",
+        "Carruagem"
+      ],
+      "correct": 0,
+      "ref": "Zc 9"
+    },
+    {
+      "id": "q091",
+      "level": "expert",
+      "bookId": "gen",
+      "q": "Quem foi o primeiro a ser chamado hebreu na Escritura?",
+      "options": [
+        "Abrão",
+        "Jacó",
+        "José",
+        "Moisés"
+      ],
+      "correct": 0,
+      "ref": "Gn 14:13"
+    },
+    {
+      "id": "q092",
+      "level": "expert",
+      "bookId": "exo",
+      "q": "Bezaleel trabalhou na:",
+      "options": [
+        "Construção do tabernáculo",
+        "Arca de Noé",
+        "Templo de Salomão",
+        "Muralha de Neemias"
+      ],
+      "correct": 0,
+      "ref": "Êx 31"
+    },
+    {
+      "id": "q093",
+      "level": "expert",
+      "bookId": "num",
+      "q": "As cidades de refúgio eram:",
+      "options": [
+        "6",
+        "3",
+        "12",
+        "7"
+      ],
+      "correct": 0,
+      "ref": "Nm 35"
+    },
+    {
+      "id": "q094",
+      "level": "expert",
+      "bookId": "jos",
+      "q": "A porção de Calebe foi:",
+      "options": [
+        "Hebrom",
+        "Silo",
+        "Betel",
+        "Jerusalém"
+      ],
+      "correct": 0,
+      "ref": "Js 14"
+    },
+    {
+      "id": "q095",
+      "level": "expert",
+      "bookId": "jui",
+      "q": "Gideão reduziu o exército para:",
+      "options": [
+        "300",
+        "3000",
+        "30000",
+        "12"
+      ],
+      "correct": 0,
+      "ref": "Jz 7"
+    },
+    {
+      "id": "q096",
+      "level": "expert",
+      "bookId": "1sa",
+      "q": "A arca ficou na casa de:",
+      "options": [
+        "Abinadabe / Obede-Edom (trajeto)",
+        "Faraó",
+        "Nabucodonosor",
+        "Pilatos"
+      ],
+      "correct": 0,
+      "ref": "1Sm 7; 2Sm 6"
+    },
+    {
+      "id": "q097",
+      "level": "expert",
+      "bookId": "1rs",
+      "q": "A rainha de Sabá visitou:",
+      "options": [
+        "Salomão",
+        "Davi",
+        "Acabe",
+        "Ezequias"
+      ],
+      "correct": 0,
+      "ref": "1Rs 10"
+    },
+    {
+      "id": "q098",
+      "level": "expert",
+      "bookId": "2rs",
+      "q": "Naamã foi curado da lepra no:",
+      "options": [
+        "Jordão",
+        "Mar Morto",
+        "Nilo",
+        "Eufrates"
+      ],
+      "correct": 0,
+      "ref": "2Rs 5"
+    },
+    {
+      "id": "q099",
+      "level": "expert",
+      "bookId": "est",
+      "q": "O rei de Ester chamava-se:",
+      "options": [
+        "Assuero (Xerxes)",
+        "Ciro",
+        "Dario",
+        "Nabucodonosor"
+      ],
+      "correct": 0,
+      "ref": "Et 1"
+    },
+    {
+      "id": "q100",
+      "level": "expert",
+      "bookId": "jo",
+      "q": "Os amigos de Jó eram:",
+      "options": [
+        "Elifaz, Bildade e Zofar",
+        "Pedro, Tiago e João",
+        "Sadraque, Mesaque e Abede-Nego",
+        "Saul, Davi e Jônatas"
+      ],
+      "correct": 0,
+      "ref": "Jó 2"
+    },
+    {
+      "id": "q101",
+      "level": "expert",
+      "bookId": "sal",
+      "q": "O acróstico alfabético hebraico aparece nos Salmos:",
+      "options": [
+        "Vários (ex. 119)",
+        "Só no 1",
+        "Só no 23",
+        "Nenhum"
+      ],
+      "correct": 0,
+      "ref": "Sl 119"
+    },
+    {
+      "id": "q102",
+      "level": "expert",
+      "bookId": "can",
+      "q": "Cânticos é também chamado:",
+      "options": [
+        "Cântico dos Cânticos",
+        "Livro da Sabedoria",
+        "Eclesiástico",
+        "Provérbios 2"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q103",
+      "level": "expert",
+      "bookId": "lam",
+      "q": "Lamentações tradicionalmente atribuídas a:",
+      "options": [
+        "Jeremias",
+        "Isaías",
+        "Ezequiel",
+        "Daniel"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q104",
+      "level": "expert",
+      "bookId": "oba",
+      "q": "Obadias profetiza contra:",
+      "options": [
+        "Edom",
+        "Nínive",
+        "Babel",
+        "Egito"
+      ],
+      "correct": 0,
+      "ref": "Ob 1"
+    },
+    {
+      "id": "q105",
+      "level": "expert",
+      "bookId": "naa",
+      "q": "Naum anuncia a queda de:",
+      "options": [
+        "Nínive",
+        "Jerusalém",
+        "Roma",
+        "Tiro"
+      ],
+      "correct": 0,
+      "ref": "Na 1-3"
+    },
+    {
+      "id": "q106",
+      "level": "expert",
+      "bookId": "sof",
+      "q": "Sofonias fala do:",
+      "options": [
+        "Dia do Senhor",
+        "Dilúvio",
+        "Êxodo",
+        "Pentecostes"
+      ],
+      "correct": 0,
+      "ref": "Sf 1"
+    },
+    {
+      "id": "q107",
+      "level": "expert",
+      "bookId": "age",
+      "q": "Ageu estimulou a reconstrução do:",
+      "options": [
+        "Templo",
+        "Muro",
+        "Palácio",
+        "Tabernáculo no deserto"
+      ],
+      "correct": 0,
+      "ref": "Ag 1"
+    },
+    {
+      "id": "q108",
+      "level": "expert",
+      "bookId": "mat",
+      "q": "O Sermão Profético está em Mateus:",
+      "options": [
+        "24-25",
+        "5-7",
+        "13",
+        "28"
+      ],
+      "correct": 0,
+      "ref": "Mt 24-25"
+    },
+    {
+      "id": "q109",
+      "level": "expert",
+      "bookId": "mar",
+      "q": "O final longo de Marcos inclui:",
+      "options": [
+        "16:9-20 (tradição)",
+        "Capítulo 17",
+        "Atos 1",
+        "Nada"
+      ],
+      "correct": 0,
+      "ref": "Mc 16"
+    },
+    {
+      "id": "q110",
+      "level": "expert",
+      "bookId": "luc",
+      "q": "O cântico Magnificat é de:",
+      "options": [
+        "Maria",
+        "Isabel",
+        "Ana",
+        "Marta"
+      ],
+      "correct": 0,
+      "ref": "Lc 1"
+    },
+    {
+      "id": "q111",
+      "level": "expert",
+      "bookId": "joao",
+      "q": "O discurso do Bom Pastor está em:",
+      "options": [
+        "João 10",
+        "João 3",
+        "João 14",
+        "João 21"
+      ],
+      "correct": 0,
+      "ref": "Jo 10"
+    },
+    {
+      "id": "q112",
+      "level": "expert",
+      "bookId": "ato",
+      "q": "Sérgio Paulo era:",
+      "options": [
+        "Procônsul em Chipre",
+        "Centurião em Cesaréia",
+        "Rei de Herodes",
+        "Fariseu"
+      ],
+      "correct": 0,
+      "ref": "At 13"
+    },
+    {
+      "id": "q113",
+      "level": "expert",
+      "bookId": "2co",
+      "q": "Paulo fala do espinho na:",
+      "options": [
+        "Carne",
+        "Alma só",
+        "Igreja de Roma",
+        "Casa de Lídia"
+      ],
+      "correct": 0,
+      "ref": "2Co 12"
+    },
+    {
+      "id": "q114",
+      "level": "expert",
+      "bookId": "1ts",
+      "q": "1 Tessalonicenses trata da:",
+      "options": [
+        "Vinda do Senhor",
+        "Lei mosaica",
+        "Circuncisão",
+        "Genealogia"
+      ],
+      "correct": 0,
+      "ref": "1Ts 4-5"
+    },
+    {
+      "id": "q115",
+      "level": "expert",
+      "bookId": "tt",
+      "q": "Tito foi deixado em:",
+      "options": [
+        "Creta",
+        "Éfeso",
+        "Roma",
+        "Corinto"
+      ],
+      "correct": 0,
+      "ref": "Tt 1"
+    },
+    {
+      "id": "q116",
+      "level": "expert",
+      "bookId": "fm",
+      "q": "Filemom trata de:",
+      "options": [
+        "Onésimo",
+        "Timóteo",
+        "Tito",
+        "Barnabé"
+      ],
+      "correct": 0,
+      "ref": "Fm"
+    },
+    {
+      "id": "q117",
+      "level": "expert",
+      "bookId": "2pe",
+      "q": "2 Pedro alerta sobre:",
+      "options": [
+        "Falsos mestres",
+        "Impostos",
+        "Guerra santa",
+        "Dietas"
+      ],
+      "correct": 0,
+      "ref": "2Pe 2"
+    },
+    {
+      "id": "q118",
+      "level": "expert",
+      "bookId": "2jo",
+      "q": "2 João é dirigida à:",
+      "options": [
+        "Senhora eleita",
+        "Igreja de Éfeso",
+        "Sinagoga",
+        "Casa de Lídia"
+      ],
+      "correct": 0,
+      "ref": "2Jo 1"
+    },
+    {
+      "id": "q119",
+      "level": "expert",
+      "bookId": "3jo",
+      "q": "3 João menciona:",
+      "options": [
+        "Gaio e Diótrefes",
+        "Pilatos",
+        "Herodes",
+        "César"
+      ],
+      "correct": 0,
+      "ref": "3Jo"
+    },
+    {
+      "id": "q120",
+      "level": "expert",
+      "bookId": "ap",
+      "q": "Os 24 anciãos aparecem em:",
+      "options": [
+        "Apocalipse 4",
+        "Apocalipse 1",
+        "Apocalipse 20",
+        "Apocalipse 22"
+      ],
+      "correct": 0,
+      "ref": "Ap 4"
+    },
+    {
+      "id": "q121",
+      "level": "facil",
+      "bookId": "lev",
+      "q": "Levítico trata principalmente de:",
+      "options": [
+        "Leis e santidade",
+        "Guerra",
+        "Reis",
+        "Cartas"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q122",
+      "level": "facil",
+      "bookId": "num",
+      "q": "Números narra a jornada no:",
+      "options": [
+        "Deserto",
+        "Mar",
+        "Céu",
+        "Éden"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q123",
+      "level": "facil",
+      "bookId": "deu",
+      "q": "Moisés morreu em:",
+      "options": [
+        "Moabe / monte Nebo",
+        "Egito",
+        "Canaã",
+        "Sinai só"
+      ],
+      "correct": 0,
+      "ref": "Dt 34"
+    },
+    {
+      "id": "q124",
+      "level": "medio",
+      "bookId": "1cr",
+      "q": "1 e 2 Crônicas recontam a história de:",
+      "options": [
+        "Israel e Judá",
+        "Roma",
+        "Egito",
+        "Babel só"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q125",
+      "level": "medio",
+      "bookId": "2sa",
+      "q": "Absalão era filho de:",
+      "options": [
+        "Davi",
+        "Saul",
+        "Salomão",
+        "Samuel"
+      ],
+      "correct": 0,
+      "ref": "2Sm 15"
+    },
+    {
+      "id": "q126",
+      "level": "facil",
+      "bookId": "2sa",
+      "q": "Davi trouxe a arca para:",
+      "options": [
+        "Jerusalém",
+        "Hebrom",
+        "Belém",
+        "Silo"
+      ],
+      "correct": 0,
+      "ref": "2Sm 6"
+    },
+    {
+      "id": "q127",
+      "level": "medio",
+      "bookId": "pro",
+      "q": "Quem é tradicionalmente autor de muitos Provérbios?",
+      "options": [
+        "Salomão",
+        "Davi",
+        "Moisés",
+        "Esdras"
+      ],
+      "correct": 0,
+      "ref": "Pv 1"
+    },
+    {
+      "id": "q128",
+      "level": "facil",
+      "bookId": "dan",
+      "q": "Daniel interpretou sonhos em:",
+      "options": [
+        "Babilônia",
+        "Egito",
+        "Roma",
+        "Nínive"
+      ],
+      "correct": 0,
+      "ref": "Dn 2"
+    },
+    {
+      "id": "q129",
+      "level": "medio",
+      "bookId": "joe",
+      "q": "Joel fala de uma praga de:",
+      "options": [
+        "Gafanhotos",
+        "Rãs",
+        "Sangue",
+        "Trevas só"
+      ],
+      "correct": 0,
+      "ref": "Jl 1"
+    },
+    {
+      "id": "q130",
+      "level": "facil",
+      "bookId": "mat",
+      "q": "A oração do Pai Nosso está em:",
+      "options": [
+        "Mateus 6",
+        "João 3",
+        "Atos 2",
+        "Salmos 23"
+      ],
+      "correct": 0,
+      "ref": "Mt 6"
+    },
+    {
+      "id": "q131",
+      "level": "medio",
+      "bookId": "rom",
+      "q": "Romanos 8 fala que nada nos separará do:",
+      "options": [
+        "Amor de Deus",
+        "Templo",
+        "Império",
+        "Mar"
+      ],
+      "correct": 0,
+      "ref": "Rm 8"
+    },
+    {
+      "id": "q132",
+      "level": "facil",
+      "bookId": "hb",
+      "q": "A fé é a certeza de coisas que se:",
+      "options": [
+        "Esperam",
+        "Vêem",
+        "Compram",
+        "Temem"
+      ],
+      "correct": 0,
+      "ref": "Hb 11"
+    },
+    {
+      "id": "q133",
+      "level": "medio",
+      "bookId": "ap",
+      "q": "O número da besta tradicionalmente citado é:",
+      "options": [
+        "666",
+        "777",
+        "12",
+        "40"
+      ],
+      "correct": 0,
+      "ref": "Ap 13"
+    },
+    {
+      "id": "q134",
+      "level": "dificil",
+      "bookId": "gen",
+      "q": "Enoque:",
+      "options": [
+        "Andou com Deus e foi trasladado",
+        "Construiu a arca",
+        "Vendeu José",
+        "Foi rei"
+      ],
+      "correct": 0,
+      "ref": "Gn 5"
+    },
+    {
+      "id": "q135",
+      "level": "dificil",
+      "bookId": "exo",
+      "q": "O maná caiu por:",
+      "options": [
+        "40 anos",
+        "40 dias",
+        "7 anos",
+        "12 meses"
+      ],
+      "correct": 0,
+      "ref": "Êx 16"
+    },
+    {
+      "id": "q136",
+      "level": "expert",
+      "bookId": "lev",
+      "q": "O ano do jubileu ocorria a cada:",
+      "options": [
+        "50 anos",
+        "7 anos",
+        "12 anos",
+        "100 anos"
+      ],
+      "correct": 0,
+      "ref": "Lv 25"
+    },
+    {
+      "id": "q137",
+      "level": "medio",
+      "bookId": "1rs",
+      "q": "Elias desafiou os profetas de Baal no monte:",
+      "options": [
+        "Carmelo",
+        "Sinai",
+        "Sião",
+        "Olivete"
+      ],
+      "correct": 0,
+      "ref": "1Rs 18"
+    },
+    {
+      "id": "q138",
+      "level": "facil",
+      "bookId": "joao",
+      "q": "Jesus disse: Eu sou o:",
+      "options": [
+        "Caminho, a verdade e a vida",
+        "Rei de Roma",
+        "Anjo",
+        "Levitas"
+      ],
+      "correct": 0,
+      "ref": "Jo 14"
+    },
+    {
+      "id": "q139",
+      "level": "medio",
+      "bookId": "ato",
+      "q": "Barnabé significava:",
+      "options": [
+        "Filho de consolação",
+        "Filho do trovão",
+        "Rocha",
+        "Amado"
+      ],
+      "correct": 0,
+      "ref": "At 4"
+    },
+    {
+      "id": "q140",
+      "level": "dificil",
+      "bookId": "gal",
+      "q": "O fruto do Espírito inclui:",
+      "options": [
+        "Amor, alegria, paz…",
+        "Ouro e prata",
+        "Exércitos",
+        "Impostos"
+      ],
+      "correct": 0,
+      "ref": "Gl 5"
+    },
+    {
+      "id": "q141",
+      "level": "facil",
+      "bookId": "1pe",
+      "q": "Pedro era:",
+      "options": [
+        "Apóstolo / pescador",
+        "Publicano",
+        "Fariseu",
+        "Rei"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q142",
+      "level": "medio",
+      "bookId": "2tm",
+      "q": "Demas abandonou Paulo por amor ao:",
+      "options": [
+        "Presente século",
+        "Templo",
+        "Mar",
+        "Ouro de Ofir"
+      ],
+      "correct": 0,
+      "ref": "2Tm 4"
+    },
+    {
+      "id": "q143",
+      "level": "expert",
+      "bookId": "nee",
+      "q": "O copeiro do rei Artaxerxes foi:",
+      "options": [
+        "Neemias",
+        "Esdras",
+        "Zorobabel",
+        "Ageu"
+      ],
+      "correct": 0,
+      "ref": "Ne 1-2"
+    },
+    {
+      "id": "q144",
+      "level": "dificil",
+      "bookId": "isa",
+      "q": "Serafim aparece em Isaías:",
+      "options": [
+        "6",
+        "53",
+        "40",
+        "1"
+      ],
+      "correct": 0,
+      "ref": "Is 6"
+    },
+    {
+      "id": "q145",
+      "level": "facil",
+      "bookId": "luc",
+      "q": "Os pastores foram avisados por:",
+      "options": [
+        "Anjos",
+        "Magos",
+        "Herodes",
+        "Pilatos"
+      ],
+      "correct": 0,
+      "ref": "Lc 2"
+    },
+    {
+      "id": "q146",
+      "level": "medio",
+      "bookId": "mar",
+      "q": "Bartimeu era:",
+      "options": [
+        "Cego",
+        "Surdo",
+        "Paralítico",
+        "Leproso"
+      ],
+      "correct": 0,
+      "ref": "Mc 10"
+    },
+    {
+      "id": "q147",
+      "level": "expert",
+      "bookId": "1co",
+      "q": "As línguas e o dom de profecia são discutidos em:",
+      "options": [
+        "1 Coríntios 12-14",
+        "Romanos 1",
+        "João 1",
+        "Atos 1 só"
+      ],
+      "correct": 0,
+      "ref": "1Co 12-14"
+    },
+    {
+      "id": "q148",
+      "level": "dificil",
+      "bookId": "ef",
+      "q": "Somos salvos pela graça, mediante a:",
+      "options": [
+        "Fé",
+        "Lei",
+        "Circuncisão",
+        "Obra do templo"
+      ],
+      "correct": 0,
+      "ref": "Ef 2"
+    },
+    {
+      "id": "q149",
+      "level": "facil",
+      "bookId": "ap",
+      "q": "Jesus é o Alfa e o:",
+      "options": [
+        "Ômega",
+        "Beta",
+        "Delta",
+        "Gama"
+      ],
+      "correct": 0,
+      "ref": "Ap 1"
+    },
+    {
+      "id": "q150",
+      "level": "medio",
+      "bookId": "mat",
+      "q": "Os magos trouxeram ouro, incenso e:",
+      "options": [
+        "Mirra",
+        "Prata",
+        "Bronze",
+        "Pérolas"
+      ],
+      "correct": 0,
+      "ref": "Mt 2"
+    },
+    {
+      "id": "q151",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "Caim matou:",
+      "options": [
+        "Abel",
+        "Sete",
+        "Noé",
+        "Ló"
+      ],
+      "correct": 0,
+      "ref": "Gn 4"
+    },
+    {
+      "id": "q152",
+      "level": "facil",
+      "bookId": "exo",
+      "q": "O bezerro de ouro foi feito por:",
+      "options": [
+        "Arão",
+        "Moisés",
+        "Josué",
+        "Miriam"
+      ],
+      "correct": 0,
+      "ref": "Êx 32"
+    },
+    {
+      "id": "q153",
+      "level": "medio",
+      "bookId": "jos",
+      "q": "Raabe escondeu os:",
+      "options": [
+        "Espias",
+        "Reis",
+        "Sacerdotes",
+        "Profetas"
+      ],
+      "correct": 0,
+      "ref": "Js 2"
+    },
+    {
+      "id": "q154",
+      "level": "facil",
+      "bookId": "1sa",
+      "q": "Ana era mãe de:",
+      "options": [
+        "Samuel",
+        "Saul",
+        "Davi",
+        "Eli"
+      ],
+      "correct": 0,
+      "ref": "1Sm 1"
+    },
+    {
+      "id": "q155",
+      "level": "medio",
+      "bookId": "2rs",
+      "q": "Eliseu multiplicou o azeite da:",
+      "options": [
+        "Viúva",
+        "Rainha",
+        "Profetisa Débora",
+        "Rute"
+      ],
+      "correct": 0,
+      "ref": "2Rs 4"
+    },
+    {
+      "id": "q156",
+      "level": "facil",
+      "bookId": "dan",
+      "q": "Belsazar viu a:",
+      "options": [
+        "Escrita na parede",
+        "Arca",
+        "Estrela",
+        "Pomba"
+      ],
+      "correct": 0,
+      "ref": "Dn 5"
+    },
+    {
+      "id": "q157",
+      "level": "medio",
+      "bookId": "mat",
+      "q": "Judas Iscariotes:",
+      "options": [
+        "Traiu Jesus",
+        "Batizou Jesus",
+        "Escreveu um evangelho canônico",
+        "Foi o primeiro mártir"
+      ],
+      "correct": 0,
+      "ref": "Mt 26"
+    },
+    {
+      "id": "q158",
+      "level": "facil",
+      "bookId": "joao",
+      "q": "Pedro cortou a orelha de:",
+      "options": [
+        "Malco",
+        "Pilatos",
+        "Herodes",
+        "Caifás"
+      ],
+      "correct": 0,
+      "ref": "Jo 18"
+    },
+    {
+      "id": "q159",
+      "level": "medio",
+      "bookId": "ato",
+      "q": "Estêvão foi:",
+      "options": [
+        "O primeiro mártir cristão",
+        "O primeiro papa",
+        "Rei de Israel",
+        "Autor de Hebreus"
+      ],
+      "correct": 0,
+      "ref": "At 7"
+    },
+    {
+      "id": "q160",
+      "level": "dificil",
+      "bookId": "rom",
+      "q": "Abraão foi justificado pela:",
+      "options": [
+        "Fé",
+        "Lei de Moisés",
+        "Circuncisão só",
+        "Riqueza"
+      ],
+      "correct": 0,
+      "ref": "Rm 4"
+    },
+    {
+      "id": "q161",
+      "level": "expert",
+      "bookId": "1rs",
+      "q": "O profeta que ungiu Jeú foi enviado por:",
+      "options": [
+        "Eliseu",
+        "Elias",
+        "Samuel",
+        "Natã"
+      ],
+      "correct": 0,
+      "ref": "2Rs 9"
+    },
+    {
+      "id": "q162",
+      "level": "facil",
+      "bookId": "pro",
+      "q": "O temor do Senhor é o princípio da:",
+      "options": [
+        "Sabedoria",
+        "Guerra",
+        "Riqueza",
+        "Fama"
+      ],
+      "correct": 0,
+      "ref": "Pv 1"
+    },
+    {
+      "id": "q163",
+      "level": "medio",
+      "bookId": "ecl",
+      "q": "Há tempo para todo propósito debaixo do:",
+      "options": [
+        "Céu",
+        "Templo",
+        "Trono",
+        "Mar"
+      ],
+      "correct": 0,
+      "ref": "Ec 3"
+    },
+    {
+      "id": "q164",
+      "level": "dificil",
+      "bookId": "eze",
+      "q": "Ezequiel era:",
+      "options": [
+        "Sacerdote e profeta no exílio",
+        "Rei de Judá",
+        "Apóstolo",
+        "Juiz"
+      ],
+      "correct": 0,
+      "ref": "Ez 1"
+    },
+    {
+      "id": "q165",
+      "level": "facil",
+      "bookId": "jon",
+      "q": "Jonas fugiu para:",
+      "options": [
+        "Társis",
+        "Nínive",
+        "Jerusalém",
+        "Egito"
+      ],
+      "correct": 0,
+      "ref": "Jn 1"
+    },
+    {
+      "id": "q166",
+      "level": "medio",
+      "bookId": "miq",
+      "q": "O Senhor requer justiça, misericórdia e:",
+      "options": [
+        "Andar humildemente",
+        "Ouro",
+        "Exércitos",
+        "Jeju eterno"
+      ],
+      "correct": 0,
+      "ref": "Mq 6"
+    },
+    {
+      "id": "q167",
+      "level": "facil",
+      "bookId": "mat",
+      "q": "Jesus andou sobre o:",
+      "options": [
+        "Mar",
+        "Deserto",
+        "Jordão seco",
+        "Templo"
+      ],
+      "correct": 0,
+      "ref": "Mt 14"
+    },
+    {
+      "id": "q168",
+      "level": "medio",
+      "bookId": "luc",
+      "q": "O bom samaritano ajudou o:",
+      "options": [
+        "Homem assaltado",
+        "Fariseu",
+        "Publicano rico",
+        "Centurião"
+      ],
+      "correct": 0,
+      "ref": "Lc 10"
+    },
+    {
+      "id": "q169",
+      "level": "dificil",
+      "bookId": "joao",
+      "q": "Tomé duvidou da:",
+      "options": [
+        "Ressurreição",
+        "Multiplicação",
+        "Ascensão só",
+        "Encarnação só"
+      ],
+      "correct": 0,
+      "ref": "Jo 20"
+    },
+    {
+      "id": "q170",
+      "level": "expert",
+      "bookId": "hb",
+      "q": "Melquisedeque é tipo de:",
+      "options": [
+        "Cristo / sacerdócio eterno",
+        "Saul",
+        "Moisés",
+        "Arão apenas"
+      ],
+      "correct": 0,
+      "ref": "Hb 7"
+    },
+    {
+      "id": "q171",
+      "level": "facil",
+      "bookId": "tg",
+      "q": "A língua é comparada a um:",
+      "options": [
+        "Fogo / leme",
+        "Rio",
+        "Monte",
+        "Templo"
+      ],
+      "correct": 0,
+      "ref": "Tg 3"
+    },
+    {
+      "id": "q172",
+      "level": "medio",
+      "bookId": "1jo",
+      "q": "Deus é:",
+      "options": [
+        "Amor",
+        "Guerra",
+        "Ouro",
+        "Tempo"
+      ],
+      "correct": 0,
+      "ref": "1Jo 4"
+    },
+    {
+      "id": "q173",
+      "level": "dificil",
+      "bookId": "ap",
+      "q": "Os selos, trombetas e taças são ciclos de:",
+      "options": [
+        "Juízo",
+        "Bênção só",
+        "Genealogia",
+        "Censos"
+      ],
+      "correct": 0,
+      "ref": "Ap 6-16"
+    },
+    {
+      "id": "q174",
+      "level": "facil",
+      "bookId": "gen",
+      "q": "Sara riu quando ouviu sobre:",
+      "options": [
+        "O nascimento de Isaque",
+        "O dilúvio",
+        "A torre",
+        "José"
+      ],
+      "correct": 0,
+      "ref": "Gn 18"
+    },
+    {
+      "id": "q175",
+      "level": "medio",
+      "bookId": "exo",
+      "q": "Miriam era irmã de:",
+      "options": [
+        "Moisés e Arão",
+        "Davi",
+        "Samuel",
+        "Josué"
+      ],
+      "correct": 0,
+      "ref": "Êx 15"
+    },
+    {
+      "id": "q176",
+      "level": "expert",
+      "bookId": "num",
+      "q": "Coré, Datã e Abirão:",
+      "options": [
+        "Rebelaram-se e a terra os engoliu",
+        "Construíram o templo",
+        "Ungiram Saul",
+        "Escreveram Salmos"
+      ],
+      "correct": 0,
+      "ref": "Nm 16"
+    },
+    {
+      "id": "q177",
+      "level": "facil",
+      "bookId": "rut",
+      "q": "Noemi significava:",
+      "options": [
+        "Agradável (depois Mara = amarga)",
+        "Rainha",
+        "Profetisa",
+        "Juíza"
+      ],
+      "correct": 0,
+      "ref": "Rt 1"
+    },
+    {
+      "id": "q178",
+      "level": "medio",
+      "bookId": "1sa",
+      "q": "Golias era de:",
+      "options": [
+        "Gate",
+        "Belém",
+        "Hebrom",
+        "Silo"
+      ],
+      "correct": 0,
+      "ref": "1Sm 17"
+    },
+    {
+      "id": "q179",
+      "level": "dificil",
+      "bookId": "isa",
+      "q": "O livro de Isaías tem quantos capítulos?",
+      "options": [
+        "66",
+        "39",
+        "27",
+        "12"
+      ],
+      "correct": 0,
+      "ref": null
+    },
+    {
+      "id": "q180",
+      "level": "expert",
+      "bookId": "jer",
+      "q": "Baruque era:",
+      "options": [
+        "Secretário de Jeremias",
+        "Rei",
+        "Apóstolo",
+        "Filho de Saul"
+      ],
+      "correct": 0,
+      "ref": "Jr 36"
+    }
+  ]
+}

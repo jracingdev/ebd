@@ -286,6 +286,12 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<List<UserProfile>> listLocalUsers() async {
+    return localUsersSnapshot;
+  }
+
+  /// Snapshot síncrono dos usuários locais (Hive).
+  List<UserProfile> get localUsersSnapshot {
+    if (_localUsers == null) return const [];
     return _localUsers!.values
         .whereType<Map>()
         .map((e) => UserProfile.fromJson(Map<String, dynamic>.from(e)))

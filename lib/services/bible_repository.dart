@@ -24,6 +24,8 @@ class BibleRepository extends ChangeNotifier {
   List<BibleBookmark> bookmarks = [];
   List<BibleHighlight> highlights = [];
   Map<String, ReadingPlanProgress> planProgress = {};
+  Set<String> chaptersRead = {};
+  Set<String> readDates = {};
 
   /// Progresso de download offline (0..1) por versionId; null = idle.
   final Map<String, double> downloadProgress = {};
@@ -33,11 +35,34 @@ class BibleRepository extends ChangeNotifier {
 
   bool get hasApiBibleKey => _remote.hasApiBibleKey;
 
+  int get chaptersReadCount => chaptersRead.length;
+
+  /// Dias consecutivos de leitura até hoje (ou ontem se ainda não leu hoje).
+  int get readingStreakDays {
+    if (readDates.isEmpty) return 0;
+    final today = DateTime.now();
+    String ymd(DateTime d) =>
+        '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    var cursor = DateTime(today.year, today.month, today.day);
+    if (!readDates.contains(ymd(cursor))) {
+      cursor = cursor.subtract(const Duration(days: 1));
+      if (!readDates.contains(ymd(cursor))) return 0;
+    }
+    var streak = 0;
+    while (readDates.contains(ymd(cursor))) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
   Future<void> load() async {
     prefs = _store.loadPrefs();
     bookmarks = _store.loadBookmarks();
     highlights = _store.loadHighlights();
     planProgress = _store.loadPlanProgress();
+    chaptersRead = _store.loadChaptersRead();
+    readDates = _store.loadReadDates();
     await _asset.ensureLoaded();
     notifyListeners();
   }
@@ -73,7 +98,26 @@ class BibleRepository extends ChangeNotifier {
   Future<void> rememberPlace(String bookId, int chapter) async {
     prefs = prefs.copyWith(lastBookId: bookId, lastChapter: chapter);
     await _store.savePrefs(prefs);
-    notifyListeners();
+    await markChapterRead(bookId, chapter);
+  }
+
+  Future<void> markChapterRead(String bookId, int chapter) async {
+    final key = '$bookId:$chapter';
+    final now = DateTime.now();
+    final ymd =
+        '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    var changed = false;
+    if (!chaptersRead.contains(key)) {
+      chaptersRead = {...chaptersRead, key};
+      await _store.saveChaptersRead(chaptersRead);
+      changed = true;
+    }
+    if (!readDates.contains(ymd)) {
+      readDates = {...readDates, ymd};
+      await _store.saveReadDates(readDates);
+      changed = true;
+    }
+    if (changed) notifyListeners();
   }
 
   List<BibleBook> get books => kBibleBooks;

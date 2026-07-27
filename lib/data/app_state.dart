@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:livro_registro/data/engagement/engagement_store.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/storage.dart';
 import 'package:livro_registro/data/user_models.dart';
@@ -6,9 +7,10 @@ import 'package:livro_registro/services/betel_sync_service.dart';
 import 'package:uuid/uuid.dart';
 
 class AppState extends ChangeNotifier {
-  AppState(this._storage);
+  AppState(this._storage, {this.engagement});
 
   final EbdStorage _storage;
+  final EngagementStore? engagement;
   final _uuid = const Uuid();
   final _betelSync = BetelSyncService();
 
@@ -455,6 +457,7 @@ class AppState extends ChangeNotifier {
           nome: aluno.nome,
           presente: prev?.presente ?? false,
           alunoId: aluno.id,
+          trouxeBiblia: prev?.trouxeBiblia ?? false,
         );
       }).toList();
       if (merged.length != s.pessoas.length) {
@@ -466,7 +469,8 @@ class AppState extends ChangeNotifier {
           if (a.id != b.id ||
               a.nome != b.nome ||
               a.presente != b.presente ||
-              a.alunoId != b.alunoId) {
+              a.alunoId != b.alunoId ||
+              a.trouxeBiblia != b.trouxeBiblia) {
             changed = true;
             break;
           }
@@ -511,6 +515,7 @@ class AppState extends ChangeNotifier {
           nome: p.nome,
           presente: p.presente,
           alunoId: alunoId ?? uniqueId,
+          trouxeBiblia: p.trouxeBiblia,
         );
       }).toList();
       return AttendanceSession(
@@ -550,10 +555,52 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  AppBackup exportBackup() => _storage.exportBackup();
+  Future<void> setAttendanceBroughtBible({
+    required String sessionId,
+    required String alunoId,
+    required bool trouxeBiblia,
+  }) async {
+    attendance = attendance.map((s) {
+      if (s.id != sessionId) return s;
+      final pessoas = s.pessoas.map((p) {
+        final key = p.alunoId ?? p.id;
+        return key == alunoId ? p.copyWith(trouxeBiblia: trouxeBiblia) : p;
+      }).toList();
+      return AttendanceSession(
+        id: s.id,
+        grupo: s.grupo,
+        data: s.data,
+        pessoas: pessoas,
+        criadoEm: s.criadoEm,
+      );
+    }).toList();
+    await _storage.saveAttendance(attendance);
+    notifyListeners();
+  }
+
+  AppBackup exportBackup() {
+    final base = _storage.exportBackup();
+    final eng = engagement?.exportMap() ?? const <String, dynamic>{};
+    if (eng.isEmpty) return base;
+    return AppBackup(
+      version: base.version,
+      exportedAt: base.exportedAt,
+      editions: base.editions,
+      records: base.records,
+      finances: base.finances,
+      attendance: base.attendance,
+      students: base.students,
+      lessons: base.lessons,
+      customGroups: base.customGroups,
+      engagement: eng,
+    );
+  }
 
   Future<void> importBackup(AppBackup backup) async {
     await _storage.importBackup(backup);
+    if (engagement != null && backup.engagement.isNotEmpty) {
+      await engagement!.importMap(backup.engagement);
+    }
     await load();
   }
 }

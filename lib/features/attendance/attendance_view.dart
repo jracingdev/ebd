@@ -83,19 +83,41 @@ class _AttendanceViewState extends State<AttendanceView> {
         ),
         if (session != null)
           for (final p in session.pessoas)
-            SwitchListTile(
-              title: Text(p.nome),
-              subtitle: Text(p.presente ? 'Presente' : 'Ausente'),
-              value: p.presente,
-              activeThumbColor: AppColors.green,
-              onChanged: (v) {
-                final key = p.alunoId ?? p.id;
-                state.setAttendancePresent(
-                  sessionId: session.id,
-                  alunoId: key,
-                  presente: v,
-                );
-              },
+            Column(
+              children: [
+                SwitchListTile(
+                  title: Text(p.nome),
+                  subtitle: Text(p.presente ? 'Presente' : 'Ausente'),
+                  value: p.presente,
+                  activeThumbColor: AppColors.green,
+                  onChanged: (v) {
+                    final key = p.alunoId ?? p.id;
+                    state.setAttendancePresent(
+                      sessionId: session.id,
+                      alunoId: key,
+                      presente: v,
+                    );
+                  },
+                ),
+                if (p.presente)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 8, bottom: 4),
+                    child: SwitchListTile(
+                      dense: true,
+                      title: const Text('Trouxe Bíblia'),
+                      value: p.trouxeBiblia,
+                      activeThumbColor: AppColors.gold,
+                      onChanged: (v) {
+                        final key = p.alunoId ?? p.id;
+                        state.setAttendanceBroughtBible(
+                          sessionId: session.id,
+                          alunoId: key,
+                          trouxeBiblia: v,
+                        );
+                      },
+                    ),
+                  ),
+              ],
             )
         else
           for (final a in alunos)

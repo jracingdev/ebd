@@ -49,11 +49,13 @@ flutter:
   assets:
     - assets/icon/
     - assets/bible/
+    - assets/quiz/
     - .env.example
 
 flutter_launcher_icons:
   android: true
-  ios: false
+  ios: true
   image_path: assets/icon/app_icon.png
   adaptive_icon_foreground: assets/icon/app_icon_fg.png
   adaptive_icon_background: "#F7F2E7"
+  remove_alpha_ios: true

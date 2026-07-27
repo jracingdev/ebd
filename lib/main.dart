@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/bible/bible_store.dart';
+import 'package:livro_registro/data/engagement/engagement_store.dart';
 import 'package:livro_registro/data/storage.dart';
 import 'package:livro_registro/features/auth/birthday_overlay.dart';
 import 'package:livro_registro/features/auth/login_screen.dart';
@@ -25,7 +26,8 @@ Future<void> main() async {
   }
   await initializeDateFormatting('pt_BR');
   final storage = await EbdStorage.open();
-  final state = AppState(storage);
+  final engagement = await EngagementStore.open();
+  final state = AppState(storage, engagement: engagement);
   await state.load();
   final bibleStore = await BibleStore.open();
   final bible = BibleRepository(bibleStore);
@@ -34,7 +36,15 @@ Future<void> main() async {
   await auth.init();
   final fcm = FcmService();
   await fcm.init();
-  runApp(EbdApp(state: state, auth: auth, fcm: fcm, bible: bible));
+  runApp(
+    EbdApp(
+      state: state,
+      auth: auth,
+      fcm: fcm,
+      bible: bible,
+      engagement: engagement,
+    ),
+  );
 }
 
 class EbdApp extends StatelessWidget {
@@ -44,12 +54,14 @@ class EbdApp extends StatelessWidget {
     required this.auth,
     required this.fcm,
     required this.bible,
+    required this.engagement,
   });
 
   final AppState state;
   final AuthService auth;
   final FcmService fcm;
   final BibleRepository bible;
+  final EngagementStore engagement;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +70,7 @@ class EbdApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: state),
         ChangeNotifierProvider.value(value: auth),
         ChangeNotifierProvider.value(value: bible),
+        ChangeNotifierProvider.value(value: engagement),
         Provider.value(value: fcm),
       ],
       child: MaterialApp(

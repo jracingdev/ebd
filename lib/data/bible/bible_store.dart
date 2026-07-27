@@ -9,6 +9,8 @@ const _keyBookmarks = 'bookmarks';
 const _keyHighlights = 'highlights';
 const _keyPlans = 'plan_progress';
 const _keyChapterCache = 'chapter_cache';
+const _keyChaptersRead = 'chapters_read';
+const _keyReadDates = 'read_dates';
 
 class BibleStore {
   BibleStore(this._box);
@@ -116,5 +118,31 @@ class BibleStore {
     final map = _chapterCacheMap();
     map[cacheKey] = json;
     await _box.put(_keyChapterCache, jsonEncode(map));
+  }
+
+  /// Chaves `bookId:chapter` já marcadas como lidas.
+  Set<String> loadChaptersRead() {
+    final raw = _box.get(_keyChaptersRead);
+    if (raw == null) return {};
+    final list = raw is String ? jsonDecode(raw) : raw;
+    if (list is! List) return {};
+    return {for (final e in list) e.toString()};
+  }
+
+  Future<void> saveChaptersRead(Set<String> keys) async {
+    await _box.put(_keyChaptersRead, jsonEncode(keys.toList()..sort()));
+  }
+
+  /// Datas `yyyy-MM-dd` em que houve leitura (para streak).
+  Set<String> loadReadDates() {
+    final raw = _box.get(_keyReadDates);
+    if (raw == null) return {};
+    final list = raw is String ? jsonDecode(raw) : raw;
+    if (list is! List) return {};
+    return {for (final e in list) e.toString()};
+  }
+
+  Future<void> saveReadDates(Set<String> dates) async {
+    await _box.put(_keyReadDates, jsonEncode(dates.toList()..sort()));
   }
 }
