@@ -408,6 +408,30 @@ class AuthService extends ChangeNotifier {
   Future<String?> lastMatricula() => _secure.read(key: 'last_matricula');
   Future<String?> lastSenha() => _secure.read(key: 'last_senha');
 
+  /// Prefill de matrícula na tela de login (não guarda senha).
+  Future<bool> isRememberMeEnabled() async {
+    return (await _secure.read(key: 'remember_me')) == '1';
+  }
+
+  Future<String?> rememberedMatricula() async {
+    if (!await isRememberMeEnabled()) return null;
+    return _secure.read(key: 'remembered_matricula');
+  }
+
+  Future<void> persistRememberMe({
+    required bool remember,
+    required String matricula,
+  }) async {
+    final mat = matricula.trim();
+    if (remember && mat.isNotEmpty) {
+      await _secure.write(key: 'remember_me', value: '1');
+      await _secure.write(key: 'remembered_matricula', value: mat);
+    } else {
+      await _secure.delete(key: 'remember_me');
+      await _secure.delete(key: 'remembered_matricula');
+    }
+  }
+
   Future<void> setBiometricEnabled(bool enabled) async {
     await _secure.write(
       key: 'biometric_enabled',

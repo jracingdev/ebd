@@ -19,13 +19,30 @@ class _LoginScreenState extends State<LoginScreen> {
   final _senha = TextEditingController();
   bool _busy = false;
   bool _obscure = true;
+  bool _rememberMe = false;
   String? _error;
   bool _biometricAvailable = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _prepBiometric());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadRememberMe();
+      await _prepBiometric();
+    });
+  }
+
+  Future<void> _loadRememberMe() async {
+    final auth = context.read<AuthService>();
+    final remember = await auth.isRememberMeEnabled();
+    final mat = await auth.rememberedMatricula();
+    if (!mounted) return;
+    setState(() {
+      _rememberMe = remember;
+      if (remember && mat != null && mat.isNotEmpty) {
+        _matricula.text = mat;
+      }
+    });
   }
 
   Future<void> _prepBiometric() async {
@@ -51,6 +68,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final auth = context.read<AuthService>();
       await auth.login(matricula: _matricula.text, senha: _senha.text);
+      await auth.persistRememberMe(
+        remember: _rememberMe,
+        matricula: _matricula.text,
+      );
       if (!mounted) return;
       final bio = BiometricService(auth);
       if (!mounted) return;
@@ -198,6 +219,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 4),
+                CheckboxListTile(
+                  value: _rememberMe,
+                  onChanged: _busy
+                      ? null
+                      : (v) => setState(() => _rememberMe = v ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Lembrar-me neste dispositivo'),
+                ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -240,12 +272,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
                 const SizedBox(height: 24),
-                const Text(
-                  'Demo local: matrícula admin / senha admin123',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: AppColors.muted),
-                ),
-                const SizedBox(height: 4),
                 Align(
                   alignment: Alignment.center,
                   child: TextButton(
