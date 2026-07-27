@@ -322,6 +322,8 @@ class BiblePrefs {
     this.fontSize = 18,
     this.lastBookId = 'joao',
     this.lastChapter = 1,
+    this.ttsSpeechRate = 0.42,
+    this.ttsVoiceName,
   });
 
   final String versionId;
@@ -329,17 +331,29 @@ class BiblePrefs {
   final String lastBookId;
   final int lastChapter;
 
+  /// Velocidade TTS do SO (tipicamente 0.2–0.75; ~0.42 soa mais natural em pt-BR).
+  final double ttsSpeechRate;
+
+  /// Nome da voz escolhida (`getVoices`); null = melhor pt-BR automática.
+  final String? ttsVoiceName;
+
   BiblePrefs copyWith({
     String? versionId,
     double? fontSize,
     String? lastBookId,
     int? lastChapter,
+    double? ttsSpeechRate,
+    String? ttsVoiceName,
+    bool clearTtsVoice = false,
   }) =>
       BiblePrefs(
         versionId: versionId ?? this.versionId,
         fontSize: fontSize ?? this.fontSize,
         lastBookId: lastBookId ?? this.lastBookId,
         lastChapter: lastChapter ?? this.lastChapter,
+        ttsSpeechRate: ttsSpeechRate ?? this.ttsSpeechRate,
+        ttsVoiceName:
+            clearTtsVoice ? null : (ttsVoiceName ?? this.ttsVoiceName),
       );
 
   Map<String, dynamic> toJson() => {
@@ -347,6 +361,8 @@ class BiblePrefs {
         'fontSize': fontSize,
         'lastBookId': lastBookId,
         'lastChapter': lastChapter,
+        'ttsSpeechRate': ttsSpeechRate,
+        if (ttsVoiceName != null) 'ttsVoiceName': ttsVoiceName,
       };
 
   factory BiblePrefs.fromJson(Map<String, dynamic> j) {
@@ -360,6 +376,9 @@ class BiblePrefs {
       fontSize: (j['fontSize'] as num?)?.toDouble() ?? 18,
       lastBookId: j['lastBookId'] as String? ?? 'joao',
       lastChapter: j['lastChapter'] as int? ?? 1,
+      ttsSpeechRate: ((j['ttsSpeechRate'] as num?)?.toDouble() ?? 0.42)
+          .clamp(0.2, 0.75),
+      ttsVoiceName: j['ttsVoiceName'] as String?,
     );
   }
 }

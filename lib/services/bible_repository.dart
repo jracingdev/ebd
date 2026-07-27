@@ -54,6 +54,22 @@ class BibleRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setTtsSpeechRate(double rate) async {
+    prefs = prefs.copyWith(ttsSpeechRate: rate.clamp(0.2, 0.75));
+    await _store.savePrefs(prefs);
+    notifyListeners();
+  }
+
+  Future<void> setTtsVoiceName(String? voiceName) async {
+    if (voiceName == null || voiceName.isEmpty) {
+      prefs = prefs.copyWith(clearTtsVoice: true);
+    } else {
+      prefs = prefs.copyWith(ttsVoiceName: voiceName);
+    }
+    await _store.savePrefs(prefs);
+    notifyListeners();
+  }
+
   Future<void> rememberPlace(String bookId, int chapter) async {
     prefs = prefs.copyWith(lastBookId: bookId, lastChapter: chapter);
     await _store.savePrefs(prefs);

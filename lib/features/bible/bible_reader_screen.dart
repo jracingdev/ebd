@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:livro_registro/data/bible/bible_catalog.dart';
 import 'package:livro_registro/data/bible/bible_models.dart';
 import 'package:livro_registro/data/bible/sample_texts.dart';
 import 'package:livro_registro/services/bible_repository.dart';
+import 'package:livro_registro/features/bible/bible_tts_settings_sheet.dart';
 import 'package:livro_registro/services/bible_tts_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
+import 'package:livro_registro/widgets/common.dart';
 
 class BibleReaderScreen extends StatefulWidget {
   const BibleReaderScreen({
@@ -70,6 +73,14 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
     await _load();
   }
 
+  Future<void> _prepareTts() async {
+    final prefs = context.read<BibleRepository>().prefs;
+    await _tts.configure(
+      speechRate: prefs.ttsSpeechRate,
+      preferredVoiceName: prefs.ttsVoiceName,
+    );
+  }
+
   Future<void> _toggleSpeak() async {
     if (_speaking) {
       await _tts.stop();
@@ -79,12 +90,16 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
     final data = _chapterData;
     if (data == null || data.verses.isEmpty) return;
     final book = bookById(_bookId)?.name ?? _bookId;
-    final buffer = StringBuffer('$book, capítulo $_chapter. ');
-    for (final v in data.verses) {
-      buffer.write('Versículo ${v.number}. ${v.text} ');
-    }
+    await _prepareTts();
     setState(() => _speaking = true);
-    await _tts.speak(buffer.toString());
+    await _tts.speakChapter(
+      bookName: book,
+      chapter: _chapter,
+      verses: [
+        for (final v in data.verses) (number: v.number, text: v.text),
+      ],
+    );
+    if (mounted) setState(() => _speaking = false);
   }
 
   void _verseActions(BibleVerse verse) {
@@ -145,10 +160,20 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
               title: const Text('Ler este versículo'),
               onTap: () async {
                 Navigator.pop(ctx);
+                await _prepareTts();
                 setState(() => _speaking = true);
                 await _tts.speak(
                   'Versículo ${verse.number}. ${verse.text}',
                 );
+                if (mounted) setState(() => _speaking = false);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.tune_outlined),
+              title: const Text('Voz e velocidade'),
+              onTap: () {
+                Navigator.pop(ctx);
+                showBibleTtsSettingsSheet(context, tts: _tts);
               },
             ),
           ],
@@ -173,90 +198,98 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
             icon: Icon(_speaking ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
           ),
           IconButton(
+            tooltip: 'Voz e velocidade',
+            onPressed: () => showBibleTtsSettingsSheet(context, tts: _tts),
+            icon: const Icon(Icons.record_voice_over_outlined),
+          ),
+          IconButton(
             tooltip: 'Tamanho da letra',
             onPressed: () => _showFontSheet(context, repo),
             icon: const Icon(Icons.text_fields),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Row(
-              children: [
-                Text(
-                  repo.version.shortLabel,
-                  style: const TextStyle(
-                    color: AppColors.gold,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+      body: ResponsiveShell(
+        maxWidth: 720,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  Text(
+                    repo.version.shortLabel,
+                    style: const TextStyle(
+                      color: AppColors.gold,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: _chapter > 1 ? () => _goChapter(-1) : null,
-                  icon: const Icon(Icons.chevron_left),
-                ),
-                Text('Cap. $_chapter'),
-                IconButton(
-                  onPressed: book != null && _chapter < book.chapters
-                      ? () => _goChapter(1)
-                      : null,
-                  icon: const Icon(Icons.chevron_right),
-                ),
-              ],
+                  const Spacer(),
+                  IconButton(
+                    onPressed: _chapter > 1 ? () => _goChapter(-1) : null,
+                    icon: const Icon(Icons.chevron_left),
+                  ),
+                  Text('Cap. $_chapter'),
+                  IconButton(
+                    onPressed: book != null && _chapter < book.chapters
+                        ? () => _goChapter(1)
+                        : null,
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _chapterData == null
-                    ? _EmptyChapter(
-                        bookName: book?.name ?? _bookId,
-                        chapter: _chapter,
-                        message: _errorMessage,
-                        versionLabel: repo.version.shortLabel,
-                        onRetry: _load,
-                        onOpenAlmeida: () async {
-                          await repo.setVersion(BibleVersion.almeida1819);
-                          await _load();
-                        },
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                        children: [
-                          if (_chapterData!.sourceNote != null) ...[
-                            Text(
-                              _chapterData!.sourceNote!,
-                              style: const TextStyle(
-                                color: AppColors.muted,
-                                fontSize: 11,
-                                height: 1.35,
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _chapterData == null
+                      ? _EmptyChapter(
+                          bookName: book?.name ?? _bookId,
+                          chapter: _chapter,
+                          message: _errorMessage,
+                          versionLabel: repo.version.shortLabel,
+                          onRetry: _load,
+                          onOpenAlmeida: () async {
+                            await repo.setVersion(BibleVersion.almeida1819);
+                            await _load();
+                          },
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                          children: [
+                            if (_chapterData!.sourceNote != null) ...[
+                              Text(
+                                _chapterData!.sourceNote!,
+                                style: const TextStyle(
+                                  color: AppColors.muted,
+                                  fontSize: 11,
+                                  height: 1.35,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 16),
+                              const SizedBox(height: 16),
+                            ],
+                            for (final v in _chapterData!.verses)
+                              _VerseRow(
+                                verse: v,
+                                fontSize: repo.prefs.fontSize,
+                                bookmarked: repo.isBookmarked(
+                                  v.bookId,
+                                  v.chapter,
+                                  v.number,
+                                ),
+                                highlight: repo.highlightFor(
+                                  v.bookId,
+                                  v.chapter,
+                                  v.number,
+                                ),
+                                onTap: () => _verseActions(v),
+                              ),
                           ],
-                          for (final v in _chapterData!.verses)
-                            _VerseRow(
-                              verse: v,
-                              fontSize: repo.prefs.fontSize,
-                              bookmarked: repo.isBookmarked(
-                                v.bookId,
-                                v.chapter,
-                                v.number,
-                              ),
-                              highlight: repo.highlightFor(
-                                v.bookId,
-                                v.chapter,
-                                v.number,
-                              ),
-                              onTap: () => _verseActions(v),
-                            ),
-                        ],
-                      ),
-          ),
-        ],
+                        ),
+            ),
+          ],
+        ),
       ),
     );
   }

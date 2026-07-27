@@ -8,6 +8,7 @@ import 'package:livro_registro/features/bible/bible_bookmarks_screen.dart';
 import 'package:livro_registro/features/bible/bible_plans_screen.dart';
 import 'package:livro_registro/features/bible/bible_reader_screen.dart';
 import 'package:livro_registro/features/bible/bible_search_screen.dart';
+import 'package:livro_registro/features/bible/bible_tts_settings_sheet.dart';
 import 'package:livro_registro/services/bible_repository.dart';
 import 'package:livro_registro/services/bible_tts_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
@@ -114,12 +115,19 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
       return;
     }
     final book = bookById(data.bookId)?.name ?? data.bookId;
-    final buffer = StringBuffer('$book, capítulo ${data.chapter}. ');
-    for (final v in data.verses) {
-      buffer.write('Versículo ${v.number}. ${v.text} ');
-    }
+    await _tts.configure(
+      speechRate: repo.prefs.ttsSpeechRate,
+      preferredVoiceName: repo.prefs.ttsVoiceName,
+    );
     setState(() => _speaking = true);
-    await _tts.speak(buffer.toString());
+    await _tts.speakChapter(
+      bookName: book,
+      chapter: data.chapter,
+      verses: [
+        for (final v in data.verses) (number: v.number, text: v.text),
+      ],
+    );
+    if (mounted) setState(() => _speaking = false);
   }
 
   void _showFontSheet(BibleRepository repo) {
@@ -182,13 +190,20 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
         title: 'Bíblia EBD',
         actions: [
           IconButton(
+            tooltip: 'Voz e velocidade',
+            onPressed: () => showBibleTtsSettingsSheet(context, tts: _tts),
+            icon: const Icon(Icons.record_voice_over_outlined),
+          ),
+          IconButton(
             tooltip: 'Tamanho da letra',
             onPressed: () => _showFontSheet(repo),
             icon: const Icon(Icons.text_fields),
           ),
         ],
       ),
-      body: ListView(
+      body: ResponsiveShell(
+        maxWidth: 720,
+        child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
           // Continuar leitura
@@ -475,6 +490,10 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
                         onPressed: () async {
                           final b = bookById(_spotlight!.bookId)?.name ??
                               _spotlight!.bookId;
+                          await _tts.configure(
+                            speechRate: repo.prefs.ttsSpeechRate,
+                            preferredVoiceName: repo.prefs.ttsVoiceName,
+                          );
                           await _tts.speak(
                             '$b ${_spotlight!.chapter}:${_spotlight!.number}. ${_spotlight!.text}',
                           );
@@ -580,6 +599,7 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

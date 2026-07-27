@@ -1,6 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 
+/// Breakpoints simples para shell web/tablet.
+class AppBreakpoints {
+  static const double compact = 600;
+  static const double medium = 900;
+  static const double contentMax = 1100;
+}
+
+/// Centraliza conteúdo em telas largas (web/tablet) sem redesign.
+class ResponsiveShell extends StatelessWidget {
+  const ResponsiveShell({
+    super.key,
+    required this.child,
+    this.maxWidth = AppBreakpoints.contentMax,
+    this.padding,
+  });
+
+  final Widget child;
+  final double maxWidth;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: padding == null
+            ? child
+            : Padding(padding: padding!, child: child),
+      ),
+    );
+  }
+}
+
 /// AppBar de telas empilhadas: volta (pop) + atalho Início até a raiz.
 class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {
   const SecondaryAppBar({super.key, required this.title, this.actions});

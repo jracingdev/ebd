@@ -118,24 +118,37 @@ class _BackupScreenState extends State<BackupScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Como usar no Drive',
-              style: TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            _service.supportsNativeSaf
+                ? 'Como usar no Drive'
+                : 'Compartilhar backup',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 8),
-          const Text('1. Toque em Fazer backup'),
-          const Text(
-              '2. No seletor, abra o Google Drive e escolha a pasta'),
-          const Text(
-              '3. Para restaurar, escolha o arquivo ebd-backup.json no Drive'),
+          if (_service.supportsNativeSaf) ...[
+            const Text('1. Toque em Fazer backup'),
+            const Text(
+                '2. No seletor, abra o Google Drive e escolha a pasta'),
+            const Text(
+                '3. Para restaurar, escolha o arquivo ebd-backup.json no Drive'),
+          ] else ...[
+            const Text(
+              'Nesta plataforma o backup é compartilhado/baixado como '
+              'ebd-backup.json. A restauração pelo seletor de arquivos '
+              '(SAF/Drive) está disponível no Android.',
+            ),
+          ],
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _busy ? null : _export,
             child: const Text('Fazer backup'),
           ),
           const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: _busy ? null : _import,
-            child: const Text('Restaurar de arquivo / Drive'),
-          ),
+          if (_service.supportsNativeSaf)
+            OutlinedButton(
+              onPressed: _busy ? null : _import,
+              child: const Text('Restaurar de arquivo / Drive'),
+            ),
           if (_lastPath != null) ...[
             const SizedBox(height: 16),
             Text('Último backup neste aparelho: $_lastPath',

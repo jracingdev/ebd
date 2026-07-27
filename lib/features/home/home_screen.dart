@@ -16,6 +16,7 @@ import 'package:livro_registro/features/report/report_pdf.dart';
 import 'package:livro_registro/features/students/students_view.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
+import 'package:livro_registro/widgets/common.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -49,7 +50,8 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: ResponsiveShell(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
@@ -272,6 +274,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
