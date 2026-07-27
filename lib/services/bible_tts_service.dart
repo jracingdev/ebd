@@ -3,20 +3,51 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-/// Opção de voz do motor TTS do sistema (Android/iOS/Web).
+/// Gênero percebido da voz TTS (motor ou heurística).
+enum TtsVoiceGender { female, male, unknown }
+
+/// IDs estáveis de perfil (persistidos em [BiblePrefs.ttsVoiceName]).
+abstract final class TtsVoiceProfiles {
+  static const female = 'profile:female';
+  static const male = 'profile:male';
+
+  static bool isGroupProfile(String? id) =>
+      id == female || id == male;
+}
+
+/// Opção/perfil de voz do motor TTS do sistema (Android/iOS/Web).
 class TtsVoiceOption {
   const TtsVoiceOption({
     required this.name,
     required this.locale,
+    required this.gender,
+    required this.profileName,
     this.qualityHint,
+    this.isGroupProfile = false,
   });
 
+  /// Nome técnico do motor (`getVoices`) ou id de perfil de grupo.
   final String name;
   final String locale;
+  final TtsVoiceGender gender;
+  /// Nome amigável ex.: "Ana (feminina)".
+  final String profileName;
   final String? qualityHint;
+  final bool isGroupProfile;
 
-  String get label {
-    final short = name.length > 42 ? '${name.substring(0, 40)}…' : name;
+  String get genderLabel => switch (gender) {
+        TtsVoiceGender.female => 'feminina',
+        TtsVoiceGender.male => 'masculina',
+        TtsVoiceGender.unknown => 'voz',
+      };
+
+  /// Rótulo principal na UI.
+  String get label => profileName;
+
+  /// Subtítulo técnico (só vozes reais do motor).
+  String? get technicalSubtitle {
+    if (isGroupProfile) return null;
+    final short = name.length > 48 ? '${name.substring(0, 46)}…' : name;
     if (qualityHint == null || qualityHint!.isEmpty) return short;
     return '$short · $qualityHint';
   }
@@ -39,6 +70,7 @@ class BibleTtsService {
   bool _ready = false;
   bool speaking = false;
   double _speechRate = 0.42;
+  /// Perfil persistido: `profile:female` / `profile:male` / nome do motor.
   String? _preferredVoiceName;
 
   Completer<void>? _utteranceDone;
@@ -46,6 +78,32 @@ class BibleTtsService {
   List<TtsVoiceOption> _voicesCache = const [];
 
   List<TtsVoiceOption> get availableVoices => _voicesCache;
+
+  /// Perfis para a UI: grupos Feminina/Masculina + vozes do aparelho.
+  List<TtsVoiceOption> get selectableProfiles {
+    final voices = _voicesCache;
+    if (voices.isEmpty) return const [];
+
+    return [
+      const TtsVoiceOption(
+        name: TtsVoiceProfiles.female,
+        locale: 'pt-BR',
+        gender: TtsVoiceGender.female,
+        profileName: 'Feminina (recomendada)',
+        qualityHint: 'melhor pt-BR do grupo',
+        isGroupProfile: true,
+      ),
+      const TtsVoiceOption(
+        name: TtsVoiceProfiles.male,
+        locale: 'pt-BR',
+        gender: TtsVoiceGender.male,
+        profileName: 'Masculina',
+        qualityHint: 'melhor pt-BR do grupo',
+        isGroupProfile: true,
+      ),
+      ...voices,
+    ];
+  }
 
   double get speechRate => _speechRate;
 
@@ -134,18 +192,9 @@ class BibleTtsService {
       return;
     }
 
-    TtsVoiceOption? chosen;
-    if (_preferredVoiceName != null) {
-      for (final v in voices) {
-        if (v.name == _preferredVoiceName) {
-          chosen = v;
-          break;
-        }
-      }
-    }
-    chosen ??= _pickBestVoice(voices);
+    final chosen = resolveVoice(voices, _preferredVoiceName);
 
-    if (chosen != null) {
+    if (chosen != null && !chosen.isGroupProfile) {
       try {
         await _tts.setVoice(chosen.toEngineMap());
       } catch (_) {
@@ -154,6 +203,29 @@ class BibleTtsService {
     } else {
       await _tts.setLanguage('pt-BR');
     }
+  }
+
+  /// Resolve preferência persistida → voz concreta do motor.
+  static TtsVoiceOption? resolveVoice(
+    List<TtsVoiceOption> voices,
+    String? preferred,
+  ) {
+    if (voices.isEmpty) return null;
+
+    if (preferred == TtsVoiceProfiles.male) {
+      return _pickBestVoice(voices, preferGender: TtsVoiceGender.male);
+    }
+    if (preferred == TtsVoiceProfiles.female ||
+        preferred == null ||
+        preferred.isEmpty) {
+      return _pickBestVoice(voices, preferGender: TtsVoiceGender.female);
+    }
+
+    for (final v in voices) {
+      if (v.name == preferred) return v;
+    }
+    // Preferência antiga/inexistente: cai no default feminino.
+    return _pickBestVoice(voices, preferGender: TtsVoiceGender.female);
   }
 
   Future<List<TtsVoiceOption>> _loadVoices() async {
@@ -170,20 +242,146 @@ class BibleTtsService {
         if (!_isPortugueseLocale(locale) && !_looksPortugueseName(name)) {
           continue;
         }
+        final genderField =
+            '${map['gender'] ?? map['Gender'] ?? map['voiceGender'] ?? ''}';
+        final gender = _detectGender(name, genderField);
+        final quality = _qualityHint(name, locale);
         options.add(
           TtsVoiceOption(
             name: name,
             locale: locale.isEmpty ? 'pt-BR' : locale,
-            qualityHint: _qualityHint(name, locale),
+            gender: gender,
+            profileName: '', // preenchido abaixo
+            qualityHint: quality,
           ),
         );
       }
       options.sort((a, b) => _scoreVoice(b).compareTo(_scoreVoice(a)));
-      return options;
+      return _assignFriendlyNames(options);
     } catch (e) {
       debugPrint('TTS getVoices: $e');
       return const [];
     }
+  }
+
+  /// Nomes amigáveis estáveis (ordenados por id técnico).
+  static List<TtsVoiceOption> _assignFriendlyNames(
+    List<TtsVoiceOption> voices,
+  ) {
+    const femaleNames = [
+      'Ana',
+      'Clara',
+      'Sofia',
+      'Beatriz',
+      'Lúcia',
+      'Marina',
+      'Helena',
+      'Camila',
+      'Isabela',
+      'Vitória',
+    ];
+    const maleNames = [
+      'Pedro',
+      'Bruno',
+      'Rafael',
+      'Diego',
+      'Lucas',
+      'André',
+      'Thiago',
+      'Felipe',
+      'Gabriel',
+      'Ricardo',
+    ];
+    const neutralNames = [
+      'Voz A',
+      'Voz B',
+      'Voz C',
+      'Voz D',
+      'Voz E',
+      'Voz F',
+    ];
+
+    // Mapa fixo para ids conhecidos do Google / iOS.
+    const known = <String, String>{
+      'pt-br-x-afs': 'Ana',
+      'pt-br-x-afb': 'Clara',
+      'pt-br-x-afc': 'Sofia',
+      'pt-br-x-afd': 'Beatriz',
+      'pt-br-x-afe': 'Marina',
+      'pt-br-x-ptd': 'Pedro',
+      'pt-br-x-pte': 'Bruno',
+      'luciana': 'Lúcia',
+      'luciana compact': 'Lúcia',
+      'francisca': 'Francisca',
+      'io': 'Clara',
+    };
+
+    final byKey = [...voices]
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+    var fi = 0;
+    var mi = 0;
+    var ni = 0;
+    final used = <String>{};
+
+    String nextFrom(List<String> pool, int index) {
+      if (index < pool.length) return pool[index];
+      return '${pool[index % pool.length]} ${index ~/ pool.length + 1}';
+    }
+
+    String pickGiven(TtsVoiceOption v) {
+      final key = v.name.toLowerCase().trim();
+      for (final e in known.entries) {
+        if (key == e.key || key.contains(e.key)) {
+          if (!used.contains(e.value)) return e.value;
+        }
+      }
+      // Nomes próprios já no id técnico.
+      for (final n in [...femaleNames, ...maleNames, 'Francisca', 'Heloísa']) {
+        if (key.contains(n.toLowerCase().replaceAll('ú', 'u').replaceAll('í', 'i'))) {
+          if (!used.contains(n)) return n;
+        }
+      }
+      return switch (v.gender) {
+        TtsVoiceGender.female => nextFrom(femaleNames, fi++),
+        TtsVoiceGender.male => nextFrom(maleNames, mi++),
+        TtsVoiceGender.unknown => nextFrom(neutralNames, ni++),
+      };
+    }
+
+    String buildLabel(String given, TtsVoiceOption v) {
+      final neural = v.qualityHint == 'neural';
+      return switch (v.gender) {
+        TtsVoiceGender.female =>
+          neural ? '$given (neural)' : '$given (feminina)',
+        TtsVoiceGender.male =>
+          neural ? '$given (masculina · neural)' : '$given (masculina)',
+        TtsVoiceGender.unknown =>
+          neural ? '$given (neural)' : '$given (pt-BR)',
+      };
+    }
+
+    final named = <TtsVoiceOption>[];
+    for (final v in byKey) {
+      final given = pickGiven(v);
+      used.add(given);
+      named.add(
+        TtsVoiceOption(
+          name: v.name,
+          locale: v.locale,
+          gender: v.gender,
+          profileName: buildLabel(given, v),
+          qualityHint: v.qualityHint,
+        ),
+      );
+    }
+
+    named.sort((a, b) {
+      final g = a.gender.index.compareTo(b.gender.index);
+      if (g != 0) return g;
+      return _scoreVoice(b).compareTo(_scoreVoice(a));
+    });
+    return named;
   }
 
   static bool _isPortugueseLocale(String locale) {
@@ -206,7 +404,9 @@ class BibleTtsService {
         n.contains('enhanced') ||
         n.contains('premium') ||
         n.contains('wavenet') ||
-        n.contains('studio')) {
+        n.contains('studio') ||
+        // Códigos Google locais “x-” costumam ser de maior qualidade.
+        RegExp(r'pt-br-x-').hasMatch(n)) {
       return 'neural';
     }
     if (n.contains('google') || n.contains('siri') || n.contains('samsung')) {
@@ -216,7 +416,97 @@ class BibleTtsService {
     return null;
   }
 
-  static int _scoreVoice(TtsVoiceOption v) {
+  static TtsVoiceGender _detectGender(String name, String genderField) {
+    final g = genderField.toLowerCase().trim();
+    if (g.contains('female') ||
+        g == 'f' ||
+        g.contains('femin') ||
+        g == '1') {
+      return TtsVoiceGender.female;
+    }
+    if (g.contains('male') ||
+        g == 'm' ||
+        g.contains('mascul') ||
+        g == '2') {
+      // Evita casar "female" já tratado acima.
+      if (!g.contains('female')) return TtsVoiceGender.male;
+    }
+
+    final n = name.toLowerCase();
+
+    const femaleHints = [
+      'female',
+      'femin',
+      'woman',
+      'lucia',
+      'luciana',
+      'maria',
+      'francisca',
+      'vitória',
+      'vitoria',
+      'heloisa',
+      'heloísa',
+      'camila',
+      'ana',
+      'clara',
+      'sofia',
+      'isabela',
+      'helena',
+      'marina',
+      'neural2-a',
+      'neural2-c',
+      'wavenet-a',
+      'wavenet-c',
+      'standard-a',
+      'standard-c',
+      'pt-br-x-af',
+    ];
+    const maleHints = [
+      'male',
+      'mascul',
+      'man',
+      'antonio',
+      'antônio',
+      'ricardo',
+      'daniel',
+      'felipe',
+      'joao',
+      'joão',
+      'pedro',
+      'bruno',
+      'rafael',
+      'diego',
+      'lucas',
+      'andre',
+      'andré',
+      'thiago',
+      'gabriel',
+      'neural2-b',
+      'wavenet-b',
+      'standard-b',
+      'pt-br-x-pt',
+      'pt-br-x-pd',
+    ];
+
+    for (final h in femaleHints) {
+      if (n.contains(h)) return TtsVoiceGender.female;
+    }
+    for (final h in maleHints) {
+      if (n.contains(h)) return TtsVoiceGender.male;
+    }
+
+    // iOS às vezes expõe "com.apple.voice.compact.pt-BR.Luciana"
+    if (n.contains('luciana') || n.contains('francisca')) {
+      return TtsVoiceGender.female;
+    }
+
+    return TtsVoiceGender.unknown;
+  }
+
+  static int _scoreVoice(
+    TtsVoiceOption v, {
+    TtsVoiceGender? preferGender,
+  }) {
     final n = v.name.toLowerCase();
     final loc = v.locale.toLowerCase().replaceAll('_', '-');
     var score = 0;
@@ -227,32 +517,62 @@ class BibleTtsService {
         n.contains('enhanced') ||
         n.contains('premium') ||
         n.contains('wavenet') ||
-        n.contains('studio')) {
+        n.contains('studio') ||
+        RegExp(r'pt-br-x-').hasMatch(n)) {
       score += 40;
     }
-    if (n.contains('female') ||
-        n.contains('femin') ||
-        n.contains('lucia') ||
-        n.contains('luciana') ||
-        n.contains('maria') ||
-        n.contains('francisca') ||
-        n.contains('vitória') ||
-        n.contains('vitoria') ||
-        n.contains('heloisa') ||
-        n.contains('camila')) {
-      score += 25;
-    }
-    if (n.contains('male') || n.contains('mascul')) score -= 5;
     if (n.contains('google')) score += 10;
     if (n.contains('compact') || n.contains('network')) score -= 15;
+
+    if (preferGender == TtsVoiceGender.female) {
+      if (v.gender == TtsVoiceGender.female) {
+        score += 35;
+      } else if (v.gender == TtsVoiceGender.male) {
+        score -= 40;
+      } else {
+        score += 5; // unknown: aceitável no default feminino
+      }
+    } else if (preferGender == TtsVoiceGender.male) {
+      if (v.gender == TtsVoiceGender.male) {
+        score += 35;
+      } else if (v.gender == TtsVoiceGender.female) {
+        score -= 40;
+      } else {
+        score += 5;
+      }
+    } else {
+      // Ranking geral: favorece feminina neural (default histórico).
+      if (v.gender == TtsVoiceGender.female) score += 25;
+      if (v.gender == TtsVoiceGender.male) score -= 5;
+    }
     return score;
   }
 
-  static TtsVoiceOption? _pickBestVoice(List<TtsVoiceOption> voices) {
+  static TtsVoiceOption? _pickBestVoice(
+    List<TtsVoiceOption> voices, {
+    TtsVoiceGender? preferGender,
+  }) {
     if (voices.isEmpty) return null;
-    final sorted = [...voices]..sort(
-        (a, b) => _scoreVoice(b).compareTo(_scoreVoice(a)),
-      );
+
+    if (preferGender != null) {
+      final matched =
+          voices.where((v) => v.gender == preferGender).toList();
+      final pool = matched.isNotEmpty
+          ? matched
+          : voices
+              .where((v) => v.gender == TtsVoiceGender.unknown)
+              .toList();
+      final use = pool.isNotEmpty ? pool : voices;
+      final sorted = [...use]
+        ..sort(
+          (a, b) => _scoreVoice(b, preferGender: preferGender)
+              .compareTo(_scoreVoice(a, preferGender: preferGender)),
+        );
+      return sorted.first;
+    }
+
+    final sorted = [...voices]
+      ..sort((a, b) => _scoreVoice(b).compareTo(_scoreVoice(a)));
     return sorted.first;
   }
 

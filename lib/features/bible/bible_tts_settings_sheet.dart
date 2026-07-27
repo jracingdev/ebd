@@ -12,9 +12,9 @@ Future<void> showBibleTtsSettingsSheet(
   final repo = context.read<BibleRepository>();
   await tts.configure(
     speechRate: repo.prefs.ttsSpeechRate,
-    preferredVoiceName: repo.prefs.ttsVoiceName,
+    preferredVoiceName: repo.prefs.ttsVoiceName ?? TtsVoiceProfiles.female,
   );
-  final voices = await tts.refreshVoices();
+  await tts.refreshVoices();
   if (!context.mounted) return;
 
   await showModalBottomSheet<void>(
@@ -25,6 +25,12 @@ Future<void> showBibleTtsSettingsSheet(
       return StatefulBuilder(
         builder: (ctx, setModal) {
           final prefs = context.watch<BibleRepository>().prefs;
+          final profiles = tts.selectableProfiles;
+          final selectedId = _resolveSelectedProfileId(
+            prefs.ttsVoiceName,
+            profiles,
+          );
+
           return Padding(
             padding: EdgeInsets.fromLTRB(
               20,
@@ -42,9 +48,14 @@ Future<void> showBibleTtsSettingsSheet(
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'A qualidade depende das vozes instaladas no aparelho '
-                  '(Google Text-to-Speech / Siri). Vozes “neural” soam mais naturais.',
-                  style: TextStyle(color: AppColors.muted, fontSize: 12, height: 1.35),
+                  'Escolha um perfil pelo nome. A qualidade depende das vozes '
+                  'instaladas no aparelho (Google Text-to-Speech / Siri). '
+                  'Perfis “neural” soam mais naturais.',
+                  style: TextStyle(
+                    color: AppColors.muted,
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -94,7 +105,7 @@ Future<void> showBibleTtsSettingsSheet(
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Voz',
+                  'Perfil de voz',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 6),
@@ -104,43 +115,51 @@ Future<void> showBibleTtsSettingsSheet(
                     isDense: true,
                   ),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String?>(
-                      value: prefs.ttsVoiceName != null &&
-                              voices.any((v) => v.name == prefs.ttsVoiceName)
-                          ? prefs.ttsVoiceName
-                          : null,
+                    child: DropdownButton<String>(
+                      value: selectedId,
                       isExpanded: true,
-                      hint: const Text('Automática (melhor pt-BR)'),
+                      itemHeight: 56,
+                      hint: const Text('Feminina (recomendada)'),
                       items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('Automática (melhor pt-BR)'),
-                        ),
-                        for (final v in voices)
-                          DropdownMenuItem<String?>(
-                            value: v.name,
-                            child: Text(
-                              v.label,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        for (final p in profiles)
+                          DropdownMenuItem<String>(
+                            value: p.name,
+                            child: _VoiceProfileTile(profile: p),
                           ),
                       ],
-                      onChanged: (name) async {
-                        await repo.setTtsVoiceName(name);
-                        await tts.configure(preferredVoiceName: name ?? '');
+                      onChanged: (id) async {
+                        if (id == null) return;
+                        await repo.setTtsVoiceName(id);
+                        await tts.configure(preferredVoiceName: id);
                         setModal(() {});
                       },
                     ),
                   ),
                 ),
-                if (voices.isEmpty) ...[
+                if (tts.availableVoices.isEmpty) ...[
                   const SizedBox(height: 10),
                   const Text(
                     'Nenhuma voz pt-BR listada. No Android, instale ou baixe '
                     'vozes em Configurações → Sistema → Idioma → '
                     'Saída de texto para voz (Google). No iPhone, em '
                     'Acessibilidade → Conteúdo falado → Vozes.',
-                    style: TextStyle(color: AppColors.muted, fontSize: 12, height: 1.35),
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 10),
+                  const Text(
+                    '“Feminina” e “Masculina” escolhem automaticamente a melhor '
+                    'voz pt-BR de cada grupo. Você também pode escolher um '
+                    'perfil pelo nome.',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ],
@@ -150,4 +169,52 @@ Future<void> showBibleTtsSettingsSheet(
       );
     },
   );
+}
+
+String _resolveSelectedProfileId(
+  String? stored,
+  List<TtsVoiceOption> profiles,
+) {
+  final id = (stored == null || stored.isEmpty)
+      ? TtsVoiceProfiles.female
+      : stored;
+  if (profiles.any((p) => p.name == id)) return id;
+  // Preferência antiga (só nome técnico) ou voz removida → feminina.
+  return profiles.any((p) => p.name == TtsVoiceProfiles.female)
+      ? TtsVoiceProfiles.female
+      : (profiles.isNotEmpty ? profiles.first.name : TtsVoiceProfiles.female);
+}
+
+class _VoiceProfileTile extends StatelessWidget {
+  const _VoiceProfileTile({required this.profile});
+
+  final TtsVoiceOption profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final sub = profile.isGroupProfile
+        ? (profile.qualityHint ?? profile.genderLabel)
+        : profile.technicalSubtitle;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          profile.profileName,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 14),
+        ),
+        if (sub != null && sub.isNotEmpty)
+          Text(
+            sub,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.muted,
+              height: 1.2,
+            ),
+          ),
+      ],
+    );
+  }
 }

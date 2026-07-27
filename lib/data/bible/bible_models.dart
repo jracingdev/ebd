@@ -334,7 +334,8 @@ class BiblePrefs {
   /// Velocidade TTS do SO (tipicamente 0.2–0.75; ~0.42 soa mais natural em pt-BR).
   final double ttsSpeechRate;
 
-  /// Nome da voz escolhida (`getVoices`); null = melhor pt-BR automática.
+  /// Perfil TTS: `profile:female` / `profile:male` / nome técnico do motor;
+  /// null = feminina recomendada (melhor pt-BR).
   final String? ttsVoiceName;
 
   BiblePrefs copyWith({
