@@ -32,6 +32,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  void _snack(String message, {bool error = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: error ? AppColors.danger : null,
+      ),
+    );
+  }
+
   Future<void> _loadRememberMe() async {
     final auth = context.read<AuthService>();
     final remember = await auth.isRememberMeEnabled();
@@ -52,11 +62,49 @@ class _LoginScreenState extends State<LoginScreen> {
     final enabled = await auth.isBiometricEnabled();
     if (!mounted) return;
     setState(() => _biometricAvailable = supported && enabled);
-    if (supported && enabled) {
-      try {
-        await bio.tryBiometricLogin();
-        if (auth.isLoggedIn && mounted) widget.onLoggedIn?.call();
-      } catch (_) {}
+    if (!(supported && enabled)) return;
+    try {
+      await bio.tryBiometricLogin();
+      if (auth.isLoggedIn && mounted) widget.onLoggedIn?.call();
+    } on BiometricException catch (e) {
+      if (e.canceled) {
+        _snack('Login biométrico cancelado.');
+      } else {
+        _snack(e.message, error: true);
+        if (mounted) setState(() => _error = e.message);
+      }
+    } catch (e) {
+      _snack('Falha na biometria: $e', error: true);
+    }
+  }
+
+  Future<void> _loginWithBiometric() async {
+    final auth = context.read<AuthService>();
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await BiometricService(auth).tryBiometricLogin();
+      if (auth.isLoggedIn && mounted) {
+        _snack('Login biométrico realizado.');
+        widget.onLoggedIn?.call();
+      }
+    } on BiometricException catch (e) {
+      if (e.canceled) {
+        _snack('Login biométrico cancelado.');
+      } else {
+        _snack(e.message, error: true);
+        if (mounted) setState(() => _error = e.message);
+      }
+      // Credenciais ausentes: esconde o botão até novo login+ativação.
+      final still = await auth.isBiometricEnabled();
+      if (mounted) setState(() => _biometricAvailable = still);
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+      _snack('Falha na biometria: $e', error: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -74,7 +122,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       final bio = BiometricService(auth);
-      if (!mounted) return;
       if (await bio.isSupported && !await auth.isBiometricEnabled()) {
         if (!mounted) return;
         final enable = await showDialog<bool>(
@@ -94,7 +141,19 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         );
-        if (enable == true) await auth.setBiometricEnabled(true);
+        if (enable == true) {
+          try {
+            await bio.enableAfterLogin();
+            if (mounted) {
+              setState(() => _biometricAvailable = true);
+              _snack('Biometria ativada neste aparelho.');
+            }
+          } on BiometricException catch (e) {
+            _snack(e.message, error: true);
+          } catch (e) {
+            _snack('Não foi possível ativar a biometria: $e', error: true);
+          }
+        }
       }
       widget.onLoggedIn?.call();
     } catch (e) {
@@ -256,17 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (_biometricAvailable) ...[
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: _busy
-                        ? null
-                        : () async {
-                            final auth = context.read<AuthService>();
-                            try {
-                              await BiometricService(auth).tryBiometricLogin();
-                              if (auth.isLoggedIn) widget.onLoggedIn?.call();
-                            } catch (e) {
-                              setState(() => _error = e.toString());
-                            }
-                          },
+                    onPressed: _busy ? null : _loginWithBiometric,
                     icon: const Icon(Icons.fingerprint),
                     label: const Text('Entrar com biometria'),
                   ),

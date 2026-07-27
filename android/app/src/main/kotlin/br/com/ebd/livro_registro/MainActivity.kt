@@ -3,14 +3,15 @@ package br.com.ebd.livro_registro
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
-class MainActivity : FlutterActivity() {
+/// FlutterFragmentActivity é obrigatório para local_auth (BiometricPrompt / Fragment).
+class MainActivity : FlutterFragmentActivity() {
     private val channelName = "br.com.ebd.livro_registro/backup"
     private var pendingResult: MethodChannel.Result? = null
     private var pendingBytes: ByteArray? = null
