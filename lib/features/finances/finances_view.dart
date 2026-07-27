@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
+import 'package:livro_registro/features/finances/receipt_pdf.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/utils/format.dart';
 import 'package:livro_registro/widgets/common.dart';
@@ -15,10 +16,12 @@ class FinancesView extends StatelessWidget {
         .where((f) => f.grupo == state.selectedGroup)
         .toList()
       ..sort((a, b) => b.data.compareTo(a.data));
-    final ofertas =
-        items.where((f) => f.tipo == 'oferta').fold<double>(0, (s, f) => s + f.valor);
-    final doacoes =
-        items.where((f) => f.tipo == 'doacao').fold<double>(0, (s, f) => s + f.valor);
+    final ofertas = items
+        .where((f) => f.tipo == 'oferta')
+        .fold<double>(0, (s, f) => s + f.valor);
+    final doacoes = items
+        .where((f) => f.tipo == 'doacao')
+        .fold<double>(0, (s, f) => s + f.valor);
 
     return ListView(
       children: [
@@ -54,9 +57,20 @@ class FinancesView extends StatelessWidget {
           Card(
             child: ListTile(
               title: Text(f.tipo == 'oferta' ? 'Oferta' : 'Doação'),
-              subtitle: Text('${f.data}${f.descricao.isEmpty ? '' : ' — ${f.descricao}'}'),
-              trailing: Text(currency(f.valor),
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(
+                  '${f.data}${f.descricao.isEmpty ? '' : ' — ${f.descricao}'}'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(currency(f.valor),
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  IconButton(
+                    tooltip: 'Recibo PDF',
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    onPressed: () => shareFinanceReceipt(f),
+                  ),
+                ],
+              ),
             ),
           ),
       ],
@@ -68,6 +82,7 @@ class FinancesView extends StatelessWidget {
     final valor = TextEditingController();
     final desc = TextEditingController();
     var tipo = 'oferta';
+    var gerarRecibo = true;
     final data = lastOrThisSunday();
     final ok = await showDialog<bool>(
       context: context,
@@ -93,13 +108,24 @@ class FinancesView extends StatelessWidget {
               ),
               TextField(
                 controller: desc,
-                decoration: const InputDecoration(labelText: 'Observação (opcional)'),
+                decoration:
+                    const InputDecoration(labelText: 'Observação (opcional)'),
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Gerar recibo PDF para compartilhar'),
+                value: gerarRecibo,
+                onChanged: (v) => setLocal(() => gerarRecibo = v ?? true),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Salvar')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Salvar')),
           ],
         ),
       ),
@@ -107,13 +133,16 @@ class FinancesView extends StatelessWidget {
     if (ok == true && context.mounted) {
       final v = double.tryParse(valor.text.replaceAll(',', '.')) ?? 0;
       if (v <= 0) return;
-      await state.addFinance(
+      final entry = await state.addFinance(
         grupo: state.selectedGroup,
         data: data,
         tipo: tipo,
         valor: v,
         descricao: desc.text.trim(),
       );
+      if (gerarRecibo && context.mounted) {
+        await shareFinanceReceipt(entry);
+      }
     }
   }
 }

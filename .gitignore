@@ -18,6 +18,7 @@ ios/.symlinks/
 *.log
 .DS_Store
 .flutter-plugins-dependencies
+.env
 
 # Artefatos pesados da engenharia reversa (APK/jadx/libs)
 recovery/tools/

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:livro_registro/data/models.dart';
+import 'package:livro_registro/data/user_models.dart';
 
 const _boxName = 'ebd_v1';
 const _keyEditions = 'editions';
@@ -9,6 +10,8 @@ const _keyRecords = 'records';
 const _keyFinances = 'finances';
 const _keyAttendance = 'attendance';
 const _keyStudents = 'students';
+const _keyLessons = 'lessons';
+const _keyBetel = 'betel_catalog';
 
 class EbdStorage {
   EbdStorage(this._box);
@@ -38,8 +41,7 @@ class EbdStorage {
     await _box.put(key, jsonEncode(items));
   }
 
-  List<Edition> loadEditions() =>
-      _readList(_keyEditions, Edition.fromJson);
+  List<Edition> loadEditions() => _readList(_keyEditions, Edition.fromJson);
 
   Future<void> saveEditions(List<Edition> items) =>
       _writeList(_keyEditions, items.map((e) => e.toJson()).toList());
@@ -62,11 +64,38 @@ class EbdStorage {
   Future<void> saveAttendance(List<AttendanceSession> items) =>
       _writeList(_keyAttendance, items.map((e) => e.toJson()).toList());
 
-  List<Student> loadStudents() =>
-      _readList(_keyStudents, Student.fromJson);
+  List<Student> loadStudents() => _readList(_keyStudents, Student.fromJson);
 
   Future<void> saveStudents(List<Student> items) =>
       _writeList(_keyStudents, items.map((e) => e.toJson()).toList());
+
+  List<Lesson> loadLessons() => _readList(_keyLessons, Lesson.fromJson);
+
+  Future<void> saveLessons(List<Lesson> items) =>
+      _writeList(_keyLessons, items.map((e) => e.toJson()).toList());
+
+  List<BetelCatalogItem> loadBetelCatalog() {
+    final raw = _box.get(_keyBetel);
+    if (raw == null) return [];
+    final list = raw is String ? jsonDecode(raw) : raw;
+    if (list is! List) return [];
+    return list.map((e) {
+      final m = Map<String, dynamic>.from(e as Map);
+      return BetelCatalogItem(
+        grupo: m['grupo'] as String,
+        trimestre: m['trimestre'] as String,
+        serie: m['serie'] as String,
+        tema: m['tema'] as String?,
+        sku: m['sku'] as String?,
+        capaUrl: m['capa_url'] as String? ?? m['capaUrl'] as String?,
+        produtoUrl: m['produto_url'] as String? ?? m['produtoUrl'] as String?,
+        preco: (m['preco'] as num?)?.toDouble(),
+      );
+    }).toList();
+  }
+
+  Future<void> saveBetelCatalog(List<BetelCatalogItem> items) =>
+      _writeList(_keyBetel, items.map((e) => e.toJson()).toList());
 
   AppBackup exportBackup() => AppBackup(
         version: kBackupVersion,
@@ -76,6 +105,7 @@ class EbdStorage {
         finances: loadFinances(),
         attendance: loadAttendance(),
         students: loadStudents(),
+        lessons: loadLessons(),
       );
 
   Future<void> importBackup(AppBackup backup) async {
@@ -84,5 +114,6 @@ class EbdStorage {
     await saveFinances(backup.finances);
     await saveAttendance(backup.attendance);
     await saveStudents(backup.students);
+    await saveLessons(backup.lessons);
   }
 }

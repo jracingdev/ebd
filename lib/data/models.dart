@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:livro_registro/data/user_models.dart';
 
-/// Grupos/turmas da EBD (espelha o protótipo JSX e o app Flutter instalado).
+/// Grupos/turmas da EBD.
 const kGroups = <String>[
   'Maternal (2-3 anos)',
   'Pré-escolar (4-5 anos)',
@@ -13,8 +14,8 @@ const kGroups = <String>[
   'Varões',
 ];
 
-/// Versão do formato de backup JSON (`ebd-backup.json`).
-const kBackupVersion = 3;
+/// Versão do formato de backup JSON.
+const kBackupVersion = 4;
 
 class Student extends Equatable {
   const Student({
@@ -22,18 +23,40 @@ class Student extends Equatable {
     required this.nome,
     required this.grupo,
     required this.criadoEm,
+    this.matricula,
+    this.telefone,
+    this.aniversario,
+    this.fotoUrl,
   });
 
   final String id;
   final String nome;
   final String grupo;
   final DateTime criadoEm;
+  final String? matricula;
+  final String? telefone;
+  final DateTime? aniversario;
+  final String? fotoUrl;
+
+  bool get isBirthdayToday {
+    if (aniversario == null) return false;
+    final now = DateTime.now();
+    return aniversario!.day == now.day && aniversario!.month == now.month;
+  }
 
   factory Student.fromJson(Map<String, dynamic> json) => Student(
         id: json['id'] as String,
         nome: json['nome'] as String,
         grupo: json['grupo'] as String,
-        criadoEm: DateTime.parse(json['criadoEm'] as String),
+        criadoEm: DateTime.parse(
+          (json['criadoEm'] ?? json['criado_em']).toString(),
+        ),
+        matricula: json['matricula'] as String?,
+        telefone: json['telefone'] as String?,
+        aniversario: json['aniversario'] == null
+            ? null
+            : DateTime.tryParse(json['aniversario'].toString()),
+        fotoUrl: json['fotoUrl'] as String? ?? json['foto_url'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -41,10 +64,34 @@ class Student extends Equatable {
         'nome': nome,
         'grupo': grupo,
         'criadoEm': criadoEm.toIso8601String(),
+        'matricula': matricula,
+        'telefone': telefone,
+        'aniversario': aniversario?.toIso8601String().split('T').first,
+        'fotoUrl': fotoUrl,
       };
 
+  Student copyWith({
+    String? nome,
+    String? grupo,
+    String? matricula,
+    String? telefone,
+    DateTime? aniversario,
+    String? fotoUrl,
+  }) =>
+      Student(
+        id: id,
+        nome: nome ?? this.nome,
+        grupo: grupo ?? this.grupo,
+        criadoEm: criadoEm,
+        matricula: matricula ?? this.matricula,
+        telefone: telefone ?? this.telefone,
+        aniversario: aniversario ?? this.aniversario,
+        fotoUrl: fotoUrl ?? this.fotoUrl,
+      );
+
   @override
-  List<Object?> get props => [id, nome, grupo, criadoEm];
+  List<Object?> get props =>
+      [id, nome, grupo, criadoEm, matricula, telefone, aniversario, fotoUrl];
 }
 
 class Edition extends Equatable {
@@ -53,13 +100,19 @@ class Edition extends Equatable {
     required this.grupo,
     required this.trimestre,
     this.capa,
+    this.tema,
+    this.serie,
+    this.sku,
     required this.criadoEm,
   });
 
   final String id;
   final String grupo;
   final String trimestre;
-  final String? capa; // data URL ou path
+  final String? capa;
+  final String? tema;
+  final String? serie;
+  final String? sku;
   final DateTime criadoEm;
 
   factory Edition.fromJson(Map<String, dynamic> json) => Edition(
@@ -67,7 +120,12 @@ class Edition extends Equatable {
         grupo: json['grupo'] as String,
         trimestre: json['trimestre'] as String,
         capa: json['capa'] as String?,
-        criadoEm: DateTime.parse(json['criadoEm'] as String),
+        tema: json['tema'] as String?,
+        serie: json['serie'] as String?,
+        sku: json['sku'] as String?,
+        criadoEm: DateTime.parse(
+          (json['criadoEm'] ?? json['criado_em']).toString(),
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -75,14 +133,17 @@ class Edition extends Equatable {
         'grupo': grupo,
         'trimestre': trimestre,
         'capa': capa,
+        'tema': tema,
+        'serie': serie,
+        'sku': sku,
         'criadoEm': criadoEm.toIso8601String(),
       };
 
   @override
-  List<Object?> get props => [id, grupo, trimestre, capa, criadoEm];
+  List<Object?> get props =>
+      [id, grupo, trimestre, capa, tema, serie, sku, criadoEm];
 }
 
-/// Entrega/pagamento de revista (DeliveryRecord no binário).
 class DeliveryRecord extends Equatable {
   const DeliveryRecord({
     required this.id,
@@ -90,7 +151,7 @@ class DeliveryRecord extends Equatable {
     required this.grupo,
     required this.edicaoId,
     required this.valor,
-    required this.status, // pago | pendente
+    required this.status,
     required this.data,
   });
 
@@ -108,10 +169,10 @@ class DeliveryRecord extends Equatable {
         id: json['id'] as String,
         nome: json['nome'] as String,
         grupo: json['grupo'] as String,
-        edicaoId: json['edicaoId'] as String,
+        edicaoId: json['edicaoId'] as String? ?? json['edicao_id'] as String,
         valor: (json['valor'] as num).toDouble(),
         status: json['status'] as String,
-        data: DateTime.parse(json['data'] as String),
+        data: DateTime.parse(json['data'].toString()),
       );
 
   Map<String, dynamic> toJson() => {
@@ -142,8 +203,8 @@ class FinanceEntry extends Equatable {
   const FinanceEntry({
     required this.id,
     required this.grupo,
-    required this.data, // yyyy-MM-dd
-    required this.tipo, // oferta | doacao
+    required this.data,
+    required this.tipo,
     required this.valor,
     required this.descricao,
     required this.criadoEm,
@@ -164,7 +225,9 @@ class FinanceEntry extends Equatable {
         tipo: json['tipo'] as String,
         valor: (json['valor'] as num).toDouble(),
         descricao: (json['descricao'] as String?) ?? '',
-        criadoEm: DateTime.parse(json['criadoEm'] as String),
+        criadoEm: DateTime.parse(
+          (json['criadoEm'] ?? json['criado_em']).toString(),
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -178,7 +241,8 @@ class FinanceEntry extends Equatable {
       };
 
   @override
-  List<Object?> get props => [id, grupo, data, tipo, valor, descricao, criadoEm];
+  List<Object?> get props =>
+      [id, grupo, data, tipo, valor, descricao, criadoEm];
 }
 
 class AttendancePerson extends Equatable {
@@ -199,7 +263,7 @@ class AttendancePerson extends Equatable {
         id: json['id'] as String,
         nome: json['nome'] as String,
         presente: json['presente'] as bool? ?? false,
-        alunoId: json['alunoId'] as String?,
+        alunoId: json['alunoId'] as String? ?? json['aluno_id'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -224,7 +288,7 @@ class AttendanceSession extends Equatable {
   const AttendanceSession({
     required this.id,
     required this.grupo,
-    required this.data, // yyyy-MM-dd
+    required this.data,
     required this.pessoas,
     required this.criadoEm,
   });
@@ -243,10 +307,12 @@ class AttendanceSession extends Equatable {
         id: json['id'] as String,
         grupo: json['grupo'] as String,
         data: json['data'] as String,
-        pessoas: (json['pessoas'] as List<dynamic>)
+        pessoas: (json['pessoas'] as List<dynamic>? ?? [])
             .map((e) => AttendancePerson.fromJson(e as Map<String, dynamic>))
             .toList(),
-        criadoEm: DateTime.parse(json['criadoEm'] as String),
+        criadoEm: DateTime.parse(
+          (json['criadoEm'] ?? json['criado_em']).toString(),
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -270,6 +336,7 @@ class AppBackup extends Equatable {
     required this.finances,
     required this.attendance,
     required this.students,
+    this.lessons = const [],
   });
 
   final int version;
@@ -279,6 +346,7 @@ class AppBackup extends Equatable {
   final List<FinanceEntry> finances;
   final List<AttendanceSession> attendance;
   final List<Student> students;
+  final List<Lesson> lessons;
 
   factory AppBackup.fromJson(Map<String, dynamic> json) => AppBackup(
         version: json['version'] as int? ?? kBackupVersion,
@@ -298,6 +366,9 @@ class AppBackup extends Equatable {
         students: (json['students'] as List<dynamic>? ?? [])
             .map((e) => Student.fromJson(e as Map<String, dynamic>))
             .toList(),
+        lessons: (json['lessons'] as List<dynamic>? ?? [])
+            .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -308,11 +379,20 @@ class AppBackup extends Equatable {
         'finances': finances.map((e) => e.toJson()).toList(),
         'attendance': attendance.map((e) => e.toJson()).toList(),
         'students': students.map((e) => e.toJson()).toList(),
+        'lessons': lessons.map((e) => e.toJson()).toList(),
       };
 
   @override
-  List<Object?> get props =>
-      [version, exportedAt, editions, records, finances, attendance, students];
+  List<Object?> get props => [
+        version,
+        exportedAt,
+        editions,
+        records,
+        finances,
+        attendance,
+        students,
+        lessons,
+      ];
 }
 
 class EditionTotals {

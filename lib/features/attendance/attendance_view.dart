@@ -71,11 +71,14 @@ class AttendanceView extends StatelessWidget {
               subtitle: Text(p.presente ? 'Presente' : 'Ausente'),
               value: p.presente,
               activeThumbColor: AppColors.green,
-              onChanged: (v) => state.setAttendancePresent(
-                sessionId: session.id,
-                alunoId: p.alunoId ?? p.id,
-                presente: v,
-              ),
+              onChanged: (v) {
+                final key = p.alunoId ?? p.id;
+                state.setAttendancePresent(
+                  sessionId: session.id,
+                  alunoId: key,
+                  presente: v,
+                );
+              },
             ),
         if (sessions.length > 1) ...[
           const Padding(

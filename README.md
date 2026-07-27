@@ -2,7 +2,13 @@
 
 App Flutter da **Escola Bíblica Dominical** (pacote `br.com.ebd.livro_registro`) — Android + Web.
 
-Projeto recuperado a partir do APK + backups JSON + protótipo JSX. Detalhes em [`docs/AUDITORIA_RECUPERACAO.md`](docs/AUDITORIA_RECUPERACAO.md).
+- Roles: aluno, professor, superintendente, pastor, admin
+- Login por matrícula + senha, lembrete de senha, biometria (Android)
+- Sync Editora Betel, 13 lições, aniversários, recibo PDF de ofertas
+- Backend: Supabase + Firebase FCM
+
+Detalhes da recuperação do APK: [`docs/AUDITORIA_RECUPERACAO.md`](docs/AUDITORIA_RECUPERACAO.md)  
+Setup cloud: [`docs/SETUP_CLOUD.md`](docs/SETUP_CLOUD.md)
 
 ## Rodar
 
@@ -11,10 +17,6 @@ flutter pub get
 flutter run
 ```
 
-Para restaurar os dados do aparelho: no app, **Backup → Restaurar** e escolha `reference/ebd-backup26-07-2026A.json`.
+Demo local (sem Supabase): matrícula `admin` / senha `admin123`.
 
-## Stack
-
-- Flutter (Android + Web)
-- Supabase (Postgres, Auth, Storage)
-- Firebase (FCM push)
+Web: `flutter run -d chrome`

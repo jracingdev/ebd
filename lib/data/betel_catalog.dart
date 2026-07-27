@@ -1,5 +1,5 @@
-/// Catálogo Editora Betel (espelhado do protótipo e das URLs no libapp.so).
-/// CIBE e Varões usam a mesma revista de Adultos.
+/// Catálogo Editora Betel (fallback local + sync).
+/// CIBE e Varões usam a mesma revista de Adultos. Jovens = CONECTAR+.
 const betelCatalog = <String, Map<String, String>>{
   'Maternal (2-3 anos)': {
     'trimestre': '2º Trimestre 2026',
@@ -34,6 +34,12 @@ const betelCatalog = <String, Map<String, String>>{
   'Adolescentes 15-17': {
     'trimestre': '2º Trimestre 2026',
     'revista': 'VIVER+',
+    'capa':
+        'https://www.editorabetel.com.br/uploads/imagens/6a15bd2e62a26_m.jpg',
+  },
+  'Jovens': {
+    'trimestre': '2º Trimestre 2026',
+    'revista': 'CONECTAR+',
     'capa':
         'https://www.editorabetel.com.br/uploads/imagens/6a15bd2e62a26_m.jpg',
   },
