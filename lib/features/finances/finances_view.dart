@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
-import 'package:livro_registro/features/finances/receipt_pdf.dart';
+import 'package:livro_registro/features/finances/receipt_preview_screen.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/utils/format.dart';
 import 'package:livro_registro/widgets/common.dart';
@@ -65,9 +65,9 @@ class FinancesView extends StatelessWidget {
                   Text(currency(f.valor),
                       style: const TextStyle(fontWeight: FontWeight.w700)),
                   IconButton(
-                    tooltip: 'Recibo PDF',
+                    tooltip: 'Ver comprovante',
                     icon: const Icon(Icons.picture_as_pdf_outlined),
-                    onPressed: () => shareFinanceReceipt(f),
+                    onPressed: () => previewFinanceReceipt(context, f),
                   ),
                 ],
               ),
@@ -113,7 +113,7 @@ class FinancesView extends StatelessWidget {
               ),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Gerar recibo PDF para compartilhar'),
+                title: const Text('Gerar recibo PDF (visualizar)'),
                 value: gerarRecibo,
                 onChanged: (v) => setLocal(() => gerarRecibo = v ?? true),
               ),
@@ -141,7 +141,7 @@ class FinancesView extends StatelessWidget {
         descricao: desc.text.trim(),
       );
       if (gerarRecibo && context.mounted) {
-        await shareFinanceReceipt(entry);
+        await previewFinanceReceipt(context, entry);
       }
     }
   }

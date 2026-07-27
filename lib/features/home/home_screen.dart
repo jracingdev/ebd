@@ -101,7 +101,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   if (role.isStaff)
                     TextButton(
-                      onPressed: () => printEbdReport(context),
+                      onPressed: () => previewEbdReport(context),
                       child: const Text('Relatório'),
                     ),
                   PopupMenuButton<_HomeAction>(
