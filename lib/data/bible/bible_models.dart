@@ -1,41 +1,92 @@
 import 'package:equatable/equatable.dart';
 
-/// Versões exibidas na UI. Textos licenciados entram via plug-in (ver docs/BIBLIA.md).
+/// Versões exibidas na UI.
+///
+/// - [almeida1819]: texto completo embutido (domínio público).
+/// - Demais: buscam texto completo via API (Midvash e/ou API.Bible) com cache offline.
+///   Direitos das edições modernas pertencem aos detentores (ex. SBB); ver docs/BIBLIA.md.
 enum BibleVersion {
   ara2(
     id: 'ara2',
     label: '2ª edição ARA revista e corrigida',
     shortLabel: 'ARA 2ª',
+    remoteSlug: 'arc',
+    delivery: BibleVersionDelivery.remoteApi,
+    licenseSummary:
+        'Edição moderna protegida. Texto servido via API pública (Midvash slug `arc` = Almeida Revista e Corrigida) com cache no aparelho. '
+        'Para distribuição embutida ou API.Bible licenciada, configure BIBLE_API_KEY + BIBLE_API_ID_ARA2.',
   ),
   ra(
     id: 'ra',
     label: 'Revista e atualizada (RA)',
     shortLabel: 'RA',
+    remoteSlug: 'ara',
+    delivery: BibleVersionDelivery.remoteApi,
+    licenseSummary:
+        'ARA (Revista e Atualizada) protegida. Texto via API (Midvash `ara`) + cache. '
+        'Pacote embutido exige contrato SBB; opcionalmente BIBLE_API_ID_RA no .env.',
   ),
   sbb(
     id: 'sbb',
-    label: 'SBB',
+    label: 'SBB (Nova Almeida Atualizada)',
     shortLabel: 'SBB',
+    remoteSlug: 'naa',
+    delivery: BibleVersionDelivery.remoteApi,
+    licenseSummary:
+        '“SBB” no app aponta para a NAA (Nova Almeida Atualizada, publicada pela SBB) via API Midvash `naa` + cache. '
+        'Outras edições SBB exigem licença própria (BIBLE_API_ID_SBB).',
   ),
   ntlh(
     id: 'ntlh',
     label: 'Versão com linguagem de hoje (NTLH)',
     shortLabel: 'NTLH',
+    remoteSlug: 'ntlh',
+    delivery: BibleVersionDelivery.remoteApi,
+    licenseSummary:
+        'NTLH protegida (SBB). Texto via API Midvash `ntlh` + cache. '
+        'Embutir no APK exige licença; opcional BIBLE_API_ID_NTLH.',
+  ),
+  almeida1819(
+    id: 'almeida1819',
+    label: 'Almeida 1819 (domínio público)',
+    shortLabel: 'AL 1819',
+    remoteSlug: null,
+    delivery: BibleVersionDelivery.localAsset,
+    licenseSummary:
+        'Domínio público (João Ferreira de Almeida 1819 / Bíblia Livre). '
+        'Texto completo embutido em assets/bible/almeida_1819.json — funciona 100% offline.',
   );
 
   const BibleVersion({
     required this.id,
     required this.label,
     required this.shortLabel,
+    required this.remoteSlug,
+    required this.delivery,
+    required this.licenseSummary,
   });
 
   final String id;
   final String label;
   final String shortLabel;
+  final String? remoteSlug;
+  final BibleVersionDelivery delivery;
+  final String licenseSummary;
 
-  static BibleVersion fromId(String id) =>
-      BibleVersion.values.firstWhere((v) => v.id == id, orElse: () => ara2);
+  bool get isLocalAsset => delivery == BibleVersionDelivery.localAsset;
+  bool get isRemote => delivery == BibleVersionDelivery.remoteApi;
+
+  String get remoteSourceNote =>
+      'Texto de $shortLabel via API pública (cache offline no aparelho). '
+      'Edição protegida — ver docs/BIBLIA.md. Não extraído de APK de terceiros.';
+
+  static BibleVersion fromId(String id) => BibleVersion.values.firstWhere(
+        (v) => v.id == id,
+        orElse: () => BibleVersion.almeida1819,
+      );
 }
+
+enum BibleVersionDelivery { localAsset, remoteApi }
 
 class BibleBook {
   const BibleBook({
@@ -84,6 +135,24 @@ class BibleChapter {
   final String? sourceNote;
 }
 
+/// Estado quando o capítulo não pôde ser carregado (nunca “silêncio vazio”).
+class BibleChapterLoad {
+  const BibleChapterLoad.ok(this.chapter)
+      : errorMessage = null,
+        canRetry = false;
+
+  const BibleChapterLoad.fail({
+    required this.errorMessage,
+    this.canRetry = true,
+  }) : chapter = null;
+
+  final BibleChapter? chapter;
+  final String? errorMessage;
+  final bool canRetry;
+
+  bool get hasText => chapter != null && chapter!.verses.isNotEmpty;
+}
+
 class BibleBookmark extends Equatable {
   const BibleBookmark({
     required this.id,
@@ -120,7 +189,7 @@ class BibleBookmark extends Equatable {
 
   factory BibleBookmark.fromJson(Map<String, dynamic> j) => BibleBookmark(
         id: j['id'] as String,
-        versionId: j['versionId'] as String? ?? 'ara2',
+        versionId: j['versionId'] as String? ?? 'almeida1819',
         bookId: j['bookId'] as String,
         chapter: j['chapter'] as int,
         verse: j['verse'] as int,
@@ -164,7 +233,7 @@ class BibleHighlight extends Equatable {
 
   factory BibleHighlight.fromJson(Map<String, dynamic> j) => BibleHighlight(
         id: j['id'] as String,
-        versionId: j['versionId'] as String? ?? 'ara2',
+        versionId: j['versionId'] as String? ?? 'almeida1819',
         bookId: j['bookId'] as String,
         chapter: j['chapter'] as int,
         verse: j['verse'] as int,
@@ -239,8 +308,7 @@ class ReadingPlanProgress {
       ReadingPlanProgress(
         planId: j['planId'] as String,
         completedDays: {
-          for (final d in (j['completedDays'] as List? ?? const []))
-            d as int,
+          for (final d in (j['completedDays'] as List? ?? const [])) d as int,
         },
         startedAt: j['startedAt'] != null
             ? DateTime.parse(j['startedAt'] as String)
@@ -250,7 +318,7 @@ class ReadingPlanProgress {
 
 class BiblePrefs {
   const BiblePrefs({
-    this.versionId = 'ara2',
+    this.versionId = 'almeida1819',
     this.fontSize = 18,
     this.lastBookId = 'joao',
     this.lastChapter = 1,
@@ -281,10 +349,17 @@ class BiblePrefs {
         'lastChapter': lastChapter,
       };
 
-  factory BiblePrefs.fromJson(Map<String, dynamic> j) => BiblePrefs(
-        versionId: j['versionId'] as String? ?? 'ara2',
-        fontSize: (j['fontSize'] as num?)?.toDouble() ?? 18,
-        lastBookId: j['lastBookId'] as String? ?? 'joao',
-        lastChapter: j['lastChapter'] as int? ?? 1,
-      );
+  factory BiblePrefs.fromJson(Map<String, dynamic> j) {
+    var versionId = j['versionId'] as String? ?? 'almeida1819';
+    // Prefs antigas apontavam para ara2 sem texto embutido.
+    if (versionId == 'ara2' && j['migratedToDp'] != true) {
+      // Mantém ara2; texto virá da API. Não força migração silenciosa.
+    }
+    return BiblePrefs(
+      versionId: versionId,
+      fontSize: (j['fontSize'] as num?)?.toDouble() ?? 18,
+      lastBookId: j['lastBookId'] as String? ?? 'joao',
+      lastChapter: j['lastChapter'] as int? ?? 1,
+    );
+  }
 }

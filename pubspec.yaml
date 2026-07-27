@@ -48,6 +48,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/
+    - assets/bible/
     - .env.example
 
 flutter_launcher_icons:

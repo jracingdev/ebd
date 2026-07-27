@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
+import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/widgets/common.dart';
 
@@ -28,7 +29,7 @@ class StudentsView extends StatelessWidget {
                   style: const TextStyle(color: AppColors.muted)),
               const SizedBox(height: 12),
               FilledButton(
-                onPressed: () => _add(context),
+                onPressed: () => _openForm(context),
                 child: const Text('+ Adicionar aluno'),
               ),
             ],
@@ -46,6 +47,7 @@ class StudentsView extends StatelessWidget {
         for (final a in alunos)
           Card(
             child: ListTile(
+              onTap: () => _openForm(context, existing: a),
               leading: CircleAvatar(
                 backgroundImage:
                     a.fotoUrl != null ? _imageProvider(a.fotoUrl!) : null,
@@ -60,30 +62,41 @@ class StudentsView extends StatelessWidget {
                 if (a.aniversario != null)
                   'Aniv. ${a.aniversario!.day}/${a.aniversario!.month}',
                 if (a.isBirthdayToday) '🎉 Hoje!',
-              ].join(' · ')),
+              ].where((e) => e.isNotEmpty).join(' · ')),
               isThreeLine: true,
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline, color: AppColors.danger),
-                onPressed: () async {
-                  final ok = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Remover aluno?'),
-                      content: Text('Remover ${a.nome} da turma?'),
-                      actions: [
-                        TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancelar')),
-                        FilledButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text('Remover')),
-                      ],
-                    ),
-                  );
-                  if (ok == true && context.mounted) {
-                    await state.removeStudent(a.id);
-                  }
-                },
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Editar',
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => _openForm(context, existing: a),
+                  ),
+                  IconButton(
+                    tooltip: 'Remover',
+                    icon: const Icon(Icons.delete_outline, color: AppColors.danger),
+                    onPressed: () async {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Remover aluno?'),
+                          content: Text('Remover ${a.nome} da turma?'),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancelar')),
+                            FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text('Remover')),
+                          ],
+                        ),
+                      );
+                      if (ok == true && context.mounted) {
+                        await state.removeStudent(a.id);
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -97,19 +110,23 @@ class StudentsView extends StatelessWidget {
     return null;
   }
 
-  Future<void> _add(BuildContext context) async {
+  Future<void> _openForm(BuildContext context, {Student? existing}) async {
     final state = context.read<AppState>();
-    final nome = TextEditingController();
-    final matricula = TextEditingController();
-    final telefone = TextEditingController();
-    DateTime? aniversario;
-    String? fotoPath;
+    final nome = TextEditingController(text: existing?.nome ?? '');
+    final matricula = TextEditingController(text: existing?.matricula ?? '');
+    final telefone = TextEditingController(text: existing?.telefone ?? '');
+    DateTime? aniversario = existing?.aniversario;
+    String? fotoPath = existing?.fotoUrl;
+    var grupo = existing?.grupo ?? state.selectedGroup;
+    if (!state.groups.contains(grupo)) {
+      grupo = state.selectedGroup;
+    }
 
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
-          title: const Text('Cadastrar aluno'),
+          title: Text(existing == null ? 'Cadastrar aluno' : 'Editar aluno'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -139,8 +156,8 @@ class StudentsView extends StatelessWidget {
                       ),
                     );
                     if (source == null) return;
-                    final file =
-                        await ImagePicker().pickImage(source: source, imageQuality: 75);
+                    final file = await ImagePicker()
+                        .pickImage(source: source, imageQuality: 75);
                     if (file != null) setLocal(() => fotoPath = file.path);
                   },
                   child: CircleAvatar(
@@ -148,9 +165,7 @@ class StudentsView extends StatelessWidget {
                     backgroundColor: AppColors.green.withValues(alpha: 0.15),
                     backgroundImage: fotoPath == null
                         ? null
-                        : (kIsWeb
-                            ? null
-                            : FileImage(File(fotoPath!))),
+                        : (kIsWeb ? null : FileImage(File(fotoPath!))),
                     child: fotoPath == null
                         ? const Icon(Icons.add_a_photo_outlined)
                         : null,
@@ -158,16 +173,33 @@ class StudentsView extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                    controller: nome,
-                    decoration: const InputDecoration(labelText: 'Nome'),
-                    autofocus: true),
+                  controller: nome,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                  autofocus: existing == null,
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  key: ValueKey(grupo),
+                  initialValue:
+                      state.groups.contains(grupo) ? grupo : state.groups.first,
+                  decoration: const InputDecoration(labelText: 'Classe / turma'),
+                  items: [
+                    for (final g in state.groups)
+                      DropdownMenuItem(value: g, child: Text(g)),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setLocal(() => grupo = v);
+                  },
+                ),
                 TextField(
-                    controller: matricula,
-                    decoration: const InputDecoration(labelText: 'Matrícula')),
+                  controller: matricula,
+                  decoration: const InputDecoration(labelText: 'Matrícula'),
+                ),
                 TextField(
-                    controller: telefone,
-                    decoration: const InputDecoration(labelText: 'Telefone'),
-                    keyboardType: TextInputType.phone),
+                  controller: telefone,
+                  decoration: const InputDecoration(labelText: 'Telefone'),
+                  keyboardType: TextInputType.phone,
+                ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(
@@ -175,11 +207,22 @@ class StudentsView extends StatelessWidget {
                         ? 'Data de aniversário'
                         : '${aniversario!.day}/${aniversario!.month}/${aniversario!.year}',
                   ),
-                  trailing: const Icon(Icons.cake_outlined),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (aniversario != null)
+                        IconButton(
+                          tooltip: 'Limpar',
+                          icon: const Icon(Icons.clear),
+                          onPressed: () => setLocal(() => aniversario = null),
+                        ),
+                      const Icon(Icons.cake_outlined),
+                    ],
+                  ),
                   onTap: () async {
                     final d = await showDatePicker(
                       context: ctx,
-                      initialDate: DateTime(2010, 1, 1),
+                      initialDate: aniversario ?? DateTime(2010, 1, 1),
                       firstDate: DateTime(1940),
                       lastDate: DateTime.now(),
                     );
@@ -191,23 +234,48 @@ class StudentsView extends StatelessWidget {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar')),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar'),
+            ),
             FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Salvar')),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Salvar'),
+            ),
           ],
         ),
       ),
     );
-    if (ok == true && context.mounted && nome.text.trim().isNotEmpty) {
+
+    if (ok != true || !context.mounted) return;
+    final nomeTrim = nome.text.trim();
+    if (nomeTrim.isEmpty) return;
+
+    final mat = matricula.text.trim();
+    final tel = telefone.text.trim();
+
+    if (existing == null) {
       await state.addStudent(
-        nome: nome.text,
-        grupo: state.selectedGroup,
-        matricula: matricula.text,
-        telefone: telefone.text,
+        nome: nomeTrim,
+        grupo: grupo,
+        matricula: mat,
+        telefone: tel,
         aniversario: aniversario,
         fotoUrl: fotoPath,
+      );
+    } else {
+      await state.updateStudent(
+        existing.copyWith(
+          nome: nomeTrim,
+          grupo: grupo,
+          matricula: mat,
+          telefone: tel,
+          aniversario: aniversario,
+          fotoUrl: fotoPath,
+          clearMatricula: mat.isEmpty,
+          clearTelefone: tel.isEmpty,
+          clearAniversario: aniversario == null,
+          clearFotoUrl: fotoPath == null || fotoPath!.trim().isEmpty,
+        ),
       );
     }
   }

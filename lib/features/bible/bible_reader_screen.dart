@@ -24,6 +24,7 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
   late final String _bookId = widget.bookId;
   late int _chapter = widget.chapter;
   BibleChapter? _chapterData;
+  String? _errorMessage;
   bool _loading = true;
   final _tts = BibleTtsService();
   bool _speaking = false;
@@ -41,13 +42,17 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
     final repo = context.read<BibleRepository>();
     final data = await repo.loadChapter(_bookId, _chapter);
     await repo.rememberPlace(_bookId, _chapter);
     if (!mounted) return;
     setState(() {
-      _chapterData = data;
+      _chapterData = data.chapter;
+      _errorMessage = data.errorMessage;
       _loading = false;
     });
   }
@@ -207,7 +212,17 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _chapterData == null
-                    ? _EmptyChapter(bookName: book?.name ?? _bookId, chapter: _chapter)
+                    ? _EmptyChapter(
+                        bookName: book?.name ?? _bookId,
+                        chapter: _chapter,
+                        message: _errorMessage,
+                        versionLabel: repo.version.shortLabel,
+                        onRetry: _load,
+                        onOpenAlmeida: () async {
+                          await repo.setVersion(BibleVersion.almeida1819);
+                          await _load();
+                        },
+                      )
                     : ListView(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                         children: [
@@ -349,10 +364,21 @@ class _VerseRow extends StatelessWidget {
 }
 
 class _EmptyChapter extends StatelessWidget {
-  const _EmptyChapter({required this.bookName, required this.chapter});
+  const _EmptyChapter({
+    required this.bookName,
+    required this.chapter,
+    required this.message,
+    required this.versionLabel,
+    required this.onRetry,
+    required this.onOpenAlmeida,
+  });
 
   final String bookName;
   final int chapter;
+  final String? message;
+  final String versionLabel;
+  final VoidCallback onRetry;
+  final VoidCallback onOpenAlmeida;
 
   @override
   Widget build(BuildContext context) {
@@ -361,19 +387,32 @@ class _EmptyChapter extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.menu_book_outlined, size: 48, color: AppColors.muted),
+          const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.muted),
           const SizedBox(height: 16),
           Text(
-            '$bookName $chapter ainda não está na amostra local.',
+            '$bookName $chapter · $versionLabel',
             textAlign: TextAlign.center,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Disponíveis agora: Salmos 23 e João 1 (domínio público). '
-            'Capítulos licenciados podem ser plugados depois — docs/BIBLIA.md.',
+          Text(
+            message ??
+                'Não foi possível carregar este capítulo. '
+                    'Verifique a internet ou baixe a versão para leitura offline.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.muted, height: 1.35),
+            style: const TextStyle(color: AppColors.muted, height: 1.35),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Tentar de novo'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: onOpenAlmeida,
+            icon: const Icon(Icons.menu_book_outlined),
+            label: const Text('Ler Almeida 1819 (offline)'),
           ),
         ],
       ),

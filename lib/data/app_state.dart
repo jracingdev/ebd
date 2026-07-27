@@ -42,7 +42,8 @@ class AppState extends ChangeNotifier {
     records = _storage.loadRecords();
     finances = _storage.loadFinances();
     attendance = _storage.loadAttendance();
-    students = _storage.loadStudents();
+    final loadedStudents = _storage.loadStudents();
+    students = _normalizeStudents(loadedStudents);
     lessons = _storage.loadLessons();
     betelItems = _storage.loadBetelCatalog();
     customGroups = _storage.loadCustomGroups();
@@ -50,7 +51,47 @@ class AppState extends ChangeNotifier {
     if (!groups.contains(selectedGroup)) {
       selectedGroup = groups.first;
     }
+    if (!_sameStudents(loadedStudents, students)) {
+      await _storage.saveStudents(students);
+    }
     notifyListeners();
+  }
+
+  bool _sameStudents(List<Student> a, List<Student> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  /// Garante id único e campos íntegros (backups antigos / imports frágeis).
+  List<Student> _normalizeStudents(List<Student> raw) {
+    final seen = <String>{};
+    final out = <Student>[];
+    for (final s in raw) {
+      var id = s.id.trim();
+      if (id.isEmpty || seen.contains(id)) {
+        id = _uuid.v4().replaceAll('-', '').substring(0, 12);
+      }
+      seen.add(id);
+      final nome = s.nome.trim().isEmpty ? 'Aluno' : s.nome.trim();
+      final grupo = s.grupo.trim().isEmpty ? kGroups.first : s.grupo.trim();
+      out.add(
+        Student(
+          id: id,
+          nome: nome,
+          grupo: grupo,
+          criadoEm: s.criadoEm,
+          matricula: s.matricula?.trim().isEmpty == true ? null : s.matricula?.trim(),
+          telefone: s.telefone?.trim().isEmpty == true ? null : s.telefone?.trim(),
+          aniversario: s.aniversario,
+          fotoUrl: s.fotoUrl?.trim().isEmpty == true ? null : s.fotoUrl?.trim(),
+        ),
+      );
+    }
+    return out;
   }
 
   /// Inclui na lista de custom grupos encontrados nos dados (ex.: backup antigo).

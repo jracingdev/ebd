@@ -1,47 +1,64 @@
 # Bíblia EBD — textos e licenças
 
-O módulo **Bíblia EBD** é secundário ao livro de registro (revistas, ofertas, presença, alunos, painel, lições). A interface usa o tema do app (`AppColors`: creme, verde, dourado) e nomes próprios (“Bíblia EBD”, “Minha leitura”, “Marcadores”).
+O módulo **Bíblia EBD** é secundário ao livro de registro. A interface usa o tema do app e nomes próprios (“Bíblia EBD”, “Minha leitura”, “Marcadores”).
 
-## O que já vem embutido
+## O que o app entrega hoje (honesto)
 
-- **Estrutura** de livros/capítulos e seletor de versões na UI:
-  - 2ª edição ARA revista e corrigida
-  - Revista e atualizada (RA)
-  - SBB
-  - Versão com linguagem de hoje (NTLH)
-- **Amostras** de domínio público (Almeida 1819): **Salmos 23** e **João 1**.
-- Persistência Hive (`ebd_bible_v1`): preferências, marcadores, destaques, progresso de planos, cache de capítulos.
-- TTS (`flutter_tts`), busca nas amostras, planos “Semana da EBD” / “Olhar o Evangelho”.
+| Versão no app | O que o usuário lê | Como chega o texto | Offline |
+|---|---|---|---|
+| **ARA 2ª** (rótulo: 2ª ed. revista e corrigida) | Almeida **Revista e Corrigida** (`arc` na API Midvash) | API pública + cache Hive | Após abrir capítulos ou “Baixar Bíblia completa” |
+| **RA** (Revista e atualizada) | **ARA** Midvash (`ara`) | idem | idem |
+| **SBB** | **NAA** (Nova Almeida Atualizada, edição SBB) Midvash (`naa`) | idem | idem |
+| **NTLH** | **NTLH** Midvash (`ntlh`) | idem | idem |
+| **AL 1819** | Almeida 1819 / Bíblia Livre | Asset `assets/bible/almeida_1819.json` (domínio público) | Sempre |
 
-## Direitos autorais (obrigatório)
+- Catálogo: **66 livros**, 1189 capítulos.
+- Reader, TTS, marcadores e destaques funcionam sobre o texto carregado.
+- Busca: completa no asset Almeida; nas outras versões, sobre o **cache** (baixe a versão para busca total).
+- Capítulos sem rede/cache: mensagem acionável (tentar de novo / abrir Almeida 1819) — **nunca tela vazia silenciosa**.
 
-Textos modernos **ARA**, **RA**, **NTLH** e edições **SBB** são protegidos. **Não** copie APKs ou dumps de apps de terceiros para embutir o cânon completo.
+## Direitos autorais
 
-Opções legais:
+- **Não** embutimos ARA/RA/NTLH/NAA no APK (são protegidas; exigem contrato com a SBB ou detentor).
+- **Não** extraímos texto de APKs de terceiros (“Bíblia Sagrada” etc.).
+- **Almeida 1819** embutida: domínio público (`midvash/bible-data` → `almeida-livre`).
+- Versões modernas: consumo sob demanda via **API pública Midvash** (`https://api.midvash.com`) com **cache local** no aparelho. Isso permite ler a Bíblia completa em cada sigla listada sem redistribuir o cânon no instalador.
+- Opcional **API.Bible** (licença formal): configure no `.env`:
 
-1. **Licença comercial** com a SBB (ou detentor) e empacotar JSON/SQLite sob contrato.
-2. **API pública documentada** com termos que permitam cache offline (respeitar ToS).
-3. Manter **domínio público** (ex.: Almeida 1819) rotulado com clareza.
+```env
+BIBLE_API_KEY=...
+BIBLE_API_ID_ARA2=
+BIBLE_API_ID_RA=
+BIBLE_API_ID_SBB=
+BIBLE_API_ID_NTLH=
+```
 
-## Como plugar textos licenciados
+Com chave + IDs, o app tenta API.Bible primeiro e cai para Midvash se falhar.
 
-1. Implementar um `BibleTextSource` (ex. em `lib/services/`) com `Future<BibleChapter?> fetch(versionId, bookId, chapter)`.
-2. Em `BibleRepository.loadChapter`:
-   - tentar amostra local;
-   - tentar cache Hive (`BibleStore.cacheChapter`);
-   - chamar a fonte/API;
-   - em falha de rede, retornar `null` (a UI já mostra estado vazio gracioso).
-3. Formato sugerido de capítulo em cache:
+## O que falta para “pacote embutido” de cada sigla
+
+| Sigla | Para embutir no APK |
+|---|---|
+| ARA 2ª / ARC | Contrato/licença com detentor + JSON/SQLite autorizado |
+| RA / ARA | Contrato SBB (ou detentor da ARA) |
+| SBB / NAA | Contrato SBB para a edição desejada |
+| NTLH | Contrato SBB |
+
+Até lá, a leitura completa continua disponível via API + cache (e Almeida 1819 sempre offline).
+
+## Arquitetura
+
+1. `BibleAssetSource` — Almeida 1819 completa.
+2. `BibleRemoteSource` — Midvash e, se configurado, API.Bible.
+3. `BibleRepository.loadChapter` — asset → cache Hive → API → erro acionável.
+4. `downloadCurrentVersionOffline()` — prefetch de todos os capítulos da versão atual.
+5. Persistência Hive `ebd_bible_v1`: prefs, marcadores, destaques, planos, cache.
+
+## Formato de capítulo em cache
 
 ```json
 {
   "verses": [{"number": 1, "text": "..."}],
-  "sourceNote": "Licença X — uso na EBD"
+  "sourceNote": "..."
 }
 ```
-
-4. Não misturar rótulos de versão (ARA/RA/…) com texto de outra tradução sem aviso.
-
-## Offline
-
-Sem rede e sem amostra/cache, o leitor informa que o capítulo não está disponível. Capítulos já lidos via API devem ser gravados com `cacheChapter`.

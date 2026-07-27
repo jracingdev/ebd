@@ -88,26 +88,32 @@ class BibleStore {
     );
   }
 
-  /// Cache opcional de capítulos obtidos por API (JSON).
-  Map<String, dynamic>? loadCachedChapter(String cacheKey) {
+  Map<String, dynamic> _chapterCacheMap() {
     final raw = _box.get(_keyChapterCache);
-    if (raw == null) return null;
-    final map = raw is String ? jsonDecode(raw) : raw;
-    if (map is! Map) return null;
-    final item = map[cacheKey];
+    if (raw == null) return {};
+    final decoded = raw is String ? jsonDecode(raw) : raw;
+    if (decoded is! Map) return {};
+    return Map<String, dynamic>.from(decoded);
+  }
+
+  /// Cache de capítulos obtidos por API (JSON).
+  Map<String, dynamic>? loadCachedChapter(String cacheKey) {
+    final item = _chapterCacheMap()[cacheKey];
     if (item == null) return null;
     return Map<String, dynamic>.from(item as Map);
   }
 
-  Future<void> cacheChapter(String cacheKey, Map<String, dynamic> json) async {
-    final raw = _box.get(_keyChapterCache);
-    final map = <String, dynamic>{};
-    if (raw != null) {
-      final decoded = raw is String ? jsonDecode(raw) : raw;
-      if (decoded is Map) {
-        map.addAll(Map<String, dynamic>.from(decoded));
-      }
+  int countCachedChapters(String versionId) {
+    final prefix = '$versionId:';
+    var n = 0;
+    for (final key in _chapterCacheMap().keys) {
+      if (key.toString().startsWith(prefix)) n++;
     }
+    return n;
+  }
+
+  Future<void> cacheChapter(String cacheKey, Map<String, dynamic> json) async {
+    final map = _chapterCacheMap();
     map[cacheKey] = json;
     await _box.put(_keyChapterCache, jsonEncode(map));
   }

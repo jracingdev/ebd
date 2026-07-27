@@ -63,7 +63,9 @@ class _BibleSearchScreenState extends State<BibleSearchScreen> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'A busca cobre as amostras locais (Salmos 23 e João 1).',
+              'A busca usa o texto embutido (Almeida 1819) ou o cache da versão '
+              'selecionada. Para busca total em ARA/RA/SBB/NTLH, baixe a versão '
+              'na tela da Bíblia.',
               style: TextStyle(color: AppColors.muted, fontSize: 12),
             ),
           ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:livro_registro/data/bible/bible_catalog.dart';
 import 'package:livro_registro/data/bible/bible_models.dart';
-import 'package:livro_registro/data/bible/sample_texts.dart';
 import 'package:livro_registro/features/bible/bible_bookmarks_screen.dart';
 import 'package:livro_registro/features/bible/bible_plans_screen.dart';
 import 'package:livro_registro/features/bible/bible_reader_screen.dart';
@@ -18,6 +18,9 @@ class BibleHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = context.watch<BibleRepository>();
     final lastBook = bookById(repo.prefs.lastBookId);
+    final cached = repo.cachedChapterCount(repo.version.id);
+    final total = repo.totalCanonChapters;
+    final downloading = repo.downloadProgress[repo.version.id];
 
     return Scaffold(
       appBar: const SecondaryAppBar(title: 'Bíblia EBD'),
@@ -37,28 +40,10 @@ class BibleHomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Leitura, marcadores e planos pensados para a preparação '
-                  'das lições. O controle de revistas, ofertas e presença '
-                  'continua no início do app.',
+                  'Leitura completa (AT+NT), marcadores, busca e TTS. '
+                  'Versões modernas vêm da API com cache no aparelho; '
+                  'Almeida 1819 vem embutida (domínio público).',
                   style: TextStyle(color: AppColors.muted, height: 1.35),
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.gold.withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: const Text(
-                    'Amostras em domínio público (Almeida 1819). '
-                    'Versões ARA, RA, SBB e NTLH exigem licença — '
-                    'veja a documentação do módulo.',
-                    style: TextStyle(fontSize: 12, height: 1.35),
-                  ),
                 ),
               ],
             ),
@@ -94,6 +79,85 @@ class BibleHomeScreen extends StatelessWidget {
             repo.version.label,
             style: const TextStyle(color: AppColors.muted, fontSize: 12),
           ),
+          const SizedBox(height: 4),
+          Text(
+            repo.version.isLocalAsset
+                ? 'Completa offline · domínio público'
+                : (repo.isVersionFullyCached(repo.version.id)
+                    ? 'Completa no cache offline ($cached/$total cap.)'
+                    : 'API + cache · $cached/$total capítulos no aparelho'),
+            style: const TextStyle(color: AppColors.muted, fontSize: 12),
+          ),
+          if (repo.version.isRemote) ...[
+            const SizedBox(height: 10),
+            if (downloading != null) ...[
+              LinearProgressIndicator(
+                value: downloading,
+                color: AppColors.green,
+                backgroundColor: AppColors.green.withValues(alpha: 0.15),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Baixando versão… ${(downloading * 100).round()}%',
+                style: const TextStyle(fontSize: 12, color: AppColors.muted),
+              ),
+            ] else
+              OutlinedButton.icon(
+                onPressed: repo.isVersionFullyCached(repo.version.id)
+                    ? null
+                    : () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Baixando ${repo.version.shortLabel} para offline '
+                              '(pode levar alguns minutos)…',
+                            ),
+                          ),
+                        );
+                        await repo.downloadCurrentVersionOffline();
+                        if (!context.mounted) return;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              repo.isVersionFullyCached(repo.version.id)
+                                  ? '${repo.version.shortLabel} pronta offline.'
+                                  : 'Download parcial — conecte-se e tente de novo.',
+                            ),
+                          ),
+                        );
+                      },
+                icon: const Icon(Icons.download_outlined),
+                label: Text(
+                  repo.isVersionFullyCached(repo.version.id)
+                      ? 'Versão já baixada'
+                      : 'Baixar Bíblia completa (offline)',
+                ),
+              ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            repo.version.licenseSummary,
+            style: const TextStyle(fontSize: 11, height: 1.35, color: AppColors.muted),
+          ),
+          if (!repo.hasApiBibleKey && repo.version.isRemote) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.gold.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
+              ),
+              child: const Text(
+                'Opcional: configure BIBLE_API_KEY e os IDs no .env para '
+                'usar API.Bible com licença formal. Sem chave, o app usa a '
+                'API pública Midvash + cache (veja docs/BIBLIA.md).',
+                style: TextStyle(fontSize: 11, height: 1.35),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: () {
@@ -117,13 +181,17 @@ class BibleHomeScreen extends StatelessWidget {
           _NavTile(
             icon: Icons.menu_book_outlined,
             title: 'Livros',
-            subtitle: 'Antigo e Novo Testamento',
+            subtitle: '66 livros · Antigo e Novo Testamento',
             onTap: () => _openBookPicker(context, repo),
           ),
           _NavTile(
             icon: Icons.search,
             title: 'Buscar trechos',
-            subtitle: 'Nas amostras disponíveis',
+            subtitle: repo.version.isLocalAsset
+                ? 'Na Bíblia completa embutida'
+                : (repo.isVersionFullyCached(repo.version.id)
+                    ? 'Na versão baixada offline'
+                    : 'No cache baixado (baixe a versão para busca total)'),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const BibleSearchScreen()),
             ),
@@ -184,10 +252,7 @@ class BibleHomeScreen extends StatelessWidget {
               ),
               const Text(
                 'Escolher livro',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
               ),
               const SizedBox(height: 12),
               const Text(

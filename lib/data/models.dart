@@ -46,20 +46,47 @@ class Student extends Equatable {
     return aniversario!.day == now.day && aniversario!.month == now.month;
   }
 
-  factory Student.fromJson(Map<String, dynamic> json) => Student(
-        id: json['id'] as String,
-        nome: json['nome'] as String,
-        grupo: json['grupo'] as String,
-        criadoEm: DateTime.parse(
-          (json['criadoEm'] ?? json['criado_em']).toString(),
-        ),
-        matricula: json['matricula'] as String?,
-        telefone: json['telefone'] as String?,
-        aniversario: json['aniversario'] == null
-            ? null
-            : DateTime.tryParse(json['aniversario'].toString()),
-        fotoUrl: json['fotoUrl'] as String? ?? json['foto_url'] as String?,
-      );
+  factory Student.fromJson(Map<String, dynamic> json) {
+    final rawId = (json['id'] ?? json['Id'] ?? json['_id'] ?? '').toString().trim();
+    final nome = (json['nome'] ?? json['name'] ?? json['aluno'] ?? '')
+        .toString()
+        .trim();
+    final grupo = (json['grupo'] ?? json['turma'] ?? json['classe'] ?? '')
+        .toString()
+        .trim();
+    final criadoRaw = json['criadoEm'] ?? json['criado_em'] ?? json['createdAt'];
+    final criadoEm = criadoRaw == null
+        ? DateTime.now()
+        : (DateTime.tryParse(criadoRaw.toString()) ?? DateTime.now());
+    final id = rawId.isNotEmpty
+        ? rawId
+        : () {
+            final gen =
+                's${criadoEm.millisecondsSinceEpoch.toRadixString(36)}${nome.hashCode.abs().toRadixString(36)}';
+            return gen.length > 12 ? gen.substring(0, 12) : gen;
+          }();
+
+    String? opt(dynamic v) {
+      if (v == null) return null;
+      final s = v.toString().trim();
+      return s.isEmpty ? null : s;
+    }
+
+    return Student(
+      id: id,
+      nome: nome.isEmpty ? 'Aluno' : nome,
+      grupo: grupo.isEmpty ? kGroups.first : grupo,
+      criadoEm: criadoEm,
+      matricula: opt(json['matricula'] ?? json['matricula_id']),
+      telefone: opt(json['telefone'] ?? json['phone'] ?? json['celular']),
+      aniversario: json['aniversario'] == null && json['birthday'] == null
+          ? null
+          : DateTime.tryParse(
+              (json['aniversario'] ?? json['birthday']).toString(),
+            ),
+      fotoUrl: opt(json['fotoUrl'] ?? json['foto_url'] ?? json['foto']),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -79,16 +106,20 @@ class Student extends Equatable {
     String? telefone,
     DateTime? aniversario,
     String? fotoUrl,
+    bool clearMatricula = false,
+    bool clearTelefone = false,
+    bool clearAniversario = false,
+    bool clearFotoUrl = false,
   }) =>
       Student(
         id: id,
         nome: nome ?? this.nome,
         grupo: grupo ?? this.grupo,
         criadoEm: criadoEm,
-        matricula: matricula ?? this.matricula,
-        telefone: telefone ?? this.telefone,
-        aniversario: aniversario ?? this.aniversario,
-        fotoUrl: fotoUrl ?? this.fotoUrl,
+        matricula: clearMatricula ? null : (matricula ?? this.matricula),
+        telefone: clearTelefone ? null : (telefone ?? this.telefone),
+        aniversario: clearAniversario ? null : (aniversario ?? this.aniversario),
+        fotoUrl: clearFotoUrl ? null : (fotoUrl ?? this.fotoUrl),
       );
 
   @override
