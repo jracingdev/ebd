@@ -16,6 +16,7 @@ enum UserRole {
 
   bool get isStaff => this != UserRole.aluno;
 
+  /// Compat: preferir [UserProfile.can] / [userHasPermission].
   bool get seesAllClasses =>
       this == UserRole.superintendente ||
       this == UserRole.pastor ||
@@ -52,6 +53,7 @@ class UserProfile {
     this.aniversario,
     this.fotoUrl,
     this.ativo = true,
+    this.permissionOverrides,
   });
 
   final String id;
@@ -65,26 +67,42 @@ class UserProfile {
   final String? fotoUrl;
   final bool ativo;
 
+  /// Overrides opcionais sobre o preset do [role].
+  /// Chaves = nomes de AppPermission; valores true/false.
+  /// `null` ou vazio = usa só o preset.
+  final Map<String, bool>? permissionOverrides;
+
   bool get isBirthdayToday {
     if (aniversario == null) return false;
     final now = DateTime.now();
     return aniversario!.day == now.day && aniversario!.month == now.month;
   }
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-        id: json['id'] as String,
-        matricula: json['matricula'] as String,
-        nome: json['nome'] as String,
-        role: UserRole.fromString(json['role'] as String?),
-        grupo: json['grupo'] as String?,
-        telefone: json['telefone'] as String?,
-        email: json['email'] as String?,
-        aniversario: json['aniversario'] == null
-            ? null
-            : DateTime.tryParse(json['aniversario'].toString()),
-        fotoUrl: json['foto_url'] as String? ?? json['fotoUrl'] as String?,
-        ativo: json['ativo'] as bool? ?? true,
-      );
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    Map<String, bool>? overrides;
+    final raw = json['permission_overrides'] ?? json['permissionOverrides'];
+    if (raw is Map) {
+      overrides = {
+        for (final e in raw.entries) e.key.toString(): e.value == true,
+      };
+      if (overrides.isEmpty) overrides = null;
+    }
+    return UserProfile(
+      id: json['id'] as String,
+      matricula: json['matricula'] as String,
+      nome: json['nome'] as String,
+      role: UserRole.fromString(json['role'] as String?),
+      grupo: json['grupo'] as String?,
+      telefone: json['telefone'] as String?,
+      email: json['email'] as String?,
+      aniversario: json['aniversario'] == null
+          ? null
+          : DateTime.tryParse(json['aniversario'].toString()),
+      fotoUrl: json['foto_url'] as String? ?? json['fotoUrl'] as String?,
+      ativo: json['ativo'] as bool? ?? true,
+      permissionOverrides: overrides,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -97,27 +115,39 @@ class UserProfile {
         'aniversario': aniversario?.toIso8601String().split('T').first,
         'foto_url': fotoUrl,
         'ativo': ativo,
+        if (permissionOverrides != null && permissionOverrides!.isNotEmpty)
+          'permission_overrides': permissionOverrides,
       };
 
   UserProfile copyWith({
     String? nome,
+    UserRole? role,
     String? grupo,
     String? telefone,
     String? email,
     DateTime? aniversario,
     String? fotoUrl,
+    bool? ativo,
+    Map<String, bool>? permissionOverrides,
+    bool clearPermissionOverrides = false,
+    bool clearGrupo = false,
+    bool clearAniversario = false,
   }) =>
       UserProfile(
         id: id,
         matricula: matricula,
         nome: nome ?? this.nome,
-        role: role,
-        grupo: grupo ?? this.grupo,
+        role: role ?? this.role,
+        grupo: clearGrupo ? null : (grupo ?? this.grupo),
         telefone: telefone ?? this.telefone,
         email: email ?? this.email,
-        aniversario: aniversario ?? this.aniversario,
+        aniversario:
+            clearAniversario ? null : (aniversario ?? this.aniversario),
         fotoUrl: fotoUrl ?? this.fotoUrl,
-        ativo: ativo,
+        ativo: ativo ?? this.ativo,
+        permissionOverrides: clearPermissionOverrides
+            ? null
+            : (permissionOverrides ?? this.permissionOverrides),
       );
 }
 

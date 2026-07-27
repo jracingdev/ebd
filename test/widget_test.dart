@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:livro_registro/data/models.dart';
+import 'package:livro_registro/data/permissions.dart';
 import 'package:livro_registro/data/user_models.dart';
 
 void main() {
@@ -30,15 +31,81 @@ void main() {
     expect(backup.toJson()['version'], 4);
   });
 
+  test('AppBackup includes users list', () {
+    final backup = AppBackup(
+      version: kBackupVersion,
+      exportedAt: DateTime.parse('2026-07-27T12:00:00'),
+      editions: const [],
+      records: const [],
+      finances: const [],
+      attendance: const [],
+      students: const [],
+      users: [
+        {
+          'id': '1',
+          'matricula': 'admin',
+          'nome': 'Admin',
+          'role': 'admin',
+          'ativo': true,
+        }
+      ],
+    );
+    final round = AppBackup.fromJson(backup.toJson());
+    expect(round.users.single['matricula'], 'admin');
+    expect(round.version, kBackupVersion);
+  });
+
   test('UserRole helpers', () {
     expect(UserRole.admin.seesAllClasses, isTrue);
     expect(UserRole.aluno.isStaff, isFalse);
     expect(UserRole.fromString('pastor'), UserRole.pastor);
   });
 
+  test('permission presets and overrides', () {
+    final aluno = UserProfile(
+      id: 'a',
+      matricula: '100',
+      nome: 'Aluno',
+      role: UserRole.aluno,
+    );
+    expect(aluno.can(AppPermission.seeFinances), isFalse);
+    expect(aluno.can(AppPermission.editAttendance), isTrue);
+
+    final professor = UserProfile(
+      id: 'p',
+      matricula: '200',
+      nome: 'Prof',
+      role: UserRole.professor,
+      permissionOverrides: {AppPermission.seeFinances.name: true},
+    );
+    expect(professor.can(AppPermission.seeFinances), isTrue);
+    expect(professor.can(AppPermission.seePanel), isFalse);
+
+    final admin = UserProfile(
+      id: 'x',
+      matricula: 'admin',
+      nome: 'Admin',
+      role: UserRole.admin,
+      permissionOverrides: {AppPermission.seeFinances.name: false},
+    );
+    expect(admin.can(AppPermission.seeFinances), isTrue);
+
+    final overrides = UserProfilePermissions.overridesFromEffective(
+      role: UserRole.professor,
+      effective: {
+        for (final p in AppPermission.values)
+          p.name: rolePermissionPreset(UserRole.professor).contains(p),
+        AppPermission.seePanel.name: true,
+      },
+    );
+    expect(overrides?[AppPermission.seePanel.name], isTrue);
+  });
+
   test('Attendance person unique ids', () {
-    final a = AttendancePerson(id: 'a1', nome: 'A', presente: false, alunoId: 'a1');
-    final b = AttendancePerson(id: 'b1', nome: 'B', presente: false, alunoId: 'b1');
+    final a =
+        AttendancePerson(id: 'a1', nome: 'A', presente: false, alunoId: 'a1');
+    final b =
+        AttendancePerson(id: 'b1', nome: 'B', presente: false, alunoId: 'b1');
     expect(a.id == b.id, isFalse);
   });
 

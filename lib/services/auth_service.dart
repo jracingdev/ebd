@@ -89,17 +89,7 @@ class AuthService extends ChangeNotifier {
     if (user.matricula != 'admin' || a == null || a.year != 1990) {
       return user;
     }
-    final fixed = UserProfile(
-      id: user.id,
-      matricula: user.matricula,
-      nome: user.nome,
-      role: user.role,
-      email: user.email,
-      grupo: user.grupo,
-      telefone: user.telefone,
-      fotoUrl: user.fotoUrl,
-      ativo: user.ativo,
-    );
+    final fixed = user.copyWith(clearAniversario: true);
     final hiveRaw = _localUsers!.get('admin');
     if (hiveRaw is Map) {
       final map = Map<String, dynamic>.from(hiveRaw);
@@ -215,6 +205,8 @@ class AuthService extends ChangeNotifier {
     String? telefone,
     String? email,
     DateTime? aniversario,
+    bool ativo = true,
+    Map<String, bool>? permissionOverrides,
   }) async {
     final mat = matricula.trim();
     if (usingSupabase) {
@@ -242,6 +234,9 @@ class AuthService extends ChangeNotifier {
         'telefone': telefone,
         'email': email,
         'aniversario': aniversario?.toIso8601String().split('T').first,
+        'ativo': ativo,
+        if (permissionOverrides != null && permissionOverrides.isNotEmpty)
+          'permission_overrides': permissionOverrides,
       });
       return UserProfile(
         id: signed.user!.id,
@@ -252,6 +247,8 @@ class AuthService extends ChangeNotifier {
         telefone: telefone,
         email: email,
         aniversario: aniversario,
+        ativo: ativo,
+        permissionOverrides: permissionOverrides,
       );
     }
 
@@ -267,6 +264,8 @@ class AuthService extends ChangeNotifier {
       telefone: telefone,
       email: email,
       aniversario: aniversario,
+      ativo: ativo,
+      permissionOverrides: permissionOverrides,
     );
     await _localUsers!.put(mat, {...profile.toJson(), 'senha': senha});
     return profile;
@@ -285,6 +284,113 @@ class AuthService extends ChangeNotifier {
     await _localUsers!.put(matricula.trim(), map);
   }
 
+  int get activeAdminCount {
+    return localUsersSnapshot
+        .where((u) => u.ativo && u.role == UserRole.admin)
+        .length;
+  }
+
+  /// Impede remover/desativar/rebaixar o último admin ativo.
+  void _ensureNotLastAdmin({
+    required UserProfile before,
+    required UserProfile after,
+  }) {
+    final wasAdmin = before.ativo && before.role == UserRole.admin;
+    final stillAdmin = after.ativo && after.role == UserRole.admin;
+    if (wasAdmin && !stillAdmin && activeAdminCount <= 1) {
+      throw AuthException(
+        'Não é possível remover ou desativar o último administrador.',
+      );
+    }
+  }
+
+  Future<UserProfile> updateUser({
+    required String matricula,
+    String? nome,
+    UserRole? role,
+    String? grupo,
+    bool clearGrupo = false,
+    String? telefone,
+    String? email,
+    DateTime? aniversario,
+    bool clearAniversario = false,
+    bool? ativo,
+    Map<String, bool>? permissionOverrides,
+    bool clearPermissionOverrides = false,
+    String? novaSenha,
+  }) async {
+    if (usingSupabase) {
+      throw AuthException(
+        'Edição completa de perfil no Supabase ainda não está disponível neste app.',
+      );
+    }
+    final mat = matricula.trim();
+    final raw = _localUsers!.get(mat);
+    if (raw is! Map) throw AuthException('Matrícula não encontrada.');
+    final map = Map<String, dynamic>.from(raw);
+    final before = UserProfile.fromJson(map);
+    var after = before.copyWith(
+      nome: nome,
+      role: role,
+      grupo: grupo,
+      clearGrupo: clearGrupo,
+      telefone: telefone,
+      email: email,
+      aniversario: aniversario,
+      clearAniversario: clearAniversario,
+      ativo: ativo,
+      permissionOverrides: permissionOverrides,
+      clearPermissionOverrides: clearPermissionOverrides,
+    );
+    _ensureNotLastAdmin(before: before, after: after);
+    final senha = map['senha'];
+    final saved = {...after.toJson(), if (senha != null) 'senha': senha};
+    if (novaSenha != null && novaSenha.trim().isNotEmpty) {
+      saved['senha'] = novaSenha.trim();
+    }
+    await _localUsers!.put(mat, saved);
+
+    if (currentUser?.matricula == mat) {
+      currentUser = after;
+      await _session!.put('user', jsonEncode(after.toJson()));
+      notifyListeners();
+    }
+    return after;
+  }
+
+  /// Exporta usuários locais (sem senhas) para backup.
+  List<Map<String, dynamic>> exportUsersForBackup({bool includePasswords = false}) {
+    if (_localUsers == null) return const [];
+    final out = <Map<String, dynamic>>[];
+    for (final raw in _localUsers!.values) {
+      if (raw is! Map) continue;
+      final map = Map<String, dynamic>.from(raw);
+      if (!includePasswords) map.remove('senha');
+      out.add(map);
+    }
+    return out;
+  }
+
+  /// Restaura usuários de um backup (preserva senhas existentes se o backup não tiver).
+  Future<void> importUsersFromBackup(List<dynamic> users) async {
+    if (usingSupabase || _localUsers == null) return;
+    for (final item in users) {
+      if (item is! Map) continue;
+      final map = Map<String, dynamic>.from(item);
+      final mat = (map['matricula'] as String?)?.trim();
+      if (mat == null || mat.isEmpty) continue;
+      final existing = _localUsers!.get(mat);
+      if (map['senha'] == null && existing is Map && existing['senha'] != null) {
+        map['senha'] = existing['senha'];
+      }
+      map['senha'] ??= 'ebd$mat';
+      // Valida estrutura mínima.
+      UserProfile.fromJson(map);
+      await _localUsers!.put(mat, map);
+    }
+    notifyListeners();
+  }
+
   Future<List<UserProfile>> listLocalUsers() async {
     return localUsersSnapshot;
   }
@@ -295,7 +401,8 @@ class AuthService extends ChangeNotifier {
     return _localUsers!.values
         .whereType<Map>()
         .map((e) => UserProfile.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+        .toList()
+      ..sort((a, b) => a.nome.toLowerCase().compareTo(b.nome.toLowerCase()));
   }
 
   Future<String?> lastMatricula() => _secure.read(key: 'last_matricula');

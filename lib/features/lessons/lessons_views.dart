@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
+import 'package:livro_registro/data/permissions.dart';
 import 'package:livro_registro/data/user_models.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/services/betel_sync_service.dart';
@@ -154,7 +155,8 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final auth = context.watch<AuthService>();
-    final canSync = auth.currentUser?.role.canSyncBetel ?? false;
+    final canSync =
+        userHasPermission(auth.currentUser, AppPermission.syncBetel);
 
     return Scaffold(
       appBar: const SecondaryAppBar(title: 'Lições e Betel'),

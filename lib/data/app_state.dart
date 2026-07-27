@@ -578,10 +578,9 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  AppBackup exportBackup() {
+  AppBackup exportBackup({List<Map<String, dynamic>> users = const []}) {
     final base = _storage.exportBackup();
     final eng = engagement?.exportMap() ?? const <String, dynamic>{};
-    if (eng.isEmpty) return base;
     return AppBackup(
       version: base.version,
       exportedAt: base.exportedAt,
@@ -593,6 +592,7 @@ class AppState extends ChangeNotifier {
       lessons: base.lessons,
       customGroups: base.customGroups,
       engagement: eng,
+      users: users,
     );
   }
 

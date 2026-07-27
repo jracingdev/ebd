@@ -7,7 +7,7 @@ import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/engagement/engagement_models.dart';
 import 'package:livro_registro/data/engagement/engagement_store.dart';
 import 'package:livro_registro/data/engagement/raffle_engine.dart';
-import 'package:livro_registro/data/user_models.dart';
+import 'package:livro_registro/data/permissions.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/utils/format.dart';
@@ -36,8 +36,9 @@ class _RaffleTabState extends State<RaffleTab> {
       final state = context.read<AppState>();
       final auth = context.read<AuthService>();
       final user = auth.currentUser;
-      if (user?.grupo != null && !(user!.role.seesAllClasses)) {
-        setState(() => _selectedGroups.add(user.grupo!));
+      if (user?.grupo != null &&
+          !userHasPermission(user, AppPermission.seeAllClasses)) {
+        setState(() => _selectedGroups.add(user!.grupo!));
       } else if (state.groups.isNotEmpty) {
         setState(() => _selectedGroups.add(state.selectedGroup));
       }
@@ -93,10 +94,10 @@ class _RaffleTabState extends State<RaffleTab> {
 
   Future<void> _draw() async {
     final auth = context.read<AuthService>();
-    final role = auth.currentUser?.role ?? UserRole.aluno;
-    if (!role.isStaff) {
+    final user = auth.currentUser;
+    if (!userHasPermission(user, AppPermission.runSorteio)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Apenas a equipe pode sortear.')),
+        const SnackBar(content: Text('Sem permissão para sortear.')),
       );
       return;
     }
@@ -154,7 +155,9 @@ class _RaffleTabState extends State<RaffleTab> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final store = context.watch<EngagementStore>();
-    final role = context.watch<AuthService>().currentUser?.role ?? UserRole.aluno;
+    final user = context.watch<AuthService>().currentUser;
+    final canDraw = userHasPermission(user, AppPermission.runSorteio);
+    final seesAll = userHasPermission(user, AppPermission.seeAllClasses);
 
     return Stack(
       children: [
@@ -184,7 +187,7 @@ class _RaffleTabState extends State<RaffleTab> {
                           label: Text(g, style: const TextStyle(fontSize: 12)),
                           selected: _selectedGroups.contains(g),
                           selectedColor: AppColors.green.withValues(alpha: 0.25),
-                          onSelected: role.seesAllClasses ||
+                          onSelected: seesAll ||
                                   context.read<AuthService>().currentUser?.grupo ==
                                       null ||
                                   context.read<AuthService>().currentUser?.grupo ==
@@ -357,7 +360,7 @@ class _RaffleTabState extends State<RaffleTab> {
               ),
             ),
             const SizedBox(height: 8),
-            if (role.isStaff)
+            if (canDraw)
               FilledButton.icon(
                 onPressed: _drawing ? null : _draw,
                 icon: _drawing
@@ -421,7 +424,7 @@ class _RaffleTabState extends State<RaffleTab> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const Spacer(),
-                  if (role.isStaff)
+                  if (canDraw)
                     TextButton(
                       onPressed: () async {
                         await store.clearRaffleHistory();

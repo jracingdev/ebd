@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/features/backup/drive_backup_service.dart';
+import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/widgets/common.dart';
 
@@ -23,16 +24,21 @@ class _BackupScreenState extends State<BackupScreen> {
   Future<void> _export() async {
     setState(() => _busy = true);
     try {
-      final backup = context.read<AppState>().exportBackup();
-      final bytes = utf8.encode(const JsonEncoder.withIndent('  ').convert(backup.toJson()));
+      final auth = context.read<AuthService>();
+      final backup = context.read<AppState>().exportBackup(
+            users: auth.exportUsersForBackup(),
+          );
+      final bytes = utf8.encode(
+        const JsonEncoder.withIndent('  ').convert(backup.toJson()),
+      );
       final path = await _service.saveBackup(bytes: bytes);
       if (!mounted) return;
       setState(() => _lastPath = path);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(path == null
-              ? 'Backup cancelado.'
-              : 'Backup salvo em $path'),
+          content: Text(
+            path == null ? 'Backup cancelado.' : 'Backup salvo em $path',
+          ),
         ),
       );
     } catch (e) {
@@ -52,15 +58,18 @@ class _BackupScreenState extends State<BackupScreen> {
         title: const Text('Restaurar backup?'),
         content: const Text(
           'Isso substitui todos os dados locais pelo arquivo escolhido '
-          '(por exemplo, um backup no Google Drive).',
+          '(por exemplo, um backup no Google Drive). '
+          'Perfis e permissões também são restaurados quando presentes.',
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Restaurar')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Restaurar'),
+          ),
         ],
       ),
     );
@@ -80,6 +89,10 @@ class _BackupScreenState extends State<BackupScreen> {
       final backup = AppBackup.fromJson(map);
       if (!mounted) return;
       await context.read<AppState>().importBackup(backup);
+      if (!mounted) return;
+      if (backup.users.isNotEmpty) {
+        await context.read<AuthService>().importUsersFromBackup(backup.users);
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Backup restaurado.')),
@@ -105,8 +118,10 @@ class _BackupScreenState extends State<BackupScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Backup do app EBD',
-              style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            'Backup do app EBD',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           const SizedBox(height: 8),
           const Text(
             'GOOGLE DRIVE / ARQUIVO',
@@ -128,9 +143,11 @@ class _BackupScreenState extends State<BackupScreen> {
           if (_service.supportsNativeSaf) ...[
             const Text('1. Toque em Fazer backup'),
             const Text(
-                '2. No seletor, abra o Google Drive e escolha a pasta'),
+              '2. No seletor, abra o Google Drive e escolha a pasta',
+            ),
             const Text(
-                '3. Para restaurar, escolha o arquivo ebd-backup.json no Drive'),
+              '3. Para restaurar, escolha o arquivo ebd-backup.json no Drive',
+            ),
           ] else ...[
             const Text(
               'Nesta plataforma o backup é compartilhado/baixado como '
@@ -151,8 +168,10 @@ class _BackupScreenState extends State<BackupScreen> {
             ),
           if (_lastPath != null) ...[
             const SizedBox(height: 16),
-            Text('Último backup neste aparelho: $_lastPath',
-                style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+            Text(
+              'Último backup neste aparelho: $_lastPath',
+              style: const TextStyle(color: AppColors.muted, fontSize: 12),
+            ),
           ],
         ],
       ),

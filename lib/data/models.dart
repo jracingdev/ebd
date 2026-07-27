@@ -17,7 +17,7 @@ const kGroups = <String>[
 bool isDefaultGroup(String grupo) => kGroups.contains(grupo);
 
 /// Versão do formato de backup JSON.
-const kBackupVersion = 6;
+const kBackupVersion = 7;
 
 class Student extends Equatable {
   const Student({
@@ -382,6 +382,7 @@ class AppBackup extends Equatable {
     this.lessons = const [],
     this.customGroups = const [],
     this.engagement = const {},
+    this.users = const [],
   });
 
   final int version;
@@ -396,6 +397,9 @@ class AppBackup extends Equatable {
 
   /// Dados de sorteios / quiz / placar (mapa serializado).
   final Map<String, dynamic> engagement;
+
+  /// Usuários locais (perfis + overrides; senhas opcionais).
+  final List<Map<String, dynamic>> users;
 
   factory AppBackup.fromJson(Map<String, dynamic> json) => AppBackup(
         version: json['version'] as int? ?? kBackupVersion,
@@ -425,6 +429,10 @@ class AppBackup extends Equatable {
         engagement: json['engagement'] is Map
             ? Map<String, dynamic>.from(json['engagement'] as Map)
             : const {},
+        users: (json['users'] as List<dynamic>? ?? [])
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -438,6 +446,7 @@ class AppBackup extends Equatable {
         'lessons': lessons.map((e) => e.toJson()).toList(),
         'customGroups': customGroups,
         'engagement': engagement,
+        'users': users,
       };
 
   @override
@@ -452,6 +461,7 @@ class AppBackup extends Equatable {
         lessons,
         customGroups,
         engagement,
+        users,
       ];
 }
 
