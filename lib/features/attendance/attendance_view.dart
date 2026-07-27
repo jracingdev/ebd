@@ -44,21 +44,26 @@ class _AttendanceViewState extends State<AttendanceView> {
     _ensureSession(state, grupo, data);
 
     if (alunos.isEmpty) {
-      return SectionCard(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Cadastre os alunos da turma para marcar presente/ausente neste domingo.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.muted),
+      return ScrollableFill(
+        child: Center(
+          child: SectionCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Cadastre os alunos da turma para marcar presente/ausente neste domingo.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.muted),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => state.setModeView('alunos'),
+                  child: const Text('Ir para Alunos'),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => state.setModeView('alunos'),
-              child: const Text('Ir para Alunos'),
-            ),
-          ],
+          ),
         ),
       );
     }

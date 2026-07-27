@@ -18,21 +18,26 @@ class MagazinesView extends StatelessWidget {
     final catalog = betelCatalog[grupo];
 
     if (edition == null) {
-      return SectionCard(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Nenhuma revista cadastrada para $grupo ainda.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.muted),
+      return ScrollableFill(
+        child: Center(
+          child: SectionCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Nenhuma revista cadastrada para $grupo ainda.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.muted),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () => _cadastrarRevista(context, grupo, catalog),
+                  child: const Text('Cadastrar revista do trimestre'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => _cadastrarRevista(context, grupo, catalog),
-              child: const Text('Cadastrar revista do trimestre'),
-            ),
-          ],
+          ),
         ),
       );
     }

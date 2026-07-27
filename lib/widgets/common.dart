@@ -35,6 +35,37 @@ class ResponsiveShell extends StatelessWidget {
   }
 }
 
+/// Altura baixa típica de telefone em landscape (~360–480 dp).
+bool isShortViewport(BuildContext context, {double threshold = 520}) {
+  return MediaQuery.sizeOf(context).height < threshold;
+}
+
+/// Preenche a altura disponível e faz scroll se o conteúdo não couber
+/// (evita RenderFlex overflow em landscape).
+class ScrollableFill extends StatelessWidget {
+  const ScrollableFill({super.key, required this.child, this.padding});
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final h = constraints.maxHeight.isFinite ? constraints.maxHeight : 0.0;
+        Widget body = ConstrainedBox(
+          constraints: BoxConstraints(minHeight: h),
+          child: child,
+        );
+        if (padding != null) {
+          body = Padding(padding: padding!, child: body);
+        }
+        return SingleChildScrollView(child: body);
+      },
+    );
+  }
+}
+
 /// AppBar de telas empilhadas: volta (pop) + atalho Início até a raiz.
 class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {
   const SecondaryAppBar({super.key, required this.title, this.actions});

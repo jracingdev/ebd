@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/permissions.dart';
 import 'package:livro_registro/data/user_models.dart';
+import 'package:livro_registro/widgets/common.dart';
 
 void main() {
   test('AppBackup roundtrip with student fields', () {
@@ -112,5 +113,51 @@ void main() {
   testWidgets('placeholder', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: SizedBox()));
     expect(find.byType(SizedBox), findsOneWidget);
+  });
+
+  testWidgets('ScrollableFill evita overflow em altura de landscape',
+      (tester) async {
+    FlutterError.onError = (details) {
+      fail('FlutterError: ${details.exceptionAsString()}');
+    };
+    await tester.binding.setSurfaceSize(const Size(800, 360));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              const SizedBox(height: 120),
+              Expanded(
+                child: ScrollableFill(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Nenhuma revista cadastrada para Maternal ainda.',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: () {},
+                          child: const Text('Cadastrar revista do trimestre'),
+                        ),
+                        const SizedBox(height: 80),
+                        const Text('extra para forçar scroll'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Cadastrar revista do trimestre'), findsOneWidget);
   });
 }

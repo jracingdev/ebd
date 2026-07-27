@@ -221,40 +221,46 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final short = MediaQuery.sizeOf(context).height < 520;
+    final pad = short ? 16.0 : 28.0;
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: ListView(
-              padding: const EdgeInsets.all(28),
+              padding: EdgeInsets.symmetric(horizontal: pad, vertical: short ? 12 : 28),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               children: [
-                const SizedBox(height: 24),
+                SizedBox(height: short ? 4 : 24),
                 Text(
                   'ESCOLA BÍBLICA DOMINICAL',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.gold,
                     letterSpacing: 1.6,
-                    fontSize: 12,
+                    fontSize: short ? 11 : 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   'EBD',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: (short
+                          ? Theme.of(context).textTheme.headlineMedium
+                          : Theme.of(context).textTheme.displaySmall)
+                      ?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: short ? 4 : 8),
                 const Text(
                   'Entre com sua matrícula',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppColors.muted),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: short ? 16 : 32),
                 TextField(
                   controller: _matricula,
                   decoration: const InputDecoration(
@@ -320,7 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: const Text('Entrar com biometria'),
                   ),
                 ],
-                const SizedBox(height: 24),
+                SizedBox(height: short ? 12 : 24),
                 Align(
                   alignment: Alignment.center,
                   child: TextButton(

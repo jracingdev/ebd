@@ -75,6 +75,11 @@ class HomeScreen extends StatelessWidget {
       });
     }
 
+    final short = isShortViewport(context);
+    final chipH = short ? 36.0 : 40.0;
+    final showLessonBanner = !short &&
+        (role == UserRole.aluno || role == UserRole.professor);
+
     return Scaffold(
       body: SafeArea(
         child: ResponsiveShell(
@@ -82,55 +87,65 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+                padding: EdgeInsets.fromLTRB(16, short ? 4 : 8, 8, 0),
                 child: Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'ESCOLA BÍBLICA DOMINICAL',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: AppColors.gold,
-                              letterSpacing: 1.2,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
+                          if (!short)
+                            const Text(
+                              'ESCOLA BÍBLICA DOMINICAL',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: AppColors.gold,
+                                letterSpacing: 1.2,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
                           Text(
                             'EBD',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
+                            style: (short
+                                    ? Theme.of(context).textTheme.titleLarge
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium)
                                 ?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.1,
-                                ),
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w600,
+                              height: 1.1,
+                            ),
                           ),
                           if (user != null)
                             Text(
                               '${user.nome} · ${role.label}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.muted,
-                                fontSize: 12,
+                                fontSize: short ? 11 : 12,
                               ),
                             ),
                         ],
                       ),
                     ),
                     if (can(user, AppPermission.seeReport))
-                      TextButton(
-                        onPressed: () => previewEbdReport(context),
-                        child: const Text('Relatório'),
-                      ),
+                      short
+                          ? IconButton(
+                              tooltip: 'Relatório',
+                              onPressed: () => previewEbdReport(context),
+                              icon: const Icon(Icons.picture_as_pdf_outlined),
+                            )
+                          : TextButton(
+                              onPressed: () => previewEbdReport(context),
+                              child: const Text('Relatório'),
+                            ),
                     PopupMenuButton<_HomeAction>(
                       tooltip: 'Menu',
                       onSelected: (action) =>
@@ -229,7 +244,7 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              if (role == UserRole.aluno || role == UserRole.professor)
+              if (showLessonBanner)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: LessonTodayCard(
@@ -237,9 +252,9 @@ class HomeScreen extends StatelessWidget {
                         .lessonTodayFor(user?.grupo ?? state.selectedGroup),
                   ),
                 ),
-              const SizedBox(height: 8),
+              SizedBox(height: short ? 4 : 8),
               SizedBox(
-                height: 40,
+                height: chipH,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -263,9 +278,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               if (seesAll || role == UserRole.professor) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: short ? 4 : 8),
                 SizedBox(
-                  height: 40,
+                  height: chipH,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -309,10 +324,10 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
+              SizedBox(height: short ? 4 : 8),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  padding: EdgeInsets.fromLTRB(16, short ? 4 : 8, 16, short ? 8 : 16),
                   child: switch (state.modeView) {
                     'ofertas' => const FinancesView(),
                     'presenca' => const AttendanceView(),
