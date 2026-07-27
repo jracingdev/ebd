@@ -12,6 +12,7 @@ import 'package:livro_registro/features/magazines/magazines_view.dart';
 import 'package:livro_registro/features/report/report_pdf.dart';
 import 'package:livro_registro/features/students/students_view.dart';
 import 'package:livro_registro/features/admin/users_admin_screen.dart';
+import 'package:livro_registro/features/about/about_screen.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 
@@ -123,6 +124,13 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () => printEbdReport(context),
                       child: const Text('Relatório'),
                     ),
+                  IconButton(
+                    tooltip: 'Sobre',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AboutScreen()),
+                    ),
+                    icon: const Icon(Icons.info_outline),
+                  ),
                   IconButton(
                     tooltip: 'Sair',
                     onPressed: () => auth.logout(),

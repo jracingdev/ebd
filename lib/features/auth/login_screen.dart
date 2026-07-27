@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:livro_registro/features/about/about_screen.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/services/biometric_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
@@ -243,6 +244,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Demo local: matrícula admin / senha admin123',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12, color: AppColors.muted),
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AboutScreen()),
+                    ),
+                    child: const Text('Sobre'),
+                  ),
                 ),
               ],
             ),
