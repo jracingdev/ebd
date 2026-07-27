@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
 
 /// Critérios combináveis do sorteio EBD.
@@ -218,6 +220,22 @@ class QuizQuestion extends Equatable {
         correctIndex: (j['correct'] as num?)?.toInt() ?? 0,
         reference: j['ref'] as String? ?? j['reference'] as String?,
       );
+
+  /// Embaralha as alternativas e recalcula o índice da resposta correta.
+  QuizQuestion withShuffledOptions([Random? random]) {
+    if (options.length < 2) return this;
+    final correct = options[correctIndex.clamp(0, options.length - 1)];
+    final shuffled = List<String>.from(options)..shuffle(random);
+    return QuizQuestion(
+      id: id,
+      level: level,
+      bookId: bookId,
+      question: question,
+      options: shuffled,
+      correctIndex: shuffled.indexOf(correct),
+      reference: reference,
+    );
+  }
 
   @override
   List<Object?> get props =>

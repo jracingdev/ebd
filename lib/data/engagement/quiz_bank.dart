@@ -1,7 +1,23 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:livro_registro/data/engagement/engagement_models.dart';
+
+/// Resultado de uma seleção de rodada do quiz.
+class QuizPickResult {
+  const QuizPickResult({
+    required this.questions,
+    required this.poolSize,
+    required this.requestedCount,
+  });
+
+  final List<QuizQuestion> questions;
+  final int poolSize;
+  final int requestedCount;
+
+  bool get usedFullPool => poolSize > 0 && questions.length < requestedCount;
+}
 
 /// Carrega o banco embutido `assets/quiz/questions.json`.
 class QuizBank {
@@ -36,15 +52,53 @@ class QuizBank {
     }).toList();
   }
 
+  int availableCount({
+    required QuizLevel level,
+    Set<String>? bookIds,
+  }) =>
+      filter(level: level, bookIds: bookIds).length;
+
+  /// Seleciona perguntas aleatórias sem repetir na rodada, embaralha alternativas.
+  QuizPickResult pickRound({
+    required QuizLevel level,
+    Set<String>? bookIds,
+    int count = 10,
+    Random? random,
+  }) {
+    final rng = random ?? Random();
+    final pool = filter(level: level, bookIds: bookIds)..shuffle(rng);
+    if (pool.isEmpty) {
+      return QuizPickResult(
+        questions: const [],
+        poolSize: 0,
+        requestedCount: count,
+      );
+    }
+    final take = count.clamp(1, pool.length);
+    final picked = pool
+        .take(take)
+        .map((q) => q.withShuffledOptions(rng))
+        .toList();
+    return QuizPickResult(
+      questions: picked,
+      poolSize: pool.length,
+      requestedCount: count,
+    );
+  }
+
+  /// Mantido por compatibilidade; prefira [pickRound].
   List<QuizQuestion> pick({
     required QuizLevel level,
     Set<String>? bookIds,
     int count = 10,
-  }) {
-    final pool = filter(level: level, bookIds: bookIds)..shuffle();
-    if (pool.isEmpty) return [];
-    return pool.take(count.clamp(1, pool.length)).toList();
-  }
+    Random? random,
+  }) =>
+      pickRound(
+        level: level,
+        bookIds: bookIds,
+        count: count,
+        random: random,
+      ).questions;
 
   Set<String> get bookIds => {for (final q in questions) q.bookId};
 }

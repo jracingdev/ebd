@@ -15,9 +15,12 @@ class QuizTab extends StatefulWidget {
 }
 
 class _QuizTabState extends State<QuizTab> {
+  static const _roundSizes = [10, 20, 30, 50];
+
   QuizBank? _bank;
   String? _loadError;
   QuizLevel _level = QuizLevel.facil;
+  int _roundSize = 10;
   List<QuizQuestion> _session = [];
   int _index = 0;
   int _score = 0;
@@ -45,18 +48,34 @@ class _QuizTabState extends State<QuizTab> {
     }
   }
 
+  int get _availableForLevel {
+    final bank = _bank;
+    if (bank == null) return 0;
+    return bank.availableCount(level: _level);
+  }
+
   void _start() {
     final bank = _bank;
     if (bank == null) return;
-    final picked = bank.pick(level: _level, count: 10);
-    if (picked.isEmpty) {
+    final result = bank.pickRound(level: _level, count: _roundSize);
+    if (result.questions.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Sem perguntas no nível ${_level.label}.')),
       );
       return;
     }
+    if (result.usedFullPool) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Só há ${result.poolSize} pergunta${result.poolSize == 1 ? '' : 's'} '
+            'neste nível. A rodada usará todas.',
+          ),
+        ),
+      );
+    }
     setState(() {
-      _session = picked;
+      _session = result.questions;
       _index = 0;
       _score = 0;
       _selected = null;
@@ -228,6 +247,11 @@ class _QuizTabState extends State<QuizTab> {
       );
     }
 
+    final available = _availableForLevel;
+    final effectiveRound = available == 0
+        ? 0
+        : (_roundSize > available ? available : _roundSize);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -254,10 +278,47 @@ class _QuizTabState extends State<QuizTab> {
                 ],
               ),
               const SizedBox(height: 16),
+              Text(
+                'Perguntas na rodada',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final size in _roundSizes)
+                    ChoiceChip(
+                      label: Text('$size'),
+                      selected: _roundSize == size,
+                      selectedColor: AppColors.green,
+                      labelStyle: TextStyle(
+                        color: _roundSize == size ? Colors.white : AppColors.ink,
+                      ),
+                      onSelected: (_) => setState(() => _roundSize = size),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                available == 0
+                    ? 'Nenhuma pergunta neste nível.'
+                    : available < _roundSize
+                        ? 'Disponíveis neste nível: $available '
+                            '(a rodada usará todas).'
+                        : 'Disponíveis neste nível: $available · '
+                            'Rodada: $effectiveRound perguntas aleatórias.',
+                style: const TextStyle(color: AppColors.muted, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: _start,
+                onPressed: available == 0 ? null : _start,
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('Iniciar quiz (10 perguntas)'),
+                label: Text(
+                  effectiveRound == 0
+                      ? 'Iniciar quiz'
+                      : 'Iniciar quiz ($effectiveRound perguntas)',
+                ),
               ),
             ],
           ),
