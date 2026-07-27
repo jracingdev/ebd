@@ -168,14 +168,32 @@ class HomeScreen extends StatelessWidget {
                       .lessonTodayFor(user?.grupo ?? state.selectedGroup),
                 ),
               ),
-            if (role.seesAllClasses && state.modeView == 'licoes')
-              const Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: LessonsByClassPanel(),
-                ),
-              )
-            else ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  for (final (id, label) in modes)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(label),
+                        selected: state.modeView == id,
+                        onSelected: (_) => state.setModeView(id),
+                        selectedColor: AppColors.brown,
+                        labelStyle: TextStyle(
+                          color: state.modeView == id
+                              ? Colors.white
+                              : AppColors.ink,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (role.seesAllClasses || role == UserRole.professor) ...[
               const SizedBox(height: 8),
               SizedBox(
                 height: 40,
@@ -183,76 +201,51 @@ class HomeScreen extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    for (final (id, label) in modes)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(label),
-                          selected: state.modeView == id,
-                          onSelected: (_) => state.setModeView(id),
-                          selectedColor: AppColors.brown,
-                          labelStyle: TextStyle(
-                            color: state.modeView == id
-                                ? Colors.white
-                                : AppColors.ink,
+                    for (final g in kGroups)
+                      if (role.seesAllClasses ||
+                          user?.grupo == null ||
+                          user?.grupo == g)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(g),
+                            selected: state.selectedGroup == g,
+                            onSelected: (_) => state.selectGroup(g),
+                            selectedColor: AppColors.green,
+                            labelStyle: TextStyle(
+                              color: state.selectedGroup == g
+                                  ? Colors.white
+                                  : AppColors.ink,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
-                      ),
                   ],
                 ),
               ),
-              if (role.seesAllClasses || role == UserRole.professor) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 40,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      for (final g in kGroups)
-                        if (role.seesAllClasses ||
-                            user?.grupo == null ||
-                            user?.grupo == g)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(g),
-                              selected: state.selectedGroup == g,
-                              onSelected: (_) => state.selectGroup(g),
-                              selectedColor: AppColors.green,
-                              labelStyle: TextStyle(
-                                color: state.selectedGroup == g
-                                    ? Colors.white
-                                    : AppColors.ink,
-                                fontSize: 12,
-                              ),
+            ],
+            const SizedBox(height: 8),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: switch (state.modeView) {
+                  'ofertas' => const FinancesView(),
+                  'presenca' => const AttendanceView(),
+                  'alunos' => const StudentsView(),
+                  'painel' => const DashboardView(),
+                  'licoes' => role.seesAllClasses
+                      ? const LessonsByClassPanel()
+                      : SingleChildScrollView(
+                          child: LessonTodayCard(
+                            lesson: state.lessonTodayFor(
+                              user?.grupo ?? state.selectedGroup,
                             ),
                           ),
-                    ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 8),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: switch (state.modeView) {
-                    'ofertas' => const FinancesView(),
-                    'presenca' => const AttendanceView(),
-                    'alunos' => const StudentsView(),
-                    'painel' => const DashboardView(),
-                    'licoes' => SingleChildScrollView(
-                        child: LessonTodayCard(
-                          lesson: state.lessonTodayFor(
-                            user?.grupo ?? state.selectedGroup,
-                          ),
                         ),
-                      ),
-                    _ => const MagazinesView(),
-                  },
-                ),
+                  _ => const MagazinesView(),
+                },
               ),
-            ],
+            ),
           ],
         ),
       ),
