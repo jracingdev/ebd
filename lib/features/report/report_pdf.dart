@@ -22,7 +22,7 @@ Future<pw.Document> buildEbdReportPdf(AppState state) async {
   final gerado = formatDate(DateTime.now());
   final blocks = <_Block>[];
 
-  for (final g in kGroups) {
+  for (final g in state.groups) {
     final edition = state.currentEdition(g);
     final finItems = state.finances.where((f) => f.grupo == g).toList();
     final att = state.attendance.where((a) => a.grupo == g).toList()

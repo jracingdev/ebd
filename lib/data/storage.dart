@@ -12,6 +12,7 @@ const _keyAttendance = 'attendance';
 const _keyStudents = 'students';
 const _keyLessons = 'lessons';
 const _keyBetel = 'betel_catalog';
+const _keyCustomGroups = 'custom_groups';
 
 class EbdStorage {
   EbdStorage(this._box);
@@ -97,6 +98,29 @@ class EbdStorage {
   Future<void> saveBetelCatalog(List<BetelCatalogItem> items) =>
       _writeList(_keyBetel, items.map((e) => e.toJson()).toList());
 
+  List<String> loadCustomGroups() {
+    final raw = _box.get(_keyCustomGroups);
+    if (raw == null) return [];
+    final list = raw is String ? jsonDecode(raw) : raw;
+    if (list is! List) return [];
+    return list
+        .map((e) => e.toString().trim())
+        .where((g) => g.isNotEmpty && !isDefaultGroup(g))
+        .toSet()
+        .toList();
+  }
+
+  Future<void> saveCustomGroups(List<String> groups) => _box.put(
+        _keyCustomGroups,
+        jsonEncode(
+          groups
+              .map((g) => g.trim())
+              .where((g) => g.isNotEmpty && !isDefaultGroup(g))
+              .toSet()
+              .toList(),
+        ),
+      );
+
   AppBackup exportBackup() => AppBackup(
         version: kBackupVersion,
         exportedAt: DateTime.now(),
@@ -106,6 +130,7 @@ class EbdStorage {
         attendance: loadAttendance(),
         students: loadStudents(),
         lessons: loadLessons(),
+        customGroups: loadCustomGroups(),
       );
 
   Future<void> importBackup(AppBackup backup) async {
@@ -115,5 +140,6 @@ class EbdStorage {
     await saveAttendance(backup.attendance);
     await saveStudents(backup.students);
     await saveLessons(backup.lessons);
+    await saveCustomGroups(backup.customGroups);
   }
 }

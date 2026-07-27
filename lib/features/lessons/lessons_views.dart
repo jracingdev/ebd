@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
-import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/user_models.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/services/betel_sync_service.dart';
@@ -71,7 +70,7 @@ class LessonsByClassPanel extends StatelessWidget {
           style: TextStyle(color: AppColors.muted),
         ),
         const SizedBox(height: 16),
-        for (final g in kGroups) ...[
+        for (final g in state.groups) ...[
           LessonTodayCard(lesson: map[g], grupo: g),
           const SizedBox(height: 10),
         ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:livro_registro/data/models.dart';
+import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/user_models.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
@@ -29,13 +29,14 @@ class _UsersAdminScreenState extends State<UsersAdminScreen> {
   }
 
   Future<void> _create() async {
+    final groups = context.read<AppState>().groups;
     final matricula = TextEditingController();
     final nome = TextEditingController();
     final senha = TextEditingController();
     final telefone = TextEditingController();
     final email = TextEditingController();
     var role = UserRole.aluno;
-    String? grupo = kGroups.first;
+    String? grupo = groups.isEmpty ? null : groups.first;
     DateTime? aniversario;
 
     final ok = await showDialog<bool>(
@@ -75,7 +76,7 @@ class _UsersAdminScreenState extends State<UsersAdminScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: grupo,
                   items: [
-                    for (final g in kGroups)
+                    for (final g in groups)
                       DropdownMenuItem(value: g, child: Text(g)),
                   ],
                   onChanged: (v) => setLocal(() => grupo = v),

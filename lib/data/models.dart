@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:livro_registro/data/user_models.dart';
 
-/// Grupos/turmas da EBD.
+/// Classes/turmas padrão da EBD (sempre disponíveis; seed inicial).
 const kGroups = <String>[
   'Maternal (2-3 anos)',
   'Pré-escolar (4-5 anos)',
@@ -14,8 +14,10 @@ const kGroups = <String>[
   'Varões',
 ];
 
+bool isDefaultGroup(String grupo) => kGroups.contains(grupo);
+
 /// Versão do formato de backup JSON.
-const kBackupVersion = 4;
+const kBackupVersion = 5;
 
 class Student extends Equatable {
   const Student({
@@ -337,6 +339,7 @@ class AppBackup extends Equatable {
     required this.attendance,
     required this.students,
     this.lessons = const [],
+    this.customGroups = const [],
   });
 
   final int version;
@@ -347,6 +350,7 @@ class AppBackup extends Equatable {
   final List<AttendanceSession> attendance;
   final List<Student> students;
   final List<Lesson> lessons;
+  final List<String> customGroups;
 
   factory AppBackup.fromJson(Map<String, dynamic> json) => AppBackup(
         version: json['version'] as int? ?? kBackupVersion,
@@ -369,6 +373,10 @@ class AppBackup extends Equatable {
         lessons: (json['lessons'] as List<dynamic>? ?? [])
             .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
             .toList(),
+        customGroups: (json['customGroups'] as List<dynamic>? ?? [])
+            .map((e) => e.toString())
+            .where((g) => g.trim().isNotEmpty && !isDefaultGroup(g))
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -380,6 +388,7 @@ class AppBackup extends Equatable {
         'attendance': attendance.map((e) => e.toJson()).toList(),
         'students': students.map((e) => e.toJson()).toList(),
         'lessons': lessons.map((e) => e.toJson()).toList(),
+        'customGroups': customGroups,
       };
 
   @override
@@ -392,6 +401,7 @@ class AppBackup extends Equatable {
         attendance,
         students,
         lessons,
+        customGroups,
       ];
 }
 

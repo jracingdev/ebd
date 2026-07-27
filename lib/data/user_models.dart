@@ -26,6 +26,9 @@ enum UserRole {
       this == UserRole.pastor ||
       this == UserRole.superintendente;
 
+  /// Admin, pastor e superintendente podem criar/excluir turmas extras.
+  bool get canManageGroups => seesAllClasses;
+
   bool get canSyncBetel =>
       this == UserRole.admin || this == UserRole.superintendente;
 

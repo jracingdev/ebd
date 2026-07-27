@@ -19,9 +19,23 @@ class AppState extends ChangeNotifier {
   List<Student> students = [];
   List<Lesson> lessons = [];
   List<BetelCatalogItem> betelItems = [];
+  List<String> customGroups = [];
 
   String selectedGroup = kGroups.first;
   String modeView = 'revistas';
+
+  /// Classes padrão + turmas extras cadastradas.
+  List<String> get groups {
+    final extras = <String>[];
+    final seen = <String>{...kGroups};
+    for (final g in customGroups) {
+      final name = g.trim();
+      if (name.isEmpty || seen.contains(name)) continue;
+      seen.add(name);
+      extras.add(name);
+    }
+    return [...kGroups, ...extras];
+  }
 
   Future<void> load() async {
     editions = _storage.loadEditions();
@@ -31,12 +45,94 @@ class AppState extends ChangeNotifier {
     students = _storage.loadStudents();
     lessons = _storage.loadLessons();
     betelItems = _storage.loadBetelCatalog();
+    customGroups = _storage.loadCustomGroups();
+    await _absorbOrphanGroups();
+    if (!groups.contains(selectedGroup)) {
+      selectedGroup = groups.first;
+    }
     notifyListeners();
+  }
+
+  /// Inclui na lista de custom grupos encontrados nos dados (ex.: backup antigo).
+  Future<void> _absorbOrphanGroups() async {
+    final known = <String>{...kGroups, ...customGroups};
+    final orphans = <String>{};
+    void consider(String? g) {
+      final name = g?.trim() ?? '';
+      if (name.isEmpty || known.contains(name)) return;
+      orphans.add(name);
+    }
+
+    for (final s in students) {
+      consider(s.grupo);
+    }
+    for (final e in editions) {
+      consider(e.grupo);
+    }
+    for (final f in finances) {
+      consider(f.grupo);
+    }
+    for (final a in attendance) {
+      consider(a.grupo);
+    }
+    for (final r in records) {
+      consider(r.grupo);
+    }
+    for (final l in lessons) {
+      consider(l.grupo);
+    }
+    if (orphans.isEmpty) return;
+    customGroups = [...customGroups, ...orphans];
+    await _storage.saveCustomGroups(customGroups);
   }
 
   void selectGroup(String group) {
     selectedGroup = group;
     notifyListeners();
+  }
+
+  /// Retorna `null` se ok, ou mensagem de erro.
+  Future<String?> addGroup(String nome) async {
+    final name = nome.trim();
+    if (name.isEmpty) return 'Informe o nome da classe.';
+    final lower = name.toLowerCase();
+    if (groups.any((g) => g.toLowerCase() == lower)) {
+      return 'Já existe uma classe com esse nome.';
+    }
+    customGroups = [...customGroups, name];
+    await _storage.saveCustomGroups(customGroups);
+    selectedGroup = name;
+    notifyListeners();
+    return null;
+  }
+
+  bool groupHasData(String grupo) {
+    return students.any((s) => s.grupo == grupo) ||
+        editions.any((e) => e.grupo == grupo) ||
+        finances.any((f) => f.grupo == grupo) ||
+        attendance.any((a) => a.grupo == grupo) ||
+        records.any((r) => r.grupo == grupo) ||
+        lessons.any((l) => l.grupo == grupo);
+  }
+
+  /// Remove apenas classe custom. Retorna mensagem de erro ou `null`.
+  Future<String?> removeGroup(String grupo, {bool force = false}) async {
+    if (isDefaultGroup(grupo)) {
+      return 'Classes padrão não podem ser removidas.';
+    }
+    if (!customGroups.contains(grupo)) {
+      return 'Classe não encontrada.';
+    }
+    if (!force && groupHasData(grupo)) {
+      return 'Esta classe possui dados cadastrados. Confirme a exclusão.';
+    }
+    customGroups = customGroups.where((g) => g != grupo).toList();
+    await _storage.saveCustomGroups(customGroups);
+    if (selectedGroup == grupo) {
+      selectedGroup = groups.first;
+    }
+    notifyListeners();
+    return null;
   }
 
   void setModeView(String mode) {
@@ -82,7 +178,7 @@ class AppState extends ChangeNotifier {
 
   Map<String, Lesson?> lessonsTodayByGroup() {
     final now = DateTime.now();
-    return {for (final g in kGroups) g: lessonForGroupOn(g, now)};
+    return {for (final g in groups) g: lessonForGroupOn(g, now)};
   }
 
   Future<void> addStudent({
@@ -420,3 +516,4 @@ class AppState extends ChangeNotifier {
     await load();
   }
 }
+

@@ -211,25 +211,40 @@ class HomeScreen extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    for (final g in kGroups)
+                    for (final g in state.groups)
                       if (role.seesAllClasses ||
                           user?.grupo == null ||
                           user?.grupo == g)
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(g),
-                            selected: state.selectedGroup == g,
-                            onSelected: (_) => state.selectGroup(g),
-                            selectedColor: AppColors.green,
-                            labelStyle: TextStyle(
-                              color: state.selectedGroup == g
-                                  ? Colors.white
-                                  : AppColors.ink,
-                              fontSize: 12,
+                          child: GestureDetector(
+                            onLongPress: role.canManageGroups &&
+                                    !isDefaultGroup(g)
+                                ? () => _confirmRemoveGroup(context, state, g)
+                                : null,
+                            child: ChoiceChip(
+                              label: Text(g),
+                              selected: state.selectedGroup == g,
+                              onSelected: (_) => state.selectGroup(g),
+                              selectedColor: AppColors.green,
+                              labelStyle: TextStyle(
+                                color: state.selectedGroup == g
+                                    ? Colors.white
+                                    : AppColors.ink,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ),
+                    if (role.canManageGroups)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ActionChip(
+                          avatar: const Icon(Icons.add, size: 18),
+                          label: const Text('Nova classe'),
+                          onPressed: () => _addGroupDialog(context, state),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -291,6 +306,81 @@ class HomeScreen extends StatelessWidget {
       case _HomeAction.logout:
         auth.logout();
     }
+  }
+
+  Future<void> _addGroupDialog(BuildContext context, AppState state) async {
+    final controller = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nova classe'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Nome da turma',
+            hintText: 'Ex.: Casais, Discipulado…',
+          ),
+          onSubmitted: (_) => Navigator.pop(ctx, true),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Criar'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final err = await state.addGroup(controller.text);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(err ?? 'Classe "${controller.text.trim()}" criada.'),
+      ),
+    );
+  }
+
+  Future<void> _confirmRemoveGroup(
+    BuildContext context,
+    AppState state,
+    String grupo,
+  ) async {
+    final hasData = state.groupHasData(grupo);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remover classe?'),
+        content: Text(
+          hasData
+              ? 'A classe "$grupo" possui alunos, revistas ou outros dados. '
+                  'Remover apenas a deixa de aparecer na lista; os dados '
+                  'permanecem no aparelho. Continuar?'
+              : 'Remover a classe "$grupo"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final err = await state.removeGroup(grupo, force: true);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(err ?? 'Classe "$grupo" removida.')),
+    );
   }
 }
 
