@@ -7,6 +7,7 @@ import 'package:livro_registro/features/about/about_screen.dart';
 import 'package:livro_registro/features/admin/users_admin_screen.dart';
 import 'package:livro_registro/features/attendance/attendance_view.dart';
 import 'package:livro_registro/features/backup/backup_screen.dart';
+import 'package:livro_registro/features/bible/bible_home_screen.dart';
 import 'package:livro_registro/features/dashboard/dashboard_view.dart';
 import 'package:livro_registro/features/finances/finances_view.dart';
 import 'package:livro_registro/features/lessons/lessons_views.dart';
@@ -136,6 +137,15 @@ class HomeScreen extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
+                      const PopupMenuItem(
+                        value: _HomeAction.bible,
+                        child: ListTile(
+                          dense: true,
+                          leading: Icon(Icons.auto_stories_outlined),
+                          title: Text('Bíblia EBD'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
                       const PopupMenuItem(
                         value: _HomeAction.about,
                         child: ListTile(
@@ -270,6 +280,10 @@ class HomeScreen extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const BackupScreen()),
         );
+      case _HomeAction.bible:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
+        );
       case _HomeAction.about:
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const AboutScreen()),
@@ -280,4 +294,4 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-enum _HomeAction { users, lessons, backup, about, logout }
+enum _HomeAction { users, lessons, backup, bible, about, logout }
