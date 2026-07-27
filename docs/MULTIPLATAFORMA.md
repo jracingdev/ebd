@@ -8,7 +8,7 @@ Status em **2026-07-27**. App Flutter (`livro_registro`) focado em **Android**; 
 |---|---|---|
 | **Android** | Pronto (principal) | Biometria, FCM, backup SAF/Drive, TTS, Hive local |
 | **Web** | Parcial | `web/` presente; login + shell com largura máxima; FCM/biometria/SAF desligados ou degradados |
-| **iOS** | Não pronto | Pasta `ios/` **ausente**; `flutter_launcher_icons` com `ios: false`; sem Info.plist / permissões |
+| **iOS** | Esqueleto pronto | Pasta `ios/` gerada; bundle `br.com.ebd.livro_registro`; Info.plist com câmera/fotos/Face ID/fala; **falta** signing Apple + teste em Mac/Xcode |
 
 ### Web — o que funciona / falta
 
@@ -18,12 +18,13 @@ Status em **2026-07-27**. App Flutter (`livro_registro`) focado em **Android**; 
 
 ### iOS — o que falta para lançar
 
-1. `flutter create --platforms=ios .` (gerar pasta `ios/`).
-2. Bundle ID, signing Apple Developer, ícones (`ios: true` no launcher).
-3. Info.plist: câmera/fotos, Face ID (`NSFaceIDUsageDescription`), rede.
-4. Validar `local_auth`, `flutter_tts`, `path_provider`, Hive, Supabase.
-5. FCM iOS (APNs + `GoogleService-Info.plist`) se notificações forem requisito.
-6. Backup: SAF é Android-only; iOS precisa de share/Files (export já usa `share_plus` fora do Android).
+1. ~~`flutter create --platforms=ios .`~~ — **feito**
+2. Bundle ID alinhado ao Android (`br.com.ebd.livro_registro`) — **feito**; signing Apple Developer ainda pendente
+3. Info.plist: câmera/fotos, Face ID, fala/TTS — **feito**
+4. Ícones: `flutter_launcher_icons` com `ios: true` — regenerar no Mac se precisar
+5. Validar `local_auth`, `flutter_tts`, `path_provider`, Hive, Supabase em dispositivo real
+6. FCM iOS (APNs + `GoogleService-Info.plist`) se notificações forem requisito
+7. Backup: SAF é Android-only; iOS usa share/Files (export já via `share_plus`)
 
 ## TTS (leitura da Bíblia)
 
@@ -42,7 +43,7 @@ Status em **2026-07-27**. App Flutter (`livro_registro`) focado em **Android**; 
 |---|---|
 | Supabase em produção | Sem `.env` real + migration aplicada, auth/roles/sync ficam só no Hive demo |
 | Copyright Bíblia moderna | ARA/RA/SBB/NTLH via API + cache; embutir no APK exige licença SBB (ver `docs/BIBLIA.md`). Só Almeida 1819 é DP embutido |
-| iOS inexistente | Sem pasta `ios/`, não há build App Store |
+| iOS App Store | Pasta `ios/` existe; falta signing + validação em hardware |
 | FCM produção | Precisa `google-services.json` + projeto Firebase configurado |
 
 ### P1 — importantes para paridade
@@ -51,7 +52,7 @@ Status em **2026-07-27**. App Flutter (`livro_registro`) focado em **Android**; 
 |---|---|
 | Sync multi-dispositivo | Dados EBD ainda centrados em Hive local; Supabase schema existe, sync completo incompleto |
 | Backup web/iOS | Export ok via share; restore SAF só Android |
-| Biometria iOS | Código já trata `Platform.isIOS`, mas sem projeto iOS |
+| Biometria iOS | Código trata `Platform.isIOS`; validar no device |
 | Responsividade | Shell home/login/bíblia com max-width; várias views internas ainda “mobile-first” densas |
 | Betel sync | Serviço presente; depende de cloud/edge function publicada |
 | Alunos/fotos na web | Caminhos de arquivo locais não mapeiam bem no browser |
@@ -68,9 +69,10 @@ Status em **2026-07-27**. App Flutter (`livro_registro`) focado em **Android**; 
 
 ## Correções rápidas feitas neste ciclo
 
+- Pasta `ios/` gerada + Info.plist (câmera, fotos, Face ID, fala) + bundle alinhado.
 - TTS naturalizado + UI voz/velocidade na Bíblia.
 - `ResponsiveShell` no home e hub/reader da Bíblia.
-- Backup: export via share fora do Android; UI não oferece restore SAF na web.
+- Backup: export via share fora do Android; UI não oferece restore SAF na web; engagement no backup v6.
 - Manifest Android: query `TTS_SERVICE` para listar vozes.
 - `web/index.html` título/descrição EBD.
 
@@ -80,9 +82,9 @@ Status em **2026-07-27**. App Flutter (`livro_registro`) focado em **Android**; 
 flutter pub get
 flutter run                 # Android
 flutter run -d chrome       # Web
-# iOS (após gerar plataforma):
-flutter create --platforms=ios .
-flutter run -d ios
+flutter run -d ios          # iOS (requer macOS + Xcode + signing)
 ```
+
+Lista curta do que ainda depende de licença/cloud: [`PENDENCIAS.md`](PENDENCIAS.md).
 
 Ver também: [`SETUP_CLOUD.md`](SETUP_CLOUD.md), [`BIBLIA.md`](BIBLIA.md), [`AUDITORIA_RECUPERACAO.md`](AUDITORIA_RECUPERACAO.md).
