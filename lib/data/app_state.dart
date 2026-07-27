@@ -270,6 +270,7 @@ class AppState extends ChangeNotifier {
         attendance.where((a) => a.grupo == grupo && a.data == data).toList();
     if (existing.isNotEmpty) {
       await _repairAttendancePersonIds(existing.first.id);
+      await _mergeStudentsIntoSession(existing.first.id, grupo);
       return;
     }
     final alunos = studentsFor(grupo);
@@ -296,6 +297,56 @@ class AppState extends ChangeNotifier {
     ];
     await _storage.saveAttendance(attendance);
     notifyListeners();
+  }
+
+  /// Inclui alunos novos da turma na sessão aberta, preservando presente/ausente.
+  Future<void> _mergeStudentsIntoSession(String sessionId, String grupo) async {
+    final alunos = studentsFor(grupo);
+    var changed = false;
+    attendance = attendance.map((s) {
+      if (s.id != sessionId) return s;
+      final byId = <String, AttendancePerson>{
+        for (final p in s.pessoas) (p.alunoId ?? p.id): p,
+      };
+      final byName = <String, AttendancePerson>{
+        for (final p in s.pessoas) p.nome: p,
+      };
+      final merged = alunos.map((aluno) {
+        final prev = byId[aluno.id] ?? byName[aluno.nome];
+        return AttendancePerson(
+          id: aluno.id,
+          nome: aluno.nome,
+          presente: prev?.presente ?? false,
+          alunoId: aluno.id,
+        );
+      }).toList();
+      if (merged.length != s.pessoas.length) {
+        changed = true;
+      } else {
+        for (var i = 0; i < merged.length; i++) {
+          final a = merged[i];
+          final b = s.pessoas[i];
+          if (a.id != b.id ||
+              a.nome != b.nome ||
+              a.presente != b.presente ||
+              a.alunoId != b.alunoId) {
+            changed = true;
+            break;
+          }
+        }
+      }
+      return AttendanceSession(
+        id: s.id,
+        grupo: s.grupo,
+        data: s.data,
+        pessoas: merged,
+        criadoEm: s.criadoEm,
+      );
+    }).toList();
+    if (changed) {
+      await _storage.saveAttendance(attendance);
+      notifyListeners();
+    }
   }
 
   Future<void> _repairAttendancePersonIds(String sessionId) async {

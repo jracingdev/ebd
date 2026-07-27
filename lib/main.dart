@@ -20,7 +20,8 @@ Future<void> main() async {
     try {
       await dotenv.load(fileName: '.env.example');
     } catch (_) {}
-  }  await initializeDateFormatting('pt_BR');
+  }
+  await initializeDateFormatting('pt_BR');
   final storage = await EbdStorage.open();
   final state = AppState(storage);
   await state.load();

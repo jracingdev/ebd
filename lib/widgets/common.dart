@@ -1,6 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 
+/// AppBar de telas empilhadas: volta (pop) + atalho Início até a raiz.
+class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SecondaryAppBar({super.key, required this.title});
+
+  final String title;
+
+  void _goHome(BuildContext context) {
+    final nav = Navigator.of(context);
+    if (nav.canPop()) {
+      nav.popUntil((route) => route.isFirst);
+    }
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    final canPop = Navigator.of(context).canPop();
+    return AppBar(
+      title: Text(title),
+      automaticallyImplyLeading: canPop,
+      actions: [
+        if (canPop)
+          TextButton.icon(
+            onPressed: () => _goHome(context),
+            icon: const Icon(Icons.home_outlined, size: 20),
+            label: const Text('Início'),
+          ),
+      ],
+    );
+  }
+}
+
 class SectionCard extends StatelessWidget {
   const SectionCard({super.key, required this.child});
 

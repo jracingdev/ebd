@@ -26,6 +26,7 @@ class AuthService extends ChangeNotifier {
     _localUsers = await Hive.openBox('ebd_users_v1');
     _session = await Hive.openBox('ebd_session_v1');
     await _seedLocalAdminIfNeeded();
+    await _clearDemoAdminFakeBirthday();
 
     if (usingSupabase) {
       await Supabase.initialize(
@@ -42,6 +43,7 @@ class AuthService extends ChangeNotifier {
         currentUser = UserProfile.fromJson(
           jsonDecode(raw) as Map<String, dynamic>,
         );
+        currentUser = await _sanitizeLoadedUser(currentUser);
       }
     }
     ready = true;
@@ -56,12 +58,56 @@ class AuthService extends ChangeNotifier {
       nome: 'Administrador',
       role: UserRole.admin,
       email: 'admin@ebd.local',
-      aniversario: DateTime(1990, DateTime.now().month, DateTime.now().day),
     );
     await _localUsers!.put(admin.matricula, {
       ...admin.toJson(),
       'senha': 'admin123',
     });
+  }
+
+  /// Seed antigo usava ano 1990 + dia de hoje → overlay de aniversário todo dia.
+  Future<void> _clearDemoAdminFakeBirthday() async {
+    final raw = _localUsers!.get('admin');
+    if (raw is! Map) return;
+    final map = Map<String, dynamic>.from(raw);
+    if (!_isDemoFakeBirthday(map['aniversario'])) return;
+    map['aniversario'] = null;
+    await _localUsers!.put('admin', map);
+  }
+
+  bool _isDemoFakeBirthday(Object? raw) {
+    if (raw == null) return false;
+    if (raw is DateTime) return raw.year == 1990;
+    final s = raw.toString();
+    final parsed = DateTime.tryParse(s.split(' ').first);
+    return parsed != null && parsed.year == 1990;
+  }
+
+  Future<UserProfile?> _sanitizeLoadedUser(UserProfile? user) async {
+    if (user == null) return null;
+    final a = user.aniversario;
+    if (user.matricula != 'admin' || a == null || a.year != 1990) {
+      return user;
+    }
+    final fixed = UserProfile(
+      id: user.id,
+      matricula: user.matricula,
+      nome: user.nome,
+      role: user.role,
+      email: user.email,
+      grupo: user.grupo,
+      telefone: user.telefone,
+      fotoUrl: user.fotoUrl,
+      ativo: user.ativo,
+    );
+    final hiveRaw = _localUsers!.get('admin');
+    if (hiveRaw is Map) {
+      final map = Map<String, dynamic>.from(hiveRaw);
+      map['aniversario'] = null;
+      await _localUsers!.put('admin', map);
+    }
+    await _session!.put('user', jsonEncode(fixed.toJson()));
+    return fixed;
   }
 
   Future<UserProfile?> _fetchProfile(String id) async {
@@ -106,8 +152,9 @@ class AuthService extends ChangeNotifier {
     if (raw is! Map) throw AuthException('Matrícula não encontrada.');
     final map = Map<String, dynamic>.from(raw);
     if (map['senha'] != senha) throw AuthException('Senha incorreta.');
-    final profile = UserProfile.fromJson(map);
+    var profile = UserProfile.fromJson(map);
     if (!profile.ativo) throw AuthException('Usuário inativo.');
+    profile = await _sanitizeLoadedUser(profile) ?? profile;
     currentUser = profile;
     await _session!.put('user', jsonEncode(profile.toJson()));
     await _secure.write(key: 'last_matricula', value: mat);

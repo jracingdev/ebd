@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:livro_registro/theme/app_theme.dart';
+import 'package:livro_registro/widgets/common.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -23,7 +24,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sobre')),
+      appBar: const SecondaryAppBar(title: 'Sobre'),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

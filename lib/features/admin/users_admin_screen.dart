@@ -4,6 +4,7 @@ import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/user_models.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
+import 'package:livro_registro/widgets/common.dart';
 
 class UsersAdminScreen extends StatefulWidget {
   const UsersAdminScreen({super.key});
@@ -170,7 +171,7 @@ class _UsersAdminScreenState extends State<UsersAdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Usuários')),
+      appBar: const SecondaryAppBar(title: 'Usuários'),
       floatingActionButton: FloatingActionButton(
         onPressed: _create,
         child: const Icon(Icons.person_add),

@@ -6,6 +6,7 @@ import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/features/backup/drive_backup_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
+import 'package:livro_registro/widgets/common.dart';
 
 class BackupScreen extends StatefulWidget {
   const BackupScreen({super.key});
@@ -100,7 +101,7 @@ class _BackupScreenState extends State<BackupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup EBD')),
+      appBar: const SecondaryAppBar(title: 'Backup EBD'),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [

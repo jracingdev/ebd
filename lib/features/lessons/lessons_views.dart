@@ -158,7 +158,7 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
     final canSync = auth.currentUser?.role.canSyncBetel ?? false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lições e Betel')),
+      appBar: const SecondaryAppBar(title: 'Lições e Betel'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -169,21 +169,33 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
               label: const Text('Atualizar catálogo Editora Betel'),
             ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            initialValue: _editionId,
-            decoration: const InputDecoration(
-              labelText: 'Edição / turma',
-              border: OutlineInputBorder(),
+          if (state.editions.isEmpty)
+            const Text(
+              'Nenhuma revista/edição cadastrada ainda. '
+              'Cadastre uma revista na aba Revistas ou sincronize o catálogo Betel.',
+              style: TextStyle(color: AppColors.muted),
+            )
+          else
+            DropdownButtonFormField<String>(
+              initialValue: _editionId,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: 'Edição / turma',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final e in state.editions)
+                  DropdownMenuItem(
+                    value: e.id,
+                    child: Text(
+                      '${e.grupo} — ${e.trimestre}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (v) => setState(() => _editionId = v),
             ),
-            items: [
-              for (final e in state.editions)
-                DropdownMenuItem(
-                  value: e.id,
-                  child: Text('${e.grupo} — ${e.trimestre}'),
-                ),
-            ],
-            onChanged: (v) => setState(() => _editionId = v),
-          ),
           const SizedBox(height: 12),
           ListTile(
             contentPadding: EdgeInsets.zero,

@@ -55,36 +55,40 @@ class _BirthdayOverlayState extends State<BirthdayOverlay>
         children: [
           Align(
             alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 120),
-              child: Column(
-                children: [
-                  const Text('🎈🎂🎆', style: TextStyle(fontSize: 42)),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Parabéns, ${widget.nome}!',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Que Deus continue abençoando a sua vida!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.gold,
-                      foregroundColor: AppColors.ink,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 80, 24, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🎈🎂🎆', style: TextStyle(fontSize: 42)),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Parabéns, ${widget.nome}!',
+                      textAlign: TextAlign.center,
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                     ),
-                    onPressed: widget.onDone,
-                    child: const Text('Continuar'),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Que Deus continue abençoando a sua vida!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.gold,
+                        foregroundColor: AppColors.ink,
+                      ),
+                      onPressed: widget.onDone,
+                      child: const Text('Continuar'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

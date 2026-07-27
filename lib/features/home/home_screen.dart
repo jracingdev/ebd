@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/user_models.dart';
+import 'package:livro_registro/features/about/about_screen.dart';
+import 'package:livro_registro/features/admin/users_admin_screen.dart';
 import 'package:livro_registro/features/attendance/attendance_view.dart';
 import 'package:livro_registro/features/backup/backup_screen.dart';
 import 'package:livro_registro/features/dashboard/dashboard_view.dart';
@@ -11,8 +13,6 @@ import 'package:livro_registro/features/lessons/lessons_views.dart';
 import 'package:livro_registro/features/magazines/magazines_view.dart';
 import 'package:livro_registro/features/report/report_pdf.dart';
 import 'package:livro_registro/features/students/students_view.dart';
-import 'package:livro_registro/features/admin/users_admin_screen.dart';
-import 'package:livro_registro/features/about/about_screen.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 
@@ -38,7 +38,6 @@ class HomeScreen extends StatelessWidget {
         ? _modes
         : _modes.where((m) => m.$1 == 'licoes' || m.$1 == 'presenca').toList();
 
-    // Aluno/professor: força grupo do perfil quando existir
     if (user?.grupo != null &&
         !role.seesAllClasses &&
         state.selectedGroup != user!.grupo) {
@@ -53,34 +52,42 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 12, 0),
+              padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'ESCOLA BÍBLICA DOMINICAL',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: AppColors.gold,
-                            letterSpacing: 1.6,
-                            fontSize: 11,
+                            letterSpacing: 1.2,
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           'EBD',
-                          style:
-                              Theme.of(context).textTheme.displaySmall?.copyWith(
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.w600,
+                                height: 1.1,
+                              ),
                         ),
                         if (user != null)
                           Text(
                             '${user.nome} · ${role.label}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: AppColors.muted,
                               fontSize: 12,
@@ -89,52 +96,66 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (role.canManageUsers)
-                    IconButton(
-                      tooltip: 'Usuários',
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const UsersAdminScreen(),
-                        ),
-                      ),
-                      icon: const Icon(Icons.manage_accounts_outlined),
-                    ),
-                  if (role.canSyncBetel || role == UserRole.pastor)
-                    IconButton(
-                      tooltip: 'Lições / Betel',
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const LessonsAdminScreen(),
-                        ),
-                      ),
-                      icon: const Icon(Icons.menu_book_outlined),
-                    ),
                   if (role.isStaff)
-                    IconButton(
-                      tooltip: 'Backup',
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const BackupScreen(),
-                        ),
-                      ),
-                      icon: const Icon(Icons.cloud_upload_outlined),
-                    ),
-                  if (role.isStaff)
-                    FilledButton(
+                    TextButton(
                       onPressed: () => printEbdReport(context),
                       child: const Text('Relatório'),
                     ),
-                  IconButton(
-                    tooltip: 'Sobre',
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const AboutScreen()),
-                    ),
-                    icon: const Icon(Icons.info_outline),
-                  ),
-                  IconButton(
-                    tooltip: 'Sair',
-                    onPressed: () => auth.logout(),
-                    icon: const Icon(Icons.logout),
+                  PopupMenuButton<_HomeAction>(
+                    tooltip: 'Menu',
+                    onSelected: (action) =>
+                        _onAction(context, auth, action),
+                    itemBuilder: (ctx) => [
+                      if (role.canManageUsers)
+                        const PopupMenuItem(
+                          value: _HomeAction.users,
+                          child: ListTile(
+                            dense: true,
+                            leading: Icon(Icons.manage_accounts_outlined),
+                            title: Text('Usuários'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      if (role.canSyncBetel || role == UserRole.pastor)
+                        const PopupMenuItem(
+                          value: _HomeAction.lessons,
+                          child: ListTile(
+                            dense: true,
+                            leading: Icon(Icons.menu_book_outlined),
+                            title: Text('Lições / Betel'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      if (role.isStaff)
+                        const PopupMenuItem(
+                          value: _HomeAction.backup,
+                          child: ListTile(
+                            dense: true,
+                            leading: Icon(Icons.cloud_upload_outlined),
+                            title: Text('Backup'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      const PopupMenuItem(
+                        value: _HomeAction.about,
+                        child: ListTile(
+                          dense: true,
+                          leading: Icon(Icons.info_outline),
+                          title: Text('Sobre'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: _HomeAction.logout,
+                        child: ListTile(
+                          dense: true,
+                          leading: Icon(Icons.logout),
+                          title: Text('Sair'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                    icon: const Icon(Icons.more_vert),
                   ),
                 ],
               ),
@@ -143,16 +164,19 @@ class HomeScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: LessonTodayCard(
-                  lesson: state.lessonTodayFor(user?.grupo ?? state.selectedGroup),
+                  lesson: state
+                      .lessonTodayFor(user?.grupo ?? state.selectedGroup),
                 ),
               ),
             if (role.seesAllClasses && state.modeView == 'licoes')
-              const Expanded(child: Padding(
-                padding: EdgeInsets.all(16),
-                child: LessonsByClassPanel(),
-              ))
+              const Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: LessonsByClassPanel(),
+                ),
+              )
             else ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               SizedBox(
                 height: 40,
                 child: ListView(
@@ -186,7 +210,9 @@ class HomeScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     children: [
                       for (final g in kGroups)
-                        if (role.seesAllClasses || user?.grupo == null || user?.grupo == g)
+                        if (role.seesAllClasses ||
+                            user?.grupo == null ||
+                            user?.grupo == g)
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: ChoiceChip(
@@ -215,9 +241,11 @@ class HomeScreen extends StatelessWidget {
                     'presenca' => const AttendanceView(),
                     'alunos' => const StudentsView(),
                     'painel' => const DashboardView(),
-                    'licoes' => LessonTodayCard(
-                        lesson: state.lessonTodayFor(
-                          user?.grupo ?? state.selectedGroup,
+                    'licoes' => SingleChildScrollView(
+                        child: LessonTodayCard(
+                          lesson: state.lessonTodayFor(
+                            user?.grupo ?? state.selectedGroup,
+                          ),
                         ),
                       ),
                     _ => const MagazinesView(),
@@ -230,4 +258,33 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _onAction(
+    BuildContext context,
+    AuthService auth,
+    _HomeAction action,
+  ) {
+    switch (action) {
+      case _HomeAction.users:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const UsersAdminScreen()),
+        );
+      case _HomeAction.lessons:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const LessonsAdminScreen()),
+        );
+      case _HomeAction.backup:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const BackupScreen()),
+        );
+      case _HomeAction.about:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const AboutScreen()),
+        );
+      case _HomeAction.logout:
+        auth.logout();
+    }
+  }
 }
+
+enum _HomeAction { users, lessons, backup, about, logout }

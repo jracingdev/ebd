@@ -50,12 +50,13 @@ class MagazinesView extends StatelessWidget {
                 Text(catalog['revista']!,
                     style: const TextStyle(color: AppColors.muted)),
               const SizedBox(height: 12),
-              Row(
+              Wrap(
+                spacing: 16,
+                runSpacing: 4,
                 children: [
                   Text('Recebido: ${currency(totals.pago)}',
                       style: const TextStyle(
                           color: AppColors.green, fontWeight: FontWeight.w700)),
-                  const SizedBox(width: 16),
                   Text('Pendente: ${currency(totals.pendente)}',
                       style: const TextStyle(
                           color: AppColors.danger, fontWeight: FontWeight.w700)),
