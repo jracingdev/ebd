@@ -1,37 +1,281 @@
-# Setup Supabase + Firebase
+# Configuração cloud — Supabase e Firebase
 
-## Supabase
+Este guia configura o EBD para usar Supabase (autenticação, dados, roles e
+Storage) e Firebase (FCM no Android). Execute os passos na ordem indicada.
+Não publique o `.env`, a `service_role` key nem o `google-services.json` em
+repositórios públicos.
 
-1. Crie um projeto em https://supabase.com
-2. Rode a migration em `supabase/migrations/20260727000000_init_ebd.sql` no SQL Editor
-3. Copie `.env.example` → `.env` e preencha:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
-4. Deploy functions (opcional):
+## Checklist e ordem recomendada
+
+- [ ] Criar o projeto Supabase e aplicar o schema.
+- [ ] Ajustar a autenticação por matrícula.
+- [ ] Criar o bucket de fotos e o primeiro administrador.
+- [ ] Preencher `.env` e testar login.
+- [ ] Publicar e testar a sincronização Betel.
+- [ ] Configurar Firebase/FCM no Android.
+- [ ] Publicar a Web (opcional).
+
+## 1. Criar o projeto Supabase
+
+1. Acesse <https://supabase.com/dashboard>, crie uma organização/projeto e
+   aguarde o provisionamento.
+2. Em **Project Settings > API**, copie:
+   - **Project URL**;
+   - a chave pública **anon** (ou **publishable**). Não use a
+     `service_role` no aplicativo Flutter.
+3. Em uma máquina com o Supabase CLI, autentique e vincule o projeto:
+
    ```bash
-   supabase functions deploy sync-betel
-   supabase functions deploy birthday-push
+   supabase login
+   supabase link --project-ref SEU_PROJECT_REF
    ```
 
-## Firebase (FCM)
+   O `project-ref` aparece na URL do Dashboard e em **Project Settings >
+   General**.
 
-1. Crie projeto no Firebase Console
-2. Adicione app Android `br.com.ebd.livro_registro`
-3. Baixe `google-services.json` → `android/app/`
-4. `dart pub global activate flutterfire_cli && flutterfire configure`
-5. No `.env`: `FIREBASE_ENABLED=true`
+## 2. Aplicar a migration
 
-## Login local (sem cloud)
+O arquivo `supabase/migrations/20260727000000_init_ebd.sql` cria `profiles`,
+as roles (`aluno`, `professor`, `superintendente`, `pastor`, `admin`), tabelas
+do EBD, RLS, `fcm_tokens` e o gatilho que cria o perfil ao criar um usuário.
 
-Sem `.env` válido o app usa Hive local:
+Escolha uma opção:
 
-- Matrícula: `admin`
-- Senha: `admin123`
+**Pelo Dashboard**
 
-## Web
+1. Abra **SQL Editor > New query**.
+2. Cole todo o conteúdo de
+   `supabase/migrations/20260727000000_init_ebd.sql`.
+3. Clique em **Run** e confirme que não houve erros.
+
+**Pelo CLI** (com a migration presente no repositório):
+
+```bash
+supabase db push
+```
+
+## 3. Configurar Auth: matrícula e senha
+
+O app transforma a matrícula em e-mail sintético:
+
+```text
+Matrícula 12345  →  12345@ebd.local
+```
+
+Assim, crie cada conta no Supabase Auth com esse e-mail, salvo quando houver
+um e-mail real para recuperação de senha. A matrícula original fica em
+`profiles.matricula`.
+
+1. Abra **Authentication > Providers > Email**.
+2. Para o fluxo atual de cadastro funcionar sem e-mail, desative **Confirm
+   email**. Alternativamente, ao criar contas pelo Dashboard/API administrativa,
+   marque-as como confirmadas automaticamente.
+3. Mantenha login por e-mail e senha habilitado — o app faz a conversão de
+   matrícula para e-mail internamente.
+
+### Recuperação de senha
+
+O botão de recuperação consulta `profiles.email`. Se o perfil tiver um e-mail
+real, é para ele que o Supabase envia o link. Sem e-mail real, será enviado
+para `matricula@ebd.local`, que não recebe mensagens fora de um domínio
+controlado. Para recuperação operacional, grave o e-mail real no perfil ou
+altere a senha em **Authentication > Users**.
+
+Em produção, configure em **Authentication > URL Configuration**:
+
+- a URL do site Web em **Site URL**;
+- URLs de redirecionamento permitidas para o app/site em **Redirect URLs**.
+
+## 4. Criar o bucket `avatars`
+
+O schema só documenta o bucket; ele deve ser criado no Dashboard:
+
+1. Abra **Storage > New bucket**.
+2. Informe o nome exato `avatars`.
+3. Escolha uma política de leitura:
+   - **Público**: use somente se as fotos puderem ser públicas; URLs podem ser
+     exibidas sem sessão.
+   - **Privado, leitura autenticada**: recomendado para fotos de membros.
+     Crie políticas para `authenticated` ler e para cada usuário gravar apenas
+     sua própria pasta, por exemplo `avatars/<auth.uid()>/...`.
+4. Se adotar o bucket privado, o app deve usar URL assinada para exibir fotos.
+
+> O app atual possui o campo `foto_url`, mas ainda não envia arquivos ao
+> Storage. A criação do bucket deixa a infraestrutura pronta; o upload e as
+> políticas finais devem acompanhar a implementação dessa tela.
+
+## 5. Preencher as variáveis do aplicativo
+
+Copie o modelo e preencha valores reais:
+
+```bash
+copy .env.example .env
+```
+
+No `.env`:
+
+```dotenv
+SUPABASE_URL=https://SEU_PROJECT_REF.supabase.co
+SUPABASE_ANON_KEY=SUA_CHAVE_ANON_OU_PUBLISHABLE
+FIREBASE_ENABLED=false
+```
+
+Reinicie o app após alterar o arquivo. Enquanto a URL/chave estiver ausente
+ou ainda contiver `YOUR_`, o aplicativo usa Hive local em vez do Supabase.
+
+## 6. Criar o primeiro administrador
+
+Use este procedimento antes de tentar cadastrar outros usuários pelo app:
+
+1. Em **Authentication > Users > Add user**, crie:
+   - e-mail: `admin@ebd.local` (ou outra matrícula: `MATRICULA@ebd.local`);
+   - uma senha forte;
+   - usuário confirmado/auto-confirmado.
+2. O gatilho da migration criará uma linha em `public.profiles`. No **SQL
+   Editor**, localize-a e promova-a:
+
+   ```sql
+   select id, matricula, nome, role, email
+   from public.profiles
+   where matricula = 'admin';
+
+   update public.profiles
+   set nome = 'Administrador', role = 'admin', ativo = true
+   where matricula = 'admin';
+   ```
+
+3. Entre no app com matrícula `admin` e a senha definida no Dashboard.
+
+Para outro administrador, troque `'admin'` pela matrícula correta. Não tente
+inserir senhas diretamente em `auth.users` via SQL: use o Dashboard ou a API
+Admin do Supabase.
+
+## 7. Publicar as Edge Functions
+
+Com o projeto vinculado, publique:
+
+```bash
+supabase functions deploy sync-betel
+supabase functions deploy birthday-push
+```
+
+As variáveis `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` normalmente são
+fornecidas pelo runtime das Edge Functions. Caso o ambiente não as exponha,
+defina-as apenas como secrets da função — nunca no `.env` do Flutter:
+
+```bash
+supabase secrets set SUPABASE_URL="https://SEU_PROJECT_REF.supabase.co"
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY="SUA_SERVICE_ROLE_KEY"
+supabase secrets list
+```
+
+### `sync-betel`
+
+Essa função consulta o catálogo público da Editora Betel e atualiza
+`betel_catalog`. Após o deploy, execute-a manualmente pelo Dashboard (**Edge
+Functions > sync-betel > Invoke**) e confira a resposta `upserted`. Depois,
+agende a execução trimestral/semanal pelo agendador do Supabase ou pelo seu
+orquestrador HTTP, autenticando a chamada de acordo com a configuração de JWT
+da função.
+
+### `birthday-push`: estado atual e agendamento
+
+Publique-a pelo comando acima e agende uma chamada diária (por exemplo, pelo
+agendador/cron do Supabase). Porém, **ela ainda não envia notificações**: o
+arquivo atual apenas busca aniversariantes/tokens e registra
+`Would push to ...` no log. Ele não usa secrets `FIREBASE_*` nem implementa a
+autenticação OAuth da API FCM HTTP v1.
+
+Portanto, o deploy e o cron validam a seleção de aniversariantes, mas o envio
+real exige implementar a chamada FCM HTTP v1 com uma service account do
+Firebase (e então cadastrar secrets como `FIREBASE_PROJECT_ID` e as
+credenciais da service account). Não considere o push de aniversário pronto
+até essa implementação existir e ser testada em um dispositivo.
+
+## 8. Criar o projeto Firebase e habilitar FCM
+
+1. Acesse <https://console.firebase.google.com>, crie ou selecione o projeto.
+2. Adicione um app **Android** com o package exato:
+
+   ```text
+   br.com.ebd.livro_registro
+   ```
+
+3. Baixe `google-services.json` e salve em `android/app/google-services.json`.
+4. Instale e execute o FlutterFire CLI na raiz do projeto:
+
+   ```bash
+   dart pub global activate flutterfire_cli
+   flutterfire configure --project=SEU_PROJETO_FIREBASE
+   ```
+
+   Se o CLI gerar `lib/firebase_options.dart`, mantenha-o versionado conforme
+   a política do projeto. O serviço atual inicializa Firebase sem opções, por
+   isso o `google-services.json` é indispensável para Android.
+5. Altere o `.env`:
+
+   ```dotenv
+   FIREBASE_ENABLED=true
+   ```
+
+6. Reconstrua e instale o APK. Não basta hot reload para validar a configuração
+   nativa do Firebase.
+
+## 9. Tokens e permissões FCM no Android
+
+- No Android 13+ o app pede a permissão de notificações durante a
+  inicialização; aceite-a no dispositivo.
+- Após login, o app obtém o token e tenta gravá-lo em
+  `public.fcm_tokens`, associado ao `profile_id`. Verifique no Table Editor se
+  a linha foi criada.
+- A policy da migration permite ao usuário autenticado gravar somente tokens
+  do seu próprio perfil. Se não houver linha, confira nesta ordem:
+  `FIREBASE_ENABLED=true`, arquivo `google-services.json`, permissão de
+  notificações, login Supabase e logs do Flutter (`FCM register failed`).
+- O FCM está desativado para Web no código atual (`kIsWeb`), portanto o fluxo
+  acima se aplica ao Android.
+
+## 10. Web e Firebase Hosting (opcional)
+
+Para executar localmente:
 
 ```bash
 flutter run -d chrome
-# ou
-flutter build web
 ```
+
+Para publicar no Firebase Hosting:
+
+```bash
+flutter build web --release
+firebase login
+firebase init hosting
+firebase deploy --only hosting
+```
+
+Durante `firebase init hosting`, selecione o projeto Firebase correto e use
+`build/web` como diretório público. Registre a URL gerada também em
+**Authentication > URL Configuration** do Supabase, principalmente se for
+usar recuperação de senha no navegador.
+
+## 11. Modo local sem cloud
+
+Sem `.env` válido para Supabase, o app funciona com dados locais em Hive e
+semeia o primeiro usuário:
+
+- matrícula: `admin`
+- senha: `admin123`
+
+Esse usuário é apenas para desenvolvimento. Ele não existe no Supabase, não
+sincroniza dados e não deve ser tratado como acesso de produção.
+
+## Troubleshooting rápido
+
+| Sintoma | Verificação |
+| --- | --- |
+| Login usa dados locais | Confira `SUPABASE_URL`, `SUPABASE_ANON_KEY`, remova valores `YOUR_` e reinicie o app. |
+| “Perfil não encontrado ou inativo” | Confirme a migration, o trigger `on_auth_user_created` e a linha correspondente em `profiles`. |
+| Login falha após criar usuário | Confirme que o e-mail usado é `matricula@ebd.local` e que a conta está confirmada. |
+| Reset não chega | Preencha `profiles.email` com e-mail real e configure URLs do Auth; `@ebd.local` é sintético. |
+| Não cria token FCM | Verifique `google-services.json`, `FIREBASE_ENABLED=true`, permissão Android e a tabela `fcm_tokens`. |
+| Função Betel falha | Veja logs em **Edge Functions**, teste a URL da Editora e confirme secrets de runtime. |
+| Push de aniversário não chega | Esperado no código atual: `birthday-push` ainda não chama a API FCM HTTP v1. |
