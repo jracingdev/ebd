@@ -1,0 +1,27 @@
+# EBD / livro_registro
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+.idea/
+.vscode/
+android/.gradle/
+android/local.properties
+android/app/libs/
+ios/Pods/
+ios/.symlinks/
+*.apk
+*.aab
+*.ab
+*.log
+.DS_Store
+.flutter-plugins-dependencies
+
+# Artefatos pesados da engenharia reversa (APK/jadx/libs)
+recovery/tools/
+recovery/jadx_out/
+recovery/apk_extracted/
+recovery/ebd.apk
+recovery/ebd_android.ab

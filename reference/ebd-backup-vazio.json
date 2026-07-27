@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-20T14:44:52.920315",
+  "editions": [],
+  "records": [],
+  "finances": [],
+  "attendance": [
+    {
+      "id": "mrt7f1qmhkkj",
+      "grupo": "Varões",
+      "data": "2026-07-19",
+      "pessoas": [
+        {
+          "id": "mrt7f8o9hkkj",
+          "nome": "Joelson",
+          "presente": true
+        }
+      ],
+      "criadoEm": "2026-07-20T09:31:51.694364"
+    },
+    {
+      "id": "mrt7eqzahkkj",
+      "grupo": "Maternal (2-3 anos)",
+      "data": "2026-07-19",
+      "pessoas": [],
+      "criadoEm": "2026-07-20T09:31:37.750853"
+    }
+  ],
+  "students": [
+    {
+      "id": "mrt82mbjhkkj",
+      "nome": "Joelson",
+      "grupo": "Varões",
+      "criadoEm": "2026-07-20T09:50:11.455544"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:livro_registro/data/app_state.dart';
+import 'package:livro_registro/data/models.dart';
+import 'package:livro_registro/features/backup/drive_backup_service.dart';
+import 'package:livro_registro/theme/app_theme.dart';
+
+class BackupScreen extends StatefulWidget {
+  const BackupScreen({super.key});
+
+  @override
+  State<BackupScreen> createState() => _BackupScreenState();
+}
+
+class _BackupScreenState extends State<BackupScreen> {
+  final _service = DriveBackupService();
+  String? _lastPath;
+  bool _busy = false;
+
+  Future<void> _export() async {
+    setState(() => _busy = true);
+    try {
+      final backup = context.read<AppState>().exportBackup();
+      final bytes = utf8.encode(const JsonEncoder.withIndent('  ').convert(backup.toJson()));
+      final path = await _service.saveBackup(bytes: bytes);
+      if (!mounted) return;
+      setState(() => _lastPath = path);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(path == null
+              ? 'Backup cancelado.'
+              : 'Backup salvo em $path'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar backup: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _import() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Restaurar backup?'),
+        content: const Text(
+          'Isso substitui todos os dados locais pelo arquivo escolhido '
+          '(por exemplo, um backup no Google Drive).',
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Restaurar')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final jsonStr = await _service.pickBackup();
+      if (jsonStr == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nenhum backup selecionado.')),
+        );
+        return;
+      }
+      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final backup = AppBackup.fromJson(map);
+      if (!mounted) return;
+      await context.read<AppState>().importBackup(backup);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Backup restaurado.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Arquivo inválido. Selecione um backup ebd-backup.json. ($e)',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Backup EBD')),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text('Backup do app EBD',
+              style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          const Text(
+            'GOOGLE DRIVE / ARQUIVO',
+            style: TextStyle(
+              color: AppColors.gold,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Como usar no Drive',
+              style: TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          const Text('1. Toque em Fazer backup'),
+          const Text(
+              '2. No seletor, abra o Google Drive e escolha a pasta'),
+          const Text(
+              '3. Para restaurar, escolha o arquivo ebd-backup.json no Drive'),
+          const SizedBox(height: 24),
+          FilledButton(
+            onPressed: _busy ? null : _export,
+            child: const Text('Fazer backup'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: _busy ? null : _import,
+            child: const Text('Restaurar de arquivo / Drive'),
+          ),
+          if (_lastPath != null) ...[
+            const SizedBox(height: 16),
+            Text('Último backup neste aparelho: $_lastPath',
+                style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+          ],
+        ],
+      ),
+    );
+  }
+}

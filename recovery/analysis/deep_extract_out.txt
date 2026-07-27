@@ -1,0 +1,661 @@
+﻿app_domain_strings: 379
+relative
+ presente(s) 
+PdfFont.timesBoldItalic^
+PRESEN
+Hive
+PdfFont.courierOblique
+_MixinApplication385&Object&HiveCollectionMixin&ListMixin&DelegatingListViewMixin@18353248
+PdfColor
+package:hive/hive.dart
+package:hive/src/hive.dart
+PdfType1Font.create
+application/java-archive
+_MixinApplication400&Object&PdfDiagnostic@18353248
+1. Toque em Fazer backup
+2. No seletor, abra o Google Drive e escolha a pasta
+3. Para restaurar, escolha o arquivo ebd-backup.json no Drive
+DriveBackupService
+isRootRelative
+GoogleFontsFile
++ Adicionar aluno
+ trimestre
+_MixinApplication448&PdfDataType&PdfDiagnostic@18353248
+package:pdf/src/pdf/obj/graphic_stream.dart
+package:hive/src/object/hive_collection.dart
+_representsSameSeries@209288344
+ aluno(s) cadastrado(s)
+PdfType1Font
+Marque presen
+Cadastre os alunos da turma para marcar presente/ausente neste domingo.
+1er trimestre
+PdfRaster
+Sem revista cadastrada.
+package:hive/src/binary/binary_reader.dart
+Backup cancelado.
+lido. Selecione um backup ebd-backup.json.
+GoogleFonts
+PdfSettings
+package:hive/src/box/default_compaction_strategy.dart
+Resumo de presen
+a, alunos, ofertas e revistas.
+package:pdf/src/pdf/obj/type1_font.dart
+package:hive/src/registry/type_adapter.dart
+/PDF
+Ir para Alunos
+PdfStream
+get:presentes
+_floor@886441731
+_BackupScreenState@915090765
+Alunos por classe
+ Trimestre 2026
+PdfPageList
+Revistas pendentes: 
+package:pdf/src/pdf/io/event_loop_balancer.dart
+exportBackup
+Domingos anteriores
+https://github.com/DavBfr/dart_pdf
+PdfDict.
+Presen
+package:hive/src/hive_error.dart
+OFERTAS E DOA
+package:google_fonts/src/google_fonts_family_with_variant.dart
+presenca
+Nenhuma entrega registrada para este trimestre ainda.
+RelativeRect.fromSize
+PdfDataType
+ltimo backup neste aparelho: 
+package:pdf/src/pdf/document.dart
+Backup do app EBD
+package:pdf/src/pdf/io/vm.dart
+Trimestre (ex: 3
+ Trimestre 2026)
+. No seletor, escolha Google Drive para guardar na nuvem.
+package:pdf/src/pdf/format/indirect.dart
+package:pdf/src/pdf/obj/page.dart
+get:ausentes
+domingo
+PdfFont.courierBoldOblique
+package:hive/src/util/extensions.dart
+package:hive/src/registry/type_registry_impl.dart
+HiveError: 
+package:google_fonts/src/google_fonts_base.dart
+Revistas recebidas: 
+" is a lazy box. You can only use HiveLists with normal boxes.
+printEbdReport
+package:google_fonts/src/google_fonts_variant.dart
+exportedAt
+ebd_v1
+Error: google_fonts was unable to load font 
+PdfPattern
+Box not found. Did you forget to call Hive.openBox()?
+BackupScreen
+PdfArray
+4t trimestre
+package:hive/src/util/indexable_skip_list.dart
+alunos
+PdfPageRotation.
+PdfCatalog
+package:hive/src/object/hive_collection_mixin.dart
+relatorio-geral-ebd
+Como usar no Drive
+ofertas
+package:pdf/src/pdf/format/name.dart
+hive_object_internal
+package:hive/src/binary/frame.dart
+withDrive
+%PDF-
+package:hive/src/io/buffered_file_reader.dart
+PdfCrossRefEntryType
+PdfDictStream
+ aluno(s) da turma
+PdfStringFormat
+PdfArray.
+Cadastrar alunos desta turma
+Illegal drive letter 
+package:hive/src/adapters/date_time_adapter.dart
+backupUpload
+Novo trimestre
+Cadastre os alunos para marcar presen
+PdfRect.fromLBRT
+package:hive/src/crypto/crc32.dart
+package:hive/src/backend/storage_backend_memory.dart
+package:hive/src/backend/storage_backend.dart
+PdfPage.
+PdfPoint(
+PdfPageFormat
+Painel da EBD
+Painel
+pickBackup
+PdfName
+PdfFont.times
+PdfPageMode
+trimestre
+3e trimestre
+_MixinApplication400&Object&PdfDiagnostic@18353248.
+package:pdf/src/pdf/raster.dart
+Nenhuma oferta ou doa
+drive
+GoogleFontsFamilyWithVariant
+package:pdf/src/pdf/format/base.dart
+_MixinApplication384&Object&HiveCollectionMixin&ListMixin@18353248
+package:pdf/src/pdf/obj/shading.dart
+package:hive/src/box/box_base_impl.dart
+alunoId
+ em ofertas
+Isara
+package:pdf/src/pdf/page_format.dart
+PdfPageMode.
+PdfRect(
+PdfFont
+package:pdf/src/pdf/format/xref.dart
+package:hive/src/box/box_impl.dart
+PdfPageList.
+_MixinApplication448&PdfDataType&PdfDiagnostic@18353248.
+package:google_fonts/src/google_fonts_descriptor.dart
+package:hive/src/box/box_base.dart
+GoogleFontsDescriptor
+package:livro_registro/features/backup/backup_screen.dart
+HiveObjectMixin
+PdfString
+Remover aluno?
+PdfFont.helvetica
+DrivenScrollActivity
+PdfFontMetrics
+dart_pdf
+package:pdf/src/pdf/obj/font.dart
+EbdApp
+driveLetterEnd
+PdfObject.
+PdfNum
+PdfXObject
+package:hive/src/box/change_notifier.dart
+Cadastrar revista do trimestre
+GOOGLE DRIVE / ARQUIVO
+package:livro_registro/features/backup/drive_backup_service.dart
+_PresenceToggle@909430367
+package:pdf/src/pdf/format/num.dart
+_MixinApplication383&Object&HiveCollectionMixin@18353248
+HiveImpl
+package:pdf/src/pdf/rect.dart
+ar oferta ou doa
+Restaurar backup?
+package:pdf/src/pdf/color.dart
+HiveError
+package:hive/src/backend/vm/storage_backend_vm.dart
+Nenhum backup selecionado.
+PdfTextRenderingMode.
+PdfAnnot
+ trimestres anteriores de 
+package:pdf/src/pdf/format/string.dart
+Salvar revista
+Presentes
+Alunos da turma
+package:pdf/src/pdf/obj/xobject.dart
+package:pdf/src/pdf/format/array.dart
+_MixinApplication401&PdfObject&PdfGraphicStream@18353248
+relatorio-
+package:pdf/src/pdf/obj/annotation.dart
+1r trimestre
+package:hive/src/backend/vm/backend_manager.dart
+while generating a PDF
+HiveList
+PdfShading
+Backup
+PdfLineCap
+Backup EBD
+Pesquisar na Web
+PdfObject
+package:pdf/src/pdf/obj/object_stream.dart
+importBackup
+PdfIndirect
+package:hive/src/adapters/big_int_adapter.dart
+2e trimestre
+Backup salvo em 
+presente
+PdfFont.helveticaOblique
+Nada cadastrado ainda para gerar relat
+PdfVersion.
+GoogleFontsVariant
+PdfObjectStream.
+PdfDict
+Relat
+rio deste trimestre
+AppBackup.fromJson
+setAttendancePresent
+package:pdf/src/pdf/obj/pattern.dart
+Revistas
+package:pdf/src/pdf/font/bidi_utils.dart
+pdfCompute
+init:Hive
+AppBackup
+ebd-backup.json
+3.er trimestre
+Ausente
+package:hive/src/io/frame_io_helper.dart
+package:hive/src/object/hive_list_impl.dart
+package:livro_registro/features/report/report_pdf.dart
+ ausente(s)
+package:hive/src/binary/frame_helper.dart
+package:google_fonts/src/google_fonts_parts/part_i.g.dart
+HiveCollection
+_PdfGraphicsContext@245251352
+writeHiveList
+.hivec
+Nenhuma revista cadastrada para 
+PdfFontMetrics(left:
+googleFontsTextStyle
+ presente(s) de 
+Ofertas
+findHiveFileAndCleanUp
+package:hive/src/io/buffered_file_writer.dart
+isPresentPredicate
+saveBackup
+PdfGraphics.
+PdfFont.create
+hive
+PdfStream.
+PdfObjectBase
+PdfFontMetrics.append
+revistas
+_MixinApplication401&PdfObject&PdfGraphicStream@18353248.
+ImageFilter.shader requires that the first uniform is a vec2 and at least one sampler uniform is present.
+PdfGraphics
+PdfFont.timesBold
+Nome do aluno
+PdfColor.fromHex
+Ofertas: 
+PdfXrefTable.
+layoutPdf
+package:pdf/src/pdf/format/diagnostic.dart
+ domingo(s)
+Ofertas 
+Fazer backup
+.hive
+package:hive/src/object/hive_object.dart
+package:pdf/src/pdf/font/font_metrics.dart
+PdfPoint
+package:google_fonts/src/google_fonts_parts/part_l.g.dart
+Oferta
+package:pdf/src/pdf/format/object_base.dart
+_flooredDivision@0150898
+package:pdf/src/pdf/obj/object.dart
+PdfRect
+ausentes
+package:hive/src/binary/binary_reader_impl.dart
+package:google_fonts/src/google_fonts_all_parts.g.dart
+oferta
+readHiveList
+Windows paths with drive letter must be absolute
+floor
+HiveInterface
+PdfObjectBase.
+PdfDiagnostic
+PdfFont.courierBold
+DrivenScrollActivity.
+HiveListImpl
+PdfGraphicStream
+vel ler o arquivo de backup.
+Ausentes
+package:pdf/src/pdf/format/stream.dart
+ da turma? O hist
+rico de presen
+ presente(s) / 
+PdfRasterBase
+_updateMatricesAndCreateNewRootLayer@156268214
+_BackupScreenState@915090765.
+Pesquisar
+package:pdf/src/pdf/format/dict_stream.dart
+package:hive/src/util/delegating_list_view_mixin.dart
+Nenhum aluno nesta turma ainda.
+PdfFont.zapfDingbats
+package:pdf/src/pdf/graphics.dart
+PdfLineCap.
+Gerenciar alunos
+_checkWindowsDriveLetter@0150898
+package:hive/src/registry/type_registry.dart
+RelativeRect
+pdf_1_5
+package:pdf/src/pdf/obj/catalog.dart
+Sem entregas de revista.
+PdfPage
+package:google_fonts/src/file_io_desktop_and_mobile.dart
+Oferta do dia
+HiveCollectionMixin
+PdfXref
+_normalizeRelativePath@0150898
+PdfStringFormat.
+PdfTextRenderingMode
+PdfFont.helveticaBold
+package:hive/src/binary/binary_writer.dart
+_backup@915090765
+br.com.ebd.livro_registro/backup
+HiveImpl.
+Lista de presen
+package:hive/src/box/default_key_comparator.dart
+Ofertas e doa
+PdfPageRotation
+application/pdf
+3r trimestre
+PdfFont.courier
+Cadastre alunos nas turmas.
+PdfNumList
+1.er trimestre
+PdfFont.helveticaBoldOblique
+PdfRect.fromPoints
+package:hive/src/backend/vm/read_write_sync.dart
+printPdf
+PdfXrefTable
+package:hive/src/box/box.dart
+PdfFont.timesItalic
+package:hive/src/binary/binary_writer_impl.dart
+package:pdf/src/pdf/obj/page_list.dart
+package:pdf/src/pdf/format/dict.dart
+package:hive/src/box/keystore.dart
+Backup manual
+PdfCrossRefEntryType.
+2n trimestre
+Alunos
+4e trimestre
+package:hive/src/hive_impl.dart
+presentError
+You need to initialize Hive or provide a path to store the box.
+backupDownload
+Presente
+PdfDocument.
+painel
+PdfVersion
+PdfFont.symbol
+PdfCatalog.
+package:hive/src/object/hive_list.dart
+Sem entregas de revista registradas.
+PdfDocument
+willBePresentPredicate
+Isso substitui todos os dados locais pelo arquivo escolhido (por exemplo, um backup no Google Drive). Esta a
+Restaurar de arquivo / Drive
+PdfObjectStream
+presentes
+init:presentError
+eBd)
+EBd)
+
+==== package: URIs ====
+bidi
+characters
+clock
+collection
+cross_file
+crypto
+equatable
+ffi
+fl_chart
+flutter
+flutter_localizations
+google_fonts
+hive
+hive_flutter
+http
+image_picker
+image_picker_android
+image_picker_platform_interface
+intl
+jni
+jni_flutter
+livro_registro
+material_color_utilities
+mime
+nested
+path
+path_provider
+path_provider_android
+path_provider_platform_interface
+pdf
+plugin_platform_interface
+printing
+provider
+share_plus
+share_plus_platform_interface
+uuid
+vector_math
+
+==== file:// build paths ====
+package:livro_registro/data/storage.dart
+package:livro_registro/theme/app_theme.dart
+package:livro_registro/utils/format.dart
+package:livro_registro/features/finances/finances_view.dart
+package:livro_registro/main.dart
+package:livro_registro/data/app_state.dart
+package:livro_registro/features/backup/backup_screen.dart
+package:livro_registro/features/backup/drive_backup_service.dart
+package:livro_registro/data/betel_catalog.dart
+package:livro_registro/features/attendance/attendance_view.dart
+package:livro_registro/features/report/report_pdf.dart
+package:livro_registro/widgets/common.dart
+package:livro_registro/features/magazines/magazines_view.dart
+package:livro_registro/data/models.dart
+package:livro_registro/features/home/home_screen.dart
+package:livro_registro/features/students/students_view.dart
+package:livro_registro/features/dashboard/dashboard_view.dart
+
+==== likely screen/route names ====
+/AcroForm
+ScrollAwareImageProvider
+MapView
+responseController
+FinancesView
+DriveBackupService
+TransformationController
+ScrollHoldController
+AlertDialog
+ScrollView
+BoxScrollView
+bringIntoView
+namesRoute
+restoreEntriesForPage
+hasNextPage
+deleteDrawerController
+ScaffoldFeatureController
+ByteData.sublistView
+MagazinesView
+init:renderView
+DatePickerDialog
+ImageProvider
+finalForm
+IO Service
+BackupScreen
+BaseWindowController
+asUnmodifiableView
+TVRadioService
+createMaterialHeroController
+LetterForm
+View
+RawView
+addPage
+ProcessTextService
+HeroController
+getPixelsFromPage
+SystemContextMenuController
+PageRoute
+SynchronousStreamController
+showOnScreen
+scopesRoute
+TransitionRoute
+popRoute
+StudentsView
+renderView
+PrintScreen
+ValueNotifier
+while dispatching notifications for WidgetsBindingObserver.didPopRoute
+OverlayPortalController
+DialogWindowController
+MultiPage
+Provider
+getValuesNotifier
+fullscreenDialog
+handlePopRoute
+DefaultProcessTextService
+avatarDrawerController
+ListenableProvider
+set:canPopNotifier
+ListMapView
+enableDeltaModel
+RawDialogRoute
+MethodChannelPathProvider
+showRawDialog
+DeviceGestureSettings.fromView
+TextEditingController
+Dialog
+StreamView
+initStatesController
+MediaQueryData.fromView
+SizeChangedLayoutNotifier
+createRoute
+AttendanceView
+ClipboardStatusNotifier
+DashboardView
+Form
+SnapshotController
+Form
+PrimaryScrollController
+LocalHistoryRoute
+createAnimationController
+alertDialog
+hasPreviousPage
+ListView
+DialogRoute
+DrawerController
+handleExitingRoute
+didPushRoute
+finalizeRoute
+set:scopesRoute
+UndoHistoryController
+handlePushRoute
+MaterialPageRoute
+Page
+PredictiveBackRoute
+StreamController
+nextPage
+enableController
+InheritedProvider
+PopupRoute
+set:namesRoute
+PhysicalModel
+bottomSheet
+get:fullscreenDialog
+UnmodifiableMapView
+LiveTextInputStatusNotifier
+Route
+canPopNotifier
+GridView
+PageController
+ScrollController
+ChangeNotifierProvider
+createDialogWindowController
+previousPage
+removeRoute
+TickerProvider
+showDialog
+AnimationController
+PageView
+Uint8List.sublistView
+addGlobalRoute
+ModalRoute
+animateToPage
+TVDataService
+InheritedNotifier
+/Page
+hitTestInView
+InheritedModel
+OverlayRoute
+ViewConfiguration.fromView
+PdfPage
+get:statesController
+get:implicitView
+HomeScreen
+pushRoute
+WidgetStatesController
+didPopRoute
+ScrollDragController
+MaterialInkController
+addRoute
+ChangeNotifier
+selectController
+MagnifierController
+ContextMenuController
+buildPage
+AnimatedPhysicalModel
+wrapWithDefaultView
+DisplayFeatureSubScreen
+get:showOnScreen
+
+==== JSON-like field names / snake_case keys ====
+alunos
+arquivo
+ausente
+backend_manager
+backup
+backup_screen
+bidi_utils
+big_int_adapter
+binary_reader
+binary_reader_impl
+binary_writer
+binary_writer_impl
+box_base
+box_base_impl
+box_impl
+buffered_file_reader
+buffered_file_writer
+change_notifier
+dart_pdf
+date_time_adapter
+default_compaction_strategy
+default_key_comparator
+delegating_list_view_mixin
+dict_stream
+drive_backup_service
+ebd_v1
+event_loop_balancer
+file_io_desktop_and_mobile
+font_metrics
+frame_helper
+frame_io_helper
+google_fonts
+google_fonts_all_parts
+google_fonts_base
+google_fonts_descriptor
+google_fonts_family_with_variant
+google_fonts_parts
+google_fonts_variant
+graphic_stream
+hive_collection
+hive_collection_mixin
+hive_error
+hive_impl
+hive_list
+hive_list_impl
+hive_object
+hive_object_internal
+indexable_skip_list
+livro_registro
+object_base
+object_stream
+ofertas
+page_format
+page_list
+part_i
+part_l
+pdf_1_5
+presente
+read_write_sync
+report_pdf
+revistas
+storage_backend
+storage_backend_memory
+storage_backend_vm
+trimestres
+turmas
+type1_font
+type_adapter
+type_registry
+type_registry_impl

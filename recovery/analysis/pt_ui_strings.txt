@@ -1,0 +1,542 @@
+ Trimestre 2026
+ Trimestre 2026)
+ aluno(s) cadastrado(s)
+ aluno(s) da turma
+ domingo(s)
+ em ofertas
+ trimestre
+ trimestres anteriores de 
++ Adicionar aluno
++ Nova entrega (
+-escolar
+-escolar (4-5 anos)
+.rodata
+1-chorak
+1.er trimestre
+1er trimestre
+1r trimestre
+2-chorak
+2e trimestre
+2n trimestre
+3-chorak
+3. Para restaurar, escolha o arquivo ebd-backup.json no Drive
+3.er trimestre
+3e trimestre
+3r trimestre
+4-chorak
+4e trimestre
+4t trimestre
+A data est
+ActionIconThemeData
+Adicionar foto da capa
+Aldatu datak aukeratzeko modura
+Alunos
+Alunos da turma
+Alunos por classe
+AppBarThemeData
+AssetMetadata
+AxisChartData
+AxisChartData.
+AxisSideMetaData
+AxisSideTitleMetaData
+BackgroundBarChartRodData
+BackgroundBarChartRodData.
+Backup EBD
+Backup do app EBD
+BadgeThemeData
+BarChartData
+BarChartData.
+BarChartDataExtension|calculateGroupsX
+BarChartDataTween
+BarChartGroupData
+BarChartGroupData.
+BarChartRodData
+BarChartRodData.
+BarTouchData
+BarTouchData.
+BarTouchTooltipData
+BarTouchTooltipData.
+BaseChartData
+BottomAppBarThemeData
+BottomNavigationBarThemeData
+BottomSheetThemeData
+BoxParentData
+Buscar en la Web
+Buscar na Web
+ButtonBarThemeData
+ButtonThemeData
+ByteData
+ByteData.
+ByteData.sublistView
+ByteData.view
+Cadastrar alunos desta turma
+Cadastrar revista do trimestre
+Cadastre alunos nas turmas.
+Cadastre os alunos da turma para marcar presente/ausente neste domingo.
+Cadastre os alunos para marcar presen
+CardThemeData
+CarouselViewThemeData
+CheckboxThemeData
+ChipThemeData
+ChipThemeData.fromDefaults
+Clipboard.getData
+Clipboard.setData
+ClipboardData
+ClosureData
+Codec failed to produce an image, possibly due to invalid image data.
+Connection closed before data was received
+Connection closed while receiving data
+ContainerBoxParentData
+ContainerParentDataMixin
+CupertinoBasedMaterialThemeData
+CupertinoBasedMaterialThemeData.
+CupertinoIconThemeData
+CupertinoTextThemeData
+CupertinoThemeData
+CupertinoUserInterfaceLevelData
+CupertinoUserInterfaceLevelData.
+DartApiDLInitializeData
+Data
+Data on closed connection
+Data on failed connection
+DataTableThemeData
+Datagram
+DatePickerThemeData
+DialogThemeData
+DividerThemeData
+Domingos anteriores
+DrawerThemeData
+DropdownMenuThemeData
+EBd)
+ESCOLA B
+EbdApp
+Editar
+ElevatedButtonThemeData
+EventHandler_SendData
+Excluir
+ExpansionTileThemeData
+ExtraLinesData
+FfiTrampolineData
+FilledButtonThemeData
+FlBorderData
+FlBorderData.D
+FlBorderDataExtension|get#allSidesPadding
+FlErrorIndicatorData
+FlGridData
+FlTitlesData
+FlTitlesDataExtension|get#allSidesPadding
+FlTouchData
+FlexParentData
+FloatingActionButtonThemeData
+FrameData
+Gerenciar alunos
+Hautatu data
+ICData
+IOSSystemContextMenuItemData
+IOSSystemContextMenuItemDataCopyv
+IOSSystemContextMenuItemDataCut
+IOSSystemContextMenuItemDataLiveText
+IOSSystemContextMenuItemDataLookUp
+IOSSystemContextMenuItemDataPaste
+IOSSystemContextMenuItemDataSearchWeb
+IOSSystemContextMenuItemDataSelectAll
+IOSSystemContextMenuItemDataShare
+IconButtonThemeData
+IconData
+IconThemeData
+Idatzi data
+InputDecorationThemeData
+Inserir data
+Inserisci data
+Introduce a data
+Introdueix una data
+Introduzir data
+Invalid base64 data
+Ir para Alunos
+KeepAliveParentDataMixin
+KeyData
+KeyDataTransitMode
+KeyDataTransitMode.
+ListTileThemeData
+Locale data has not been initialized, call 
+LocaleDataException
+LocaleDataException: 
+MaterialBannerThemeData
+MaterialBasedCupertinoThemeData
+MaterialBasedCupertinoThemeData.
+MediaQueryData
+MediaQueryData.fromView
+MenuBarThemeData
+MenuButtonThemeData
+MenuThemeData
+MultiChildLayoutParentData
+Naskenovat text
+NavigationBarThemeData
+NavigationDrawerThemeData
+NavigationRailThemeData
+Nenhum aluno nesta turma ainda.
+Nenhuma entrega registrada para este trimestre ainda.
+Nenhuma oferta ou doa
+NoDefaultCupertinoThemeData
+Nome do aluno
+Novambra
+Novo nome
+Novo trimestre
+OFERTAS E DOA
+Oferta
+Oferta do dia
+Ofertas
+Ofertas 
+Ofertas e doa
+Ofertas: 
+OutlinedButtonThemeData
+Painel da EBD
+ParentData
+ParentDataClass
+ParentDataElement
+ParentDataType
+ParentDataWidget
+PdfDataType
+Pesquisar
+Pesquisar na Web
+PieChartData
+PieChartData.
+PieChartDataTween
+PieChartSectionData
+PieChartSectionData.
+PieChartSectionDataListExtension|toWidgets
+PieTouchData
+PointerData
+PointerDataPacket
+PopupMenuThemeData
+ProgressIndicatorThemeData
+RadioThemeData
+RawKeyEventData
+RawKeyEventDataAndroid
+RawKeyEventDataFuchsia
+RawKeyEventDataIos
+RawKeyEventDataLinux
+RawKeyEventDataMacOs
+RawKeyEventDataWeb
+RawKeyEventDataWindows
+Remover aluno?
+RenderMetaData
+Salvar
+Salvar revista
+ScrollbarThemeData
+SearchBarThemeData
+SearchViewThemeData
+See https://docs.flutter.dev/development/data-and-backend/networking#platform-notes.
+SegmentedButtonThemeData
+Selecciona la data
+Seleccionar data
+Selecionar data
+Selecione a data
+Seleziona data
+SemanticsData
+SemanticsData.
+SharedAppData
+SideTitleFitInsideData
+SliderThemeData
+SliverGridParentData
+SliverLogicalContainerParentData
+SliverLogicalParentData
+SliverMultiBoxAdaptorParentData
+SliverPhysicalContainerParentData
+SliverPhysicalParentData
+SnackBarThemeData
+Socket_AvailableDatagram
+StackParentData
+SwitchThemeData
+TVDataService
+TabBarThemeData
+TextButtonThemeData
+TextParentData
+TextSelectionThemeData
+The asset does not exist or has empty data.
+The clone() method of a previously-disposed Image was called. Once an Image object has been disposed, it can no longer be used to create handles, as the underlying data may have been released.
+ThemeData
+ThemeData.
+ThemeData.base
+ThemeData.dark
+ThemeData.fallback
+ThemeData.light
+ThemeData.withFont
+ThemeDataTween
+TickerModeData
+TimePickerThemeData
+ToggleButtonsThemeData
+ToolbarItemsParentData
+TooltipThemeData
+TransferableTypedData
+Trimestre (ex: 3
+TypedData
+TypedDataBase_setClampedRange
+TypedDataList
+TypedDataView_offsetInBytes
+TypedData_GetFloat32
+TypedData_GetFloat32x4
+TypedData_GetFloat64
+TypedData_GetFloat64x2
+TypedData_GetInt32x4
+TypedData_SetFloat32
+TypedData_SetFloat32x4
+TypedData_SetFloat64
+TypedData_SetFloat64x2
+TypedData_SetInt32x4
+Unexpected function data 
+UninitializedLocaleData
+UninitializedLocaleData.
+UriData
+WrapParentData
+_AnonymousRestorationInformation@39124995.fromSerializableData
+_ByteDataView
+_ByteDataView@8027147
+_ByteDataView@8027147._@8027147
+_CharData@724396231
+_ConstantTickerModeDataListenable@22311458
+_DataUri@0150898
+_DefaultCupertinoTextThemeData@119195667
+_DelayedData@5048458
+_DirectionalPolicyData@97280150
+_DirectionalPolicyDataEntry@97280150
+_GrowableList._withData
+_IdentityThemeDataCacheKey@101408314
+_MixinApplication116&NoDefaultCupertinoThemeData&Diagnosticable@18353248
+_MixinApplication257&IOSSystemContextMenuItemData&Diagnosticable@18353248
+_MixinApplication268&IconThemeData&Diagnosticable@18353248
+_MixinApplication309&ParentData&ContainerParentDataMixin@18353248
+_MixinApplication322&SliverLogicalParentData&ContainerParentDataMixin@18353248
+_MixinApplication323&SliverPhysicalParentData&ContainerParentDataMixin@18353248
+_MixinApplication324&SliverLogicalParentData&ContainerParentDataMixin@18353248
+_MixinApplication325&SliverLogicalParentData&ContainerParentDataMixin&KeepAliveParentDataMixin@18353248
+_MixinApplication34&BoxParentData&ContainerParentDataMixin@18353248
+_MixinApplication388&BaseChartData&EquatableMixin@18353248
+_MixinApplication389&AxisChartData&EquatableMixin@18353248
+_MixinApplication390&FlTouchData&EquatableMixin@18353248
+_MixinApplication397&FlTouchData&EquatableMixin@18353248
+_MixinApplication448&PdfDataType&PdfDiagnostic@18353248
+_MixinApplication448&PdfDataType&PdfDiagnostic@18353248.
+_NamedRestorationInformation@39124995.fromSerializableData
+_OverflowBarParentData@175361919
+_PointerPanZoomData@381213599
+_PointerPanZoomData@381213599.fromStartEvent
+_PointerPanZoomData@381213599.fromUpdateEvent
+_ReadingOrderDirectionalGroupData@97280150
+_ReadingOrderSortData@97280150
+_ReadingOrderSortData@97280150.
+_RestorationInformation@39124995.fromSerializableData
+_SemanticsParentData@27266271
+_SharedAppDataState@319433526
+_TheaterParentData@176319124
+_TransferableTypedDataImpl
+_TransferableTypedDataImpl@1026248
+_UnmodifiableByteDataView
+_UnmodifiableByteDataView@8027147
+_UnmodifiableByteDataView@8027147.
+_UnmodifiableByteDataView@8027147._@8027147
+_WidgetSpanParentData@339328197
+_addChildData@70347053
+_addData@735385876
+_allocateData@0150898
+_applyParentData@20042623
+_boxParentData@66318349
+_boxParentData@89019562
+_checkExternalTypedDataLength@9050071
+_data@3099033
+_data@35065589
+_dataLength@35065589
+_decodeRestorationData@70347053
+_didUpdateParentData@27266271
+_dispatchPointerDataPacket@35065589
+_encodeRestorationData@70347053
+_ensureFastAndSerializableByteData@16069316
+_eventFromData@144443624
+_finalizeAddChildData@70347053
+_finalizeAndProcessData@735385876
+_findAncestorParentDataElements@20042623
+_getData@522003337
+_getData@526283544
+_getInheritedIconThemeData@291033112
+_getKeyOrData@3099033
+_getValueOrData@3099033
+_handleData@5048458
+_handlePointerDataPacket@130304576
+_inheritedCupertinoThemeData@100067045
+_initializeApiDLData@9050071
+_kDartIsolateSnapshotData
+_kDartVmSnapshotData
+_keyDataListener@35065589
+_localizedThemeDataCache@101408314
+_makeDatagram@16069316
+_nativeAvailableDatagram@16069316
+_nullDataHandler@5048458
+_onData
+_onData@10040228
+_onData@16069316
+_onData@17463476
+_onData@5048458
+_popPolicyDataIfNeeded@97280150
+_pushPolicyData@97280150
+_readSocketOrBufferedData@16069316
+_registerDataHandler@5048458
+_removeChildData@70347053
+_sendData@16069316
+_sendData@5048458
+_startsWithData@0150898
+_stateData
+_stateData@5048458
+_typedDataBase
+_typedDataBase@9050071
+_unpackKeyData@35065589
+_unpackPointerDataPacket@35065589
+_updateData@174282825
+_updateFrameData@35065589
+_updateParentData@174282825
+_updateParentData@20042623
+_updateParentDataOfChild@87490736
+_updateUserSettingsData@35065589
+_usedData@3099033
+_varData
+_varData@5048458
+_wrapUnmodifiableByteData@35065589
+a, alunos, ofertas e revistas.
+ace654289f5abc240509fc941453ebc5product no-code_comments no-dwarf_stack_traces_mode dedup_instructions no-asan no-msan no-tsan no-shared_data arm64 android compressed-pointers
+alunoId
+alunos
+application/timestamped-data
+application/vnd.data-vision.rdz
+application/vnd.dece.data
+application/vnd.denovo.fcselayout-link
+application/vnd.hydrostatix.sof-data
+application/vnd.medcalcdata
+application/vnd.nokia.n-gage.data
+application/vnd.novadigm.edm
+application/vnd.novadigm.edx
+application/vnd.novadigm.ext
+application/vnd.oasis.opendocument.database
+application/vnd.seemail
+application/vnd.shana.informed.formdata
+applyParentData
+applyParentDataToChild
+ar oferta ou doa
+asByteData
+backDrawRodData
+barTouchData
+borderData
+br.com.ebd.livro_registro/backup
+computeSerializableData
+dart.typed_data
+dart:io/data_transformer.dart
+dart:typed_data
+dart:typed_data-patch/typed_data_patch.dart
+data
+data:
+data:image/jpeg;base64,
+dataCtrl
+dataFromWeb
+dataTableTheme
+dataless
+domingo
+drawErrorIndicatorData
+eBd)
+ebd-backup.json
+ebd_v1
+email
+emailAddress
+errorIndicatorData
+eventHandlerSendData
+extraLinesData
+file:///D:/EBD/.dart_tool/flutter_build/dart_plugin_registrant.dart
+flushData
+flutter/keydata
+get:_byteData@835192079
+get:_data@3099033
+get:_data@35065589
+get:_onData@5048458
+get:_stateData@5048458
+get:_typedDataBase@9050071
+get:_usedData@3099033
+get:_varData@5048458
+get:data
+get:initializeApiDLData
+get:parentDataDirty
+get:titlesData
+getData
+getDataMap
+getSemanticsData
+getSerializableData
+handleKeyData
+init:_dataLength@35065589
+init:_localizedThemeDataCache@101408314
+init:data
+invalidateScopeData
+keyDataThenRawKeyData
+lerpBarChartGroupDataList
+lerpBarChartRodDataList
+lerpPieChartSectionDataList
+lido. Selecione um backup ebd-backup.json.
+loadDateIntlDataIfNotLoaded
+loadFontByteData
+loadStructuredBinaryData
+oferta
+ofertas
+onData
+package:fl_chart/src/chart/bar_chart/bar_chart_data.dart
+package:fl_chart/src/chart/base/axis_chart/axis_chart_data.dart
+package:fl_chart/src/chart/base/base_chart/base_chart_data.dart
+package:fl_chart/src/chart/pie_chart/pie_chart_data.dart
+package:fl_chart/src/extensions/bar_chart_data_extension.dart
+package:fl_chart/src/extensions/fl_border_data_extension.dart
+package:fl_chart/src/extensions/fl_titles_data_extension.dart
+package:flutter/src/cupertino/icon_theme_data.dart
+package:flutter/src/material/data_table_theme.dart
+package:flutter/src/material/theme_data.dart
+package:flutter/src/widgets/icon_data.dart
+package:flutter/src/widgets/icon_theme_data.dart
+package:flutter/src/widgets/shared_app_data.dart
+package:intl/date_symbol_data_custom.dart
+package:intl/date_symbol_data_local.dart
+package:intl/number_symbols_data.dart
+package:livro_registro/data/app_state.dart
+package:livro_registro/data/betel_catalog.dart
+package:livro_registro/data/models.dart
+package:livro_registro/data/storage.dart
+package:livro_registro/features/attendance/attendance_view.dart
+package:livro_registro/features/backup/backup_screen.dart
+package:livro_registro/features/backup/drive_backup_service.dart
+package:livro_registro/features/dashboard/dashboard_view.dart
+package:livro_registro/features/finances/finances_view.dart
+package:livro_registro/features/home/home_screen.dart
+package:livro_registro/features/magazines/magazines_view.dart
+package:livro_registro/features/report/report_pdf.dart
+package:livro_registro/features/students/students_view.dart
+package:livro_registro/main.dart
+package:livro_registro/theme/app_theme.dart
+package:livro_registro/utils/format.dart
+package:livro_registro/widgets/common.dart
+package:uuid/data.dart
+pieTouchData
+presenca
+printEbdReport
+rawKeyData
+relatorio-
+relatorio-geral-ebd
+requestFullMetadata
+rio deste trimestre
+set:_onData@5048458
+set:_stateData@5048458
+set:_varData@5048458
+set:anchorAbove
+set:data
+set:onKeyData
+set:onPointerDataPacket
+set:targetData
+setData
+setupParentData
+touchTooltipData
+trimestre
+updateBaseTouchData
+updateOutOfBandData
+vel salvar agora. Tente novamente.
+while handling a pointer data packet

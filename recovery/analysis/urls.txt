@@ -1,0 +1,40 @@
+  https://api.flutter.dev/flutter/dart-ui/ChannelBuffers-class.html
+  https://api.flutter.dev/flutter/material/Scaffold/of.html
+" is not supported by the platform. Refer to https://docs.flutter.dev/release/breaking-changes/network-policy-ios-android.
+(^[a-zA-Z][-+.a-zA-Z\d]*://|[^/])$
+Double-check whether the map was used in a place that documents support for WidgetStateProperty objects. If so, please file a bug report. (The https://pub.dev/ page for a package contains a link to "View/report issues".)
+If troubleshooting doesn't solve the problem, please file an issue at https://github.com/flutter/flutter/issues/new/choose.
+ImageFilter.compose
+Matrix4.compose
+None of the patterns in the switch expression the matched input value. See https://github.com/dart-lang/language/issues/3488 for details.
+Path.combine() failed.  This may be due an invalid path; in particular, check for NaN values.
+See https://docs.flutter.dev/development/data-and-backend/networking#platform-notes.
+See: https://github.com/flutter/flutter/issues/30701.
+StreamController.broadcast
+TextDecoration.combine([
+TextInputAction.commitContent
+There is likely something wrong with your test. Please see https://github.com/flutter/packages/blob/main/packages/google_fonts/example/test for examples of how to test with google_fonts.
+TickerFuture.complete
+[a-zA-Z][-+.a-zA-Z\d]*://[^/]*
+_ImageFilter@35065589.composed
+application/vnd.commonspace
+br.com.ebd.livro_registro/backup
+file://
+file:///
+file:///D:/EBD/.dart_tool/flutter_build/dart_plugin_registrant.dart
+http
+http:
+httpClient
+http_proxy
+https
+https:
+https://fonts.gstatic.com/s/a/
+https://github.com/DavBfr/dart_pdf
+https://www.editorabetel.com.br/uploads/imagens/6a15b51ae13da_m.jpg
+https://www.editorabetel.com.br/uploads/imagens/6a15b6b6a8ee1_m.jpg
+https://www.editorabetel.com.br/uploads/imagens/6a15b85602e7b_m.jpg
+https://www.editorabetel.com.br/uploads/imagens/6a15baaab01bb_m.jpg
+https://www.editorabetel.com.br/uploads/imagens/6a15bbfd69d8a_m.jpg
+https://www.editorabetel.com.br/uploads/imagens/6a15bd2e62a26_m.jpg
+https://www.editorabetel.com.br/uploads/imagens/6a15bf18ddb52_m.jpg
+https_proxy

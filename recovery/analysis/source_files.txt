@@ -1,0 +1,17 @@
+package:livro_registro/data/app_state.dart
+package:livro_registro/data/betel_catalog.dart
+package:livro_registro/data/models.dart
+package:livro_registro/data/storage.dart
+package:livro_registro/features/attendance/attendance_view.dart
+package:livro_registro/features/backup/backup_screen.dart
+package:livro_registro/features/backup/drive_backup_service.dart
+package:livro_registro/features/dashboard/dashboard_view.dart
+package:livro_registro/features/finances/finances_view.dart
+package:livro_registro/features/home/home_screen.dart
+package:livro_registro/features/magazines/magazines_view.dart
+package:livro_registro/features/report/report_pdf.dart
+package:livro_registro/features/students/students_view.dart
+package:livro_registro/main.dart
+package:livro_registro/theme/app_theme.dart
+package:livro_registro/utils/format.dart
+package:livro_registro/widgets/common.dart
