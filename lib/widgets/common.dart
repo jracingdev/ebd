@@ -3,9 +3,10 @@ import 'package:livro_registro/theme/app_theme.dart';
 
 /// AppBar de telas empilhadas: volta (pop) + atalho Início até a raiz.
 class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const SecondaryAppBar({super.key, required this.title});
+  const SecondaryAppBar({super.key, required this.title, this.actions});
 
   final String title;
+  final List<Widget>? actions;
 
   void _goHome(BuildContext context) {
     final nav = Navigator.of(context);
@@ -24,6 +25,7 @@ class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title),
       automaticallyImplyLeading: canPop,
       actions: [
+        ...?actions,
         if (canPop)
           TextButton.icon(
             onPressed: () => _goHome(context),

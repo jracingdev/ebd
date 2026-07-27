@@ -7,15 +7,24 @@ import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/widgets/common.dart';
 
 class BibleSearchScreen extends StatefulWidget {
-  const BibleSearchScreen({super.key});
+  const BibleSearchScreen({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   State<BibleSearchScreen> createState() => _BibleSearchScreenState();
 }
 
 class _BibleSearchScreenState extends State<BibleSearchScreen> {
-  final _controller = TextEditingController();
-  String _query = '';
+  late final TextEditingController _controller;
+  late String _query;
+
+  @override
+  void initState() {
+    super.initState();
+    _query = widget.initialQuery?.trim() ?? '';
+    _controller = TextEditingController(text: _query);
+  }
 
   @override
   void dispose() {
