@@ -213,8 +213,12 @@ Não considere o push pronto em produção até testar em um device com token em
 ### Sync EBD no app
 
 Com login Supabase, o menu **Sincronizar nuvem** / tela Backup envia e baixa
-`students`, `attendance` (+ `trouxe_biblia`), `finances` e `editions`. Lições,
-entregas de revista e engagement ainda não entram nesse sync mínimo.
+`students`, `attendance` (+ `trouxe_biblia`) e `finances` (merge por id).
+
+**Pausado:** sync de `editions` / catálogo Betel no cloud — incidente em que o
+sync Betel alterou trimestre e zerou dados locais. Reativar só após hot-fix
+não-destrutivo (`CloudSyncService.syncEditionsEnabled`). Lições, entregas de
+revista e engagement também ficam de fora.
 
 ## 8. Criar o projeto Firebase e habilitar FCM
 

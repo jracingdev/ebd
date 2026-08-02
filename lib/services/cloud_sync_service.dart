@@ -13,8 +13,6 @@ class CloudSyncResult {
     required this.pulledAttendance,
     required this.pushedFinances,
     required this.pulledFinances,
-    required this.pushedEditions,
-    required this.pulledEditions,
     this.warnings = const [],
   });
 
@@ -24,8 +22,6 @@ class CloudSyncResult {
   final int pulledAttendance;
   final int pushedFinances;
   final int pulledFinances;
-  final int pushedEditions;
-  final int pulledEditions;
   final List<String> warnings;
 
   String get summary {
@@ -33,7 +29,6 @@ class CloudSyncResult {
       'alunos ↑$pushedStudents ↓$pulledStudents',
       'presença ↑$pushedAttendance ↓$pulledAttendance',
       'ofertas ↑$pushedFinances ↓$pulledFinances',
-      'edições ↑$pushedEditions ↓$pulledEditions',
     ];
     if (warnings.isNotEmpty) {
       parts.add('${warnings.length} aviso(s)');
@@ -42,13 +37,18 @@ class CloudSyncResult {
   }
 }
 
-/// Sync mínimo: students, attendance, finances e editions (upsert por id).
+/// Sync mínimo e **não destrutivo** de students, attendance e finances.
 ///
-/// Estratégia: push local → pull remoto → merge por id (remoto prevalece se
-/// ambos existem e o remoto é mais recente quando houver `criado_em`).
-/// Lessons, delivery_records, engagement e Betel ficam para iterações futuras.
+/// **PAUSADO (2026-08-02):** sync de `editions` / Betel — incident com troca de
+/// trimestre e perda de dados. Reativar só após hot-fix Betel e com merge
+/// estritamente aditivo (nunca wipe/replace).
+///
+/// Lessons, delivery_records, engagement e Betel ficam para depois.
 class CloudSyncService {
   CloudSyncService();
+
+  /// Flag explícita: editions fora do sync até liberação pós-Betel.
+  static const bool syncEditionsEnabled = false;
 
   bool get available => AppConfig.supabaseConfigured;
 
@@ -65,15 +65,16 @@ class CloudSyncService {
       throw StateError('Faça login com Supabase para sincronizar.');
     }
 
-    final warnings = <String>[];
+    final warnings = <String>[
+      if (!syncEditionsEnabled)
+        'edições/Betel: sync pausado (aguardando hot-fix não-destrutivo)',
+    ];
     var pushedStudents = 0;
     var pulledStudents = 0;
     var pushedAttendance = 0;
     var pulledAttendance = 0;
     var pushedFinances = 0;
     var pulledFinances = 0;
-    var pushedEditions = 0;
-    var pulledEditions = 0;
 
     try {
       pushedStudents = await _pushStudents(state);
@@ -95,15 +96,7 @@ class CloudSyncService {
       debugPrint('CloudSync finances: $e');
     }
 
-    try {
-      pushedEditions = await _pushEditions(state);
-      final remoteEditions = await _pullEditions();
-      pulledEditions = remoteEditions.length;
-      await state.applyCloudEditions(remoteEditions);
-    } catch (e) {
-      warnings.add('editions: $e');
-      debugPrint('CloudSync editions: $e');
-    }
+    // editions: intencionalmente omitido — ver syncEditionsEnabled.
 
     try {
       pushedAttendance = await _pushAttendance(state);
@@ -128,8 +121,6 @@ class CloudSyncService {
       pulledAttendance: pulledAttendance,
       pushedFinances: pushedFinances,
       pulledFinances: pulledFinances,
-      pushedEditions: pushedEditions,
-      pulledEditions: pulledEditions,
       warnings: warnings,
     );
   }
@@ -184,33 +175,6 @@ class CloudSyncService {
     final data = await _client.from('finances').select();
     return (data as List)
         .map((e) => FinanceEntry.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
-  }
-
-  Future<int> _pushEditions(AppState state) async {
-    if (state.editions.isEmpty) return 0;
-    final rows = state.editions
-        .map(
-          (e) => {
-            'id': e.id,
-            'grupo': e.grupo,
-            'trimestre': e.trimestre,
-            'capa': e.capa,
-            'tema': e.tema,
-            'serie': e.serie,
-            'sku': e.sku,
-            'criado_em': e.criadoEm.toIso8601String(),
-          },
-        )
-        .toList();
-    await _client.from('editions').upsert(rows);
-    return rows.length;
-  }
-
-  Future<List<Edition>> _pullEditions() async {
-    final data = await _client.from('editions').select();
-    return (data as List)
-        .map((e) => Edition.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 

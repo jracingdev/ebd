@@ -212,8 +212,9 @@ class _BackupScreenState extends State<BackupScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Envia e baixa alunos, presença, ofertas e edições. '
-              'Lições, revistas entregues e engagement ainda não entram neste sync.',
+              'Envia e baixa alunos, presença e ofertas (merge por id). '
+              'Edições/Betel estão pausados no sync cloud até o hot-fix '
+              'não-destrutivo. Lições, entregas e engagement também ficam de fora.',
               style: TextStyle(color: AppColors.muted, fontSize: 13),
             ),
             const SizedBox(height: 12),

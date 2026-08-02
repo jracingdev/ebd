@@ -19,7 +19,7 @@ Atualizado em **2026-08-02**.
 | Aluno não edita chamada da turma (G05) | **OK** — preset sem `editAttendance`; UI self/read-only |
 | Admin cloud via Edge `admin-users` (G02) | **OK** — create/update/list/reset com service role (deploy necessário) |
 | Schema sync `trouxe_biblia` + overrides (G07) | **OK** — migration `20260802200000_schema_sync.sql` |
-| Sync mínimo EBD ↔ Supabase (G01) | **OK** — `CloudSyncService` (students/attendance/finances/editions) + UI |
+| Sync mínimo EBD ↔ Supabase (G01) | **Parcial** — students/attendance/finances + UI; **editions/Betel PAUSADOS** (incidente trimestre/wipe; reativar pós hot-fix não-destrutivo) |
 | FCM birthday-push além do placeholder (G03) | **OK** — HTTP v1 com secrets; dry-run explícito sem secrets |
 | Restore backup web/iOS (G06) | **OK** — `file_picker` |
 | Senhas Hive com hash (G04 parcial) | **OK** — sha256+salt + migração automática |

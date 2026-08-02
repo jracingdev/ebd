@@ -43,7 +43,7 @@ Fluxo operacional típico (Android, modo local):
 
 | ID | Área | Severidade | Descrição | Impacto | Como fechar |
 |---|---|---|---|---|---|
-| G01 | Cloud / Sync | **P0 → parcial** | **Fechado no código:** `CloudSyncService` push/pull de students, attendance, finances, editions + menu/tela “Sincronizar”. Ainda falta lessons, delivery_records, engagement e conflitos avançados. | Multi-dispositivo mínimo viável com `.env` + RLS. | Expandir entidades restantes. |
+| G01 | Cloud / Sync | **P0 → parcial** | `CloudSyncService` synca students/attendance/finances. **Editions pausadas** (2026-08-02: incidente Betel trocou trimestre e zerou dados; aguarda hot-fix). Falta lessons, delivery_records, engagement. | Multi-dispositivo parcial; edições só locais até liberação. | Reativar editions com merge aditivo pós-Betel. |
 | G02 | Cloud / Auth admin | **P0 → fechado (código)** | **Fechado:** Edge `admin-users` (list/create/update/reset) + `AuthService` invoca a função; migration `permission_overrides`. Requer `supabase functions deploy admin-users`. | Admin cloud pelo app após deploy. | Validar em projeto Supabase real. |
 | G03 | Cloud / FCM | **P0 → parcial** | **Fechado no código:** `birthday-push` com FCM HTTP v1 + dry-run explícito sem secrets; app registra token com logs claros. | Push real só com secrets Firebase + device. | Configurar secrets e testar cron. |
 | G04 | Auth / Segurança | **P1 → parcial** | **Fechado:** senhas Hive com `sha256$salt$hash` + migração automática. Biometria ainda reusa `last_senha` em Secure Storage. | Backup de app data não expõe senha em claro no Hive. | Token de sessão biométrico (sem senha). |
