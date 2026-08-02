@@ -10,6 +10,7 @@ import 'package:livro_registro/features/admin/users_admin_screen.dart';
 import 'package:livro_registro/features/attendance/attendance_view.dart';
 import 'package:livro_registro/features/backup/backup_screen.dart';
 import 'package:livro_registro/features/bible/bible_home_screen.dart';
+import 'package:livro_registro/features/harpa/harpa_home_screen.dart';
 import 'package:livro_registro/features/dashboard/dashboard_view.dart';
 import 'package:livro_registro/features/engagement/desafios_ebd_screen.dart';
 import 'package:livro_registro/features/finances/finances_view.dart';
@@ -209,6 +210,15 @@ class HomeScreen extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
+                        const PopupMenuItem(
+                          value: _HomeAction.harpa,
+                          child: ListTile(
+                            dense: true,
+                            leading: Icon(Icons.music_note_outlined),
+                            title: Text('Harpa EBD'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
                         if (can(user, AppPermission.seeDesafios)) ...[
                           const PopupMenuItem(
                             value: _HomeAction.sorteios,
@@ -395,6 +405,10 @@ class HomeScreen extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
         );
+      case _HomeAction.harpa:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const HarpaHomeScreen()),
+        );
       case _HomeAction.sorteios:
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -504,6 +518,7 @@ enum _HomeAction {
   backup,
   cloudSync,
   bible,
+  harpa,
   sorteios,
   quiz,
   placar,

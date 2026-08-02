@@ -51,6 +51,7 @@ flutter:
   assets:
     - assets/icon/
     - assets/bible/
+    - assets/harpa/
     - assets/quiz/
     - .env.example
 

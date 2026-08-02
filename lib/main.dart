@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/bible/bible_store.dart';
 import 'package:livro_registro/data/engagement/engagement_store.dart';
+import 'package:livro_registro/data/harpa/harpa_store.dart';
 import 'package:livro_registro/data/storage.dart';
 import 'package:livro_registro/features/auth/birthday_overlay.dart';
 import 'package:livro_registro/features/auth/login_screen.dart';
@@ -14,6 +15,7 @@ import 'package:livro_registro/features/home/home_screen.dart';
 import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/services/bible_repository.dart';
 import 'package:livro_registro/services/fcm_service.dart';
+import 'package:livro_registro/services/harpa_repository.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 
 Future<void> main() async {
@@ -37,6 +39,9 @@ Future<void> main() async {
   final bibleStore = await BibleStore.open();
   final bible = BibleRepository(bibleStore);
   await bible.load();
+  final harpaStore = await HarpaStore.open();
+  final harpa = HarpaRepository(harpaStore);
+  await harpa.load();
   final auth = AuthService();
   await auth.init();
   final fcm = FcmService();
@@ -47,6 +52,7 @@ Future<void> main() async {
       auth: auth,
       fcm: fcm,
       bible: bible,
+      harpa: harpa,
       engagement: engagement,
     ),
   );
@@ -59,6 +65,7 @@ class EbdApp extends StatelessWidget {
     required this.auth,
     required this.fcm,
     required this.bible,
+    required this.harpa,
     required this.engagement,
   });
 
@@ -66,6 +73,7 @@ class EbdApp extends StatelessWidget {
   final AuthService auth;
   final FcmService fcm;
   final BibleRepository bible;
+  final HarpaRepository harpa;
   final EngagementStore engagement;
 
   @override
@@ -75,6 +83,7 @@ class EbdApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: state),
         ChangeNotifierProvider.value(value: auth),
         ChangeNotifierProvider.value(value: bible),
+        ChangeNotifierProvider.value(value: harpa),
         ChangeNotifierProvider.value(value: engagement),
         Provider.value(value: fcm),
       ],
