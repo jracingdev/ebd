@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/permissions.dart';
 import 'package:livro_registro/data/user_models.dart';
+import 'package:livro_registro/services/password_hasher.dart';
 import 'package:livro_registro/widgets/common.dart';
 
 void main() {
@@ -70,7 +71,8 @@ void main() {
       role: UserRole.aluno,
     );
     expect(aluno.can(AppPermission.seeFinances), isFalse);
-    expect(aluno.can(AppPermission.editAttendance), isTrue);
+    expect(aluno.can(AppPermission.editAttendance), isFalse);
+    expect(aluno.can(AppPermission.seeDesafios), isTrue);
 
     final professor = UserProfile(
       id: 'p',
@@ -100,6 +102,14 @@ void main() {
       },
     );
     expect(overrides?[AppPermission.seePanel.name], isTrue);
+  });
+
+  test('PasswordHasher roundtrip and plain verify', () {
+    final hashed = PasswordHasher.hash('segredo');
+    expect(PasswordHasher.isHashed(hashed), isTrue);
+    expect(PasswordHasher.verify('segredo', hashed), isTrue);
+    expect(PasswordHasher.verify('outra', hashed), isFalse);
+    expect(PasswordHasher.verify('plain', 'plain'), isTrue);
   });
 
   test('Attendance person unique ids', () {

@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:livro_registro/config/app_config.dart';
 import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/models.dart';
+import 'package:livro_registro/data/permissions.dart';
 import 'package:livro_registro/features/backup/drive_backup_service.dart';
 import 'package:livro_registro/services/auth_service.dart';
+import 'package:livro_registro/services/cloud_sync_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/widgets/common.dart';
 
@@ -18,7 +21,9 @@ class BackupScreen extends StatefulWidget {
 
 class _BackupScreenState extends State<BackupScreen> {
   final _service = DriveBackupService();
+  final _cloud = CloudSyncService();
   String? _lastPath;
+  String? _lastSyncSummary;
   bool _busy = false;
 
   Future<void> _export() async {
@@ -111,8 +116,33 @@ class _BackupScreenState extends State<BackupScreen> {
     }
   }
 
+  Future<void> _cloudSync() async {
+    setState(() => _busy = true);
+    try {
+      final result = await _cloud.syncAll(context.read<AppState>());
+      if (!mounted) return;
+      setState(() => _lastSyncSummary = result.summary);
+      final msg = result.warnings.isEmpty
+          ? 'Sincronizado: ${result.summary}'
+          : 'Sync parcial: ${result.summary}\n${result.warnings.join('\n')}';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Falha na sincronização: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+    final canSyncCloud = AppConfig.supabaseConfigured &&
+        auth.usingSupabase &&
+        userHasPermission(auth.currentUser, AppPermission.backup);
+
     return Scaffold(
       appBar: const SecondaryAppBar(title: 'Backup EBD'),
       body: ListView(
@@ -136,7 +166,7 @@ class _BackupScreenState extends State<BackupScreen> {
           Text(
             _service.supportsNativeSaf
                 ? 'Como usar no Drive'
-                : 'Compartilhar backup',
+                : 'Compartilhar e restaurar',
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
@@ -151,8 +181,8 @@ class _BackupScreenState extends State<BackupScreen> {
           ] else ...[
             const Text(
               'Nesta plataforma o backup é compartilhado/baixado como '
-              'ebd-backup.json. A restauração pelo seletor de arquivos '
-              '(SAF/Drive) está disponível no Android.',
+              'ebd-backup.json. Para restaurar, use o botão abaixo e '
+              'escolha o arquivo JSON (web, iOS ou desktop).',
             ),
           ],
           const SizedBox(height: 24),
@@ -161,11 +191,45 @@ class _BackupScreenState extends State<BackupScreen> {
             child: const Text('Fazer backup'),
           ),
           const SizedBox(height: 12),
-          if (_service.supportsNativeSaf)
-            OutlinedButton(
-              onPressed: _busy ? null : _import,
-              child: const Text('Restaurar de arquivo / Drive'),
+          OutlinedButton(
+            onPressed: _busy ? null : _import,
+            child: Text(
+              _service.supportsNativeSaf
+                  ? 'Restaurar de arquivo / Drive'
+                  : 'Restaurar de arquivo JSON',
             ),
+          ),
+          if (canSyncCloud) ...[
+            const SizedBox(height: 28),
+            const Text(
+              'NUVEM SUPABASE',
+              style: TextStyle(
+                color: AppColors.gold,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Envia e baixa alunos, presença, ofertas e edições. '
+              'Lições, revistas entregues e engagement ainda não entram neste sync.',
+              style: TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.tonalIcon(
+              onPressed: _busy ? null : _cloudSync,
+              icon: const Icon(Icons.sync),
+              label: const Text('Sincronizar com a nuvem'),
+            ),
+            if (_lastSyncSummary != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Última sync: $_lastSyncSummary',
+                style: const TextStyle(color: AppColors.muted, fontSize: 12),
+              ),
+            ],
+          ],
           if (_lastPath != null) ...[
             const SizedBox(height: 16),
             Text(

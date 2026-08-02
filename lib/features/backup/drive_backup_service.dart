@@ -1,8 +1,11 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// Backup JSON: SAF no Android; compartilhar/download nas demais plataformas.
+/// Backup JSON: SAF no Android; file_picker / share nas demais plataformas.
 class DriveBackupService {
   DriveBackupService();
 
@@ -10,6 +13,9 @@ class DriveBackupService {
 
   bool get supportsNativeSaf =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  /// True se a plataforma tem seletor de arquivo para restore.
+  bool get supportsRestore => true;
 
   Future<String?> saveBackup({
     required List<int> bytes,
@@ -36,13 +42,30 @@ class DriveBackupService {
     });
   }
 
+  /// Retorna o conteúdo JSON do backup escolhido, ou null se cancelado.
   Future<String?> pickBackup() async {
-    if (!supportsNativeSaf) {
+    if (supportsNativeSaf) {
+      return _channel.invokeMethod<String>('pickBackup');
+    }
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return null;
+    final file = result.files.single;
+    if (file.bytes != null) {
+      return utf8.decode(file.bytes!);
+    }
+    final path = file.path;
+    if (path == null) {
       throw UnsupportedError(
-        'Restaurar de arquivo pelo seletor nativo está disponível no Android. '
-        'Na web/iOS, use um aparelho Android ou importe o JSON via fluxo nativo.',
+        'Não foi possível ler o arquivo selecionado nesta plataforma.',
       );
     }
-    return _channel.invokeMethod<String>('pickBackup');
+    // Desktop / iOS com path: FilePicker já preenche bytes com withData.
+    throw UnsupportedError(
+      'Arquivo sem bytes. Tente novamente ou use um backup JSON menor.',
+    );
   }
 }

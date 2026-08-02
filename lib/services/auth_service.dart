@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:livro_registro/config/app_config.dart';
 import 'package:livro_registro/data/user_models.dart';
+import 'package:livro_registro/services/password_hasher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,6 +28,7 @@ class AuthService extends ChangeNotifier {
     _session = await Hive.openBox('ebd_session_v1');
     await _seedLocalAdminIfNeeded();
     await _clearDemoAdminFakeBirthday();
+    await _migratePlainPasswordsToHash();
 
     if (usingSupabase) {
       await Supabase.initialize(
@@ -61,8 +63,22 @@ class AuthService extends ChangeNotifier {
     );
     await _localUsers!.put(admin.matricula, {
       ...admin.toJson(),
-      'senha': 'admin123',
+      'senha': PasswordHasher.hash('admin123'),
     });
+  }
+
+  /// Migra senhas em texto claro → sha256$salt$hash (uma vez por usuário).
+  Future<void> _migratePlainPasswordsToHash() async {
+    for (final key in _localUsers!.keys) {
+      final raw = _localUsers!.get(key);
+      if (raw is! Map) continue;
+      final map = Map<String, dynamic>.from(raw);
+      final senha = map['senha'];
+      if (senha is! String || senha.isEmpty) continue;
+      if (PasswordHasher.isHashed(senha)) continue;
+      map['senha'] = PasswordHasher.hash(senha);
+      await _localUsers!.put(key, map);
+    }
   }
 
   /// Seed antigo usava ano 1990 + dia de hoje → overlay de aniversário todo dia.
@@ -110,6 +126,21 @@ class AuthService extends ChangeNotifier {
     return UserProfile.fromJson(Map<String, dynamic>.from(row));
   }
 
+  Future<Map<String, dynamic>> _invokeAdminUsers(Map<String, dynamic> body) async {
+    final res = await Supabase.instance.client.functions.invoke(
+      'admin-users',
+      body: body,
+    );
+    final data = res.data;
+    if (data is Map && data['error'] != null) {
+      throw AuthException(data['error'].toString());
+    }
+    if (data is! Map) {
+      throw AuthException('Resposta inválida da função admin-users.');
+    }
+    return Map<String, dynamic>.from(data);
+  }
+
   Future<UserProfile> login({
     required String matricula,
     required String senha,
@@ -141,7 +172,15 @@ class AuthService extends ChangeNotifier {
     final raw = _localUsers!.get(mat);
     if (raw is! Map) throw AuthException('Matrícula não encontrada.');
     final map = Map<String, dynamic>.from(raw);
-    if (map['senha'] != senha) throw AuthException('Senha incorreta.');
+    final stored = map['senha']?.toString() ?? '';
+    if (!PasswordHasher.verify(senha, stored)) {
+      throw AuthException('Senha incorreta.');
+    }
+    // Upgrade transparente se ainda estava em texto claro.
+    if (!PasswordHasher.isHashed(stored)) {
+      map['senha'] = PasswordHasher.hash(senha);
+      await _localUsers!.put(mat, map);
+    }
     var profile = UserProfile.fromJson(map);
     if (!profile.ativo) throw AuthException('Usuário inativo.');
     profile = await _sanitizeLoadedUser(profile) ?? profile;
@@ -172,7 +211,6 @@ class AuthService extends ChangeNotifier {
     if (mat.isEmpty) throw AuthException('Informe a matrícula.');
 
     if (usingSupabase) {
-      // Resolve e-mail real do profile, se houver; senão usa sintético.
       final row = await Supabase.instance.client
           .from('profiles')
           .select('email, matricula')
@@ -190,9 +228,9 @@ class AuthService extends ChangeNotifier {
 
     final raw = _localUsers!.get(mat);
     if (raw is! Map) throw AuthException('Matrícula não encontrada.');
-    // Modo local: redefine para senha temporária conhecida.
     final map = Map<String, dynamic>.from(raw);
-    map['senha'] = 'ebd${mat.substring(0, mat.length.clamp(0, 4))}';
+    final temp = 'ebd${mat.substring(0, mat.length.clamp(0, 4))}';
+    map['senha'] = PasswordHasher.hash(temp);
     await _localUsers!.put(mat, map);
   }
 
@@ -210,12 +248,22 @@ class AuthService extends ChangeNotifier {
   }) async {
     final mat = matricula.trim();
     if (usingSupabase) {
-      // signUp no client troca a sessão do admin pelo novo usuário.
-      // Cadastro cloud: Dashboard Auth / API Admin (service role), ver SETUP_CLOUD.md.
-      throw AuthException(
-        'Com Supabase ativo, crie usuários pelo Dashboard (Auth → Add user + '
-        'promover em profiles). O cadastro pelo app encerraria a sessão do admin.',
-      );
+      final data = await _invokeAdminUsers({
+        'action': 'create',
+        'matricula': mat,
+        'nome': nome.trim(),
+        'senha': senha,
+        'role': role.name,
+        'grupo': grupo,
+        'telefone': telefone,
+        'email': email,
+        'aniversario': aniversario?.toIso8601String().split('T').first,
+        'ativo': ativo,
+        'permission_overrides': permissionOverrides,
+      });
+      final user = data['user'];
+      if (user is! Map) throw AuthException('Falha ao criar usuário na nuvem.');
+      return UserProfile.fromJson(Map<String, dynamic>.from(user));
     }
 
     if (_localUsers!.containsKey(mat)) {
@@ -233,20 +281,26 @@ class AuthService extends ChangeNotifier {
       ativo: ativo,
       permissionOverrides: permissionOverrides,
     );
-    await _localUsers!.put(mat, {...profile.toJson(), 'senha': senha});
+    await _localUsers!.put(mat, {
+      ...profile.toJson(),
+      'senha': PasswordHasher.hash(senha),
+    });
     return profile;
   }
 
   Future<void> resetUserPassword(String matricula, String novaSenha) async {
     if (usingSupabase) {
-      throw AuthException(
-        'No Supabase, use o painel Admin ou o e-mail de recuperação.',
-      );
+      await _invokeAdminUsers({
+        'action': 'reset_password',
+        'matricula': matricula.trim(),
+        'nova_senha': novaSenha,
+      });
+      return;
     }
     final raw = _localUsers!.get(matricula.trim());
     if (raw is! Map) throw AuthException('Matrícula não encontrada.');
     final map = Map<String, dynamic>.from(raw);
-    map['senha'] = novaSenha;
+    map['senha'] = PasswordHasher.hash(novaSenha);
     await _localUsers!.put(matricula.trim(), map);
   }
 
@@ -256,7 +310,6 @@ class AuthService extends ChangeNotifier {
         .length;
   }
 
-  /// Impede remover/desativar/rebaixar o último admin ativo.
   void _ensureNotLastAdmin({
     required UserProfile before,
     required UserProfile after,
@@ -286,9 +339,33 @@ class AuthService extends ChangeNotifier {
     String? novaSenha,
   }) async {
     if (usingSupabase) {
-      throw AuthException(
-        'Edição completa de perfil no Supabase ainda não está disponível neste app.',
-      );
+      final data = await _invokeAdminUsers({
+        'action': 'update',
+        'matricula': matricula.trim(),
+        if (nome != null) 'nome': nome,
+        if (role != null) 'role': role.name,
+        if (grupo != null) 'grupo': grupo,
+        'clear_grupo': clearGrupo,
+        if (telefone != null) 'telefone': telefone,
+        if (email != null) 'email': email,
+        if (aniversario != null)
+          'aniversario': aniversario.toIso8601String().split('T').first,
+        'clear_aniversario': clearAniversario,
+        if (ativo != null) 'ativo': ativo,
+        if (permissionOverrides != null)
+          'permission_overrides': permissionOverrides,
+        'clear_permission_overrides': clearPermissionOverrides,
+        if (novaSenha != null && novaSenha.trim().isNotEmpty)
+          'nova_senha': novaSenha.trim(),
+      });
+      final user = data['user'];
+      if (user is! Map) throw AuthException('Falha ao atualizar perfil.');
+      final profile = UserProfile.fromJson(Map<String, dynamic>.from(user));
+      if (currentUser?.matricula == profile.matricula) {
+        currentUser = profile;
+        notifyListeners();
+      }
+      return profile;
     }
     final mat = matricula.trim();
     final raw = _localUsers!.get(mat);
@@ -312,7 +389,7 @@ class AuthService extends ChangeNotifier {
     final senha = map['senha'];
     final saved = {...after.toJson(), if (senha != null) 'senha': senha};
     if (novaSenha != null && novaSenha.trim().isNotEmpty) {
-      saved['senha'] = novaSenha.trim();
+      saved['senha'] = PasswordHasher.hash(novaSenha.trim());
     }
     await _localUsers!.put(mat, saved);
 
@@ -324,7 +401,6 @@ class AuthService extends ChangeNotifier {
     return after;
   }
 
-  /// Exporta usuários locais (sem senhas) para backup.
   List<Map<String, dynamic>> exportUsersForBackup({bool includePasswords = false}) {
     if (_localUsers == null) return const [];
     final out = <Map<String, dynamic>>[];
@@ -337,7 +413,6 @@ class AuthService extends ChangeNotifier {
     return out;
   }
 
-  /// Restaura usuários de um backup (preserva senhas existentes se o backup não tiver).
   Future<void> importUsersFromBackup(List<dynamic> users) async {
     if (usingSupabase || _localUsers == null) return;
     for (final item in users) {
@@ -349,19 +424,35 @@ class AuthService extends ChangeNotifier {
       if (map['senha'] == null && existing is Map && existing['senha'] != null) {
         map['senha'] = existing['senha'];
       }
-      map['senha'] ??= 'ebd$mat';
-      // Valida estrutura mínima.
+      map['senha'] ??= PasswordHasher.hash('ebd$mat');
+      if (map['senha'] is String &&
+          !PasswordHasher.isHashed(map['senha'] as String)) {
+        map['senha'] = PasswordHasher.hash(map['senha'] as String);
+      }
       UserProfile.fromJson(map);
       await _localUsers!.put(mat, map);
     }
     notifyListeners();
   }
 
-  Future<List<UserProfile>> listLocalUsers() async {
+  /// Lista usuários (Hive local ou profiles via Edge `admin-users`).
+  Future<List<UserProfile>> listUsers() async {
+    if (usingSupabase) {
+      final data = await _invokeAdminUsers({'action': 'list'});
+      final users = data['users'];
+      if (users is! List) return const [];
+      return users
+          .whereType<Map>()
+          .map((e) => UserProfile.fromJson(Map<String, dynamic>.from(e)))
+          .toList()
+        ..sort((a, b) => a.nome.toLowerCase().compareTo(b.nome.toLowerCase()));
+    }
     return localUsersSnapshot;
   }
 
-  /// Snapshot síncrono dos usuários locais (Hive).
+  @Deprecated('Use listUsers()')
+  Future<List<UserProfile>> listLocalUsers() => listUsers();
+
   List<UserProfile> get localUsersSnapshot {
     if (_localUsers == null) return const [];
     return _localUsers!.values
@@ -374,7 +465,6 @@ class AuthService extends ChangeNotifier {
   Future<String?> lastMatricula() => _secure.read(key: 'last_matricula');
   Future<String?> lastSenha() => _secure.read(key: 'last_senha');
 
-  /// Prefill de matrícula na tela de login (não guarda senha).
   Future<bool> isRememberMeEnabled() async {
     return (await _secure.read(key: 'remember_me')) == '1';
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:livro_registro/config/app_config.dart';
 import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/permissions.dart';
@@ -17,6 +18,7 @@ import 'package:livro_registro/features/magazines/magazines_view.dart';
 import 'package:livro_registro/features/report/report_pdf.dart';
 import 'package:livro_registro/features/students/students_view.dart';
 import 'package:livro_registro/services/auth_service.dart';
+import 'package:livro_registro/services/cloud_sync_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/widgets/common.dart';
 
@@ -47,6 +49,11 @@ class HomeScreen extends StatelessWidget {
         if (can(user, perm) ||
             role == UserRole.aluno ||
             role == UserRole.professor) {
+          modes.add((id, label));
+        }
+      } else if (id == 'presenca') {
+        // Staff com editAttendance; aluno vê própria presença (self/read-only).
+        if (can(user, perm) || role == UserRole.aluno) {
           modes.add((id, label));
         }
       } else if (can(user, perm)) {
@@ -179,6 +186,17 @@ class HomeScreen extends StatelessWidget {
                               dense: true,
                               leading: Icon(Icons.cloud_upload_outlined),
                               title: Text('Backup'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        if (can(user, AppPermission.backup) &&
+                            AppConfig.supabaseConfigured)
+                          const PopupMenuItem(
+                            value: _HomeAction.cloudSync,
+                            child: ListTile(
+                              dense: true,
+                              leading: Icon(Icons.sync),
+                              title: Text('Sincronizar nuvem'),
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
@@ -371,6 +389,8 @@ class HomeScreen extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const BackupScreen()),
         );
+      case _HomeAction.cloudSync:
+        _runCloudSync(context);
       case _HomeAction.bible:
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
@@ -482,10 +502,37 @@ enum _HomeAction {
   users,
   lessons,
   backup,
+  cloudSync,
   bible,
   sorteios,
   quiz,
   placar,
   about,
   logout,
+}
+
+Future<void> _runCloudSync(BuildContext context) async {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.showSnackBar(
+    const SnackBar(content: Text('Sincronizando com a nuvem…')),
+  );
+  try {
+    final result =
+        await CloudSyncService().syncAll(context.read<AppState>());
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          result.warnings.isEmpty
+              ? 'Sincronizado: ${result.summary}'
+              : 'Sync parcial: ${result.summary}',
+        ),
+      ),
+    );
+  } catch (e) {
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(content: Text('Falha na sincronização: $e')),
+    );
+  }
 }

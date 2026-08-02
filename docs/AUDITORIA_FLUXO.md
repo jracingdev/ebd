@@ -7,7 +7,7 @@
 
 ## Resumo executivo
 
-O app Android offline-first está **funcionalmente rico** no aparelho: login local, roles/overrides, abas do livro de registro, classes custom, PDF com preview, backup SAF v7 (inclui engagement + users), Bíblia (Almeida 1819 embutida + Midvash/API), Desafios (sorteio/quiz ~1033 questões/placar) e “Trouxe Bíblia” na presença. Os gaps que ainda **quebram a visão de plataforma** estão no **cloud**: schema Supabase existe, mas `AppState` **nunca** lê/escreve essas tabelas; admin de usuários no Supabase está incompleto (edição/reset já bloqueados; criação via `signUp` era perigosa — agora bloqueada); FCM/`birthday-push` não enviam push real; Edge `sync-betel` não é chamada pelo app (sync é scrape client-side). Web/iOS seguem parciais (restore só Android; iOS sem signing). Qualidade: orientation lock ok, overflows mitigados em partes, testes quase só unitários de modelo.
+O app Android offline-first está **funcionalmente rico** no aparelho: login local, roles/overrides, abas do livro de registro, classes custom, PDF com preview, backup SAF v7 (inclui engagement + users), Bíblia (Almeida 1819 embutida + Midvash/API), Desafios (sorteio/quiz ~1033 questões/placar) e “Trouxe Bíblia” na presença. **Atualização 2026-08-02 (pós-auditoria):** G05 (presença aluno), G02 (`admin-users`), G07 (migration schema), G01 (`CloudSyncService` mínimo + UI), G03 (FCM HTTP v1 / dry-run), G06 (restore `file_picker`), G04 parcial (hash senhas Hive) e G08 (Betel edge→fallback) foram fechados no código. Ainda dependem de deploy/secrets em produção: Edge Functions, migration no projeto Supabase, Firebase. Sync ainda não cobre lessons/delivery/engagement. iOS Store signing segue fora.
 
 ## Mapa do fluxo feliz
 
@@ -43,14 +43,14 @@ Fluxo operacional típico (Android, modo local):
 
 | ID | Área | Severidade | Descrição | Impacto | Como fechar |
 |---|---|---|---|---|---|
-| G01 | Cloud / Sync | **P0** | Dados EBD (`students`, `attendance`, `finances`, `editions`, `lessons`, etc.) vivem só no Hive/`AppState`. Não há cliente Flutter que faça upsert/select nas tabelas da migration. | Multi-dispositivo e “backend pronto” são ilusão: cada aparelho é silo; cloud schema ocioso. | Serviço `EbdCloudSync` (pull/push + conflito) ligando `AppState` ↔ Supabase; começar por students/attendance/finances; RLS já parcialmente definida. |
-| G02 | Cloud / Auth admin | **P0** | Com Supabase: `updateUser` / `resetUserPassword` já lançam erro; `createUser` via `signUp` **trocava a sessão do admin** (corrigido em 2026-08-02: agora bloqueia com mensagem). `UsersAdminScreen` lista só Hive (`listLocalUsers`). Schema **não tem** coluna `permission_overrides`. | Admin cloud inviável pelo app; overrides granulares não persistem no Postgres. | Edge Function/API Admin (service role) para CRUD; `listProfiles` no Supabase; migration `permission_overrides jsonb`; UI dual local/cloud. |
-| G03 | Cloud / FCM | **P0** | `birthday-push` só faz `console.log('Would push…')`. FCM no app depende de `FIREBASE_ENABLED` + `google-services.json`; workspace atual off. | Aniversários/notificações não chegam em produção. | Implementar FCM HTTP v1 na Edge Function + secrets Firebase; validar token em `fcm_tokens` no device. |
-| G04 | Auth / Segurança | **P1** | Senhas locais em texto no Hive; biometria reusa `last_senha` no `FlutterSecureStorage`. | Compromisso do aparelho/backup de app data expõe credenciais. | Hash (bcrypt/argon2) no Hive; biometria com token de sessão de curta duração, não senha em claro. |
-| G05 | Auth / Permissões | **P1** | Role **aluno** tem `editAttendance` e a aba Presença permite marcar **toda** a turma (sem filtro “só eu”). | Aluno pode adulterar chamada da classe. | Preset aluno: só self-check-in **ou** remover `editAttendance` do aluno; UI filtrar por `alunoId`/`matricula`. |
-| G06 | Backup | **P1** | Restore nativo (SAF) só Android. Web/iOS: export via `share_plus`; `pickBackup` lança `UnsupportedError`. | Troca de plataforma / professor no browser não restaura. | `file_picker` + parse JSON no web/iOS; documentar fluxo Files/iCloud. |
-| G07 | Cloud / Schema drift | **P1** | `attendance_people` na migration **não** tem `trouxe_biblia`; app local sim (`trouxeBiblia`). | Sync futuro perderia “Trouxe Bíblia”. | `ALTER TABLE … ADD trouxe_biblia boolean default false` + mapear no sync. |
-| G08 | Betel | **P1** | App usa `BetelSyncService` (HTTP scrape no device). Edge `sync-betel` existe mas **não é invocada** pelo Flutter; catálogo cloud e local divergem. | Dois caminhos, manutenção dupla; scrape frágil a mudanças de HTML. | App chama Edge Function autenticada **ou** abandona a Edge e documenta só client; preferir Edge + leitura de `betel_catalog`. |
+| G01 | Cloud / Sync | **P0 → parcial** | **Fechado no código:** `CloudSyncService` push/pull de students, attendance, finances, editions + menu/tela “Sincronizar”. Ainda falta lessons, delivery_records, engagement e conflitos avançados. | Multi-dispositivo mínimo viável com `.env` + RLS. | Expandir entidades restantes. |
+| G02 | Cloud / Auth admin | **P0 → fechado (código)** | **Fechado:** Edge `admin-users` (list/create/update/reset) + `AuthService` invoca a função; migration `permission_overrides`. Requer `supabase functions deploy admin-users`. | Admin cloud pelo app após deploy. | Validar em projeto Supabase real. |
+| G03 | Cloud / FCM | **P0 → parcial** | **Fechado no código:** `birthday-push` com FCM HTTP v1 + dry-run explícito sem secrets; app registra token com logs claros. | Push real só com secrets Firebase + device. | Configurar secrets e testar cron. |
+| G04 | Auth / Segurança | **P1 → parcial** | **Fechado:** senhas Hive com `sha256$salt$hash` + migração automática. Biometria ainda reusa `last_senha` em Secure Storage. | Backup de app data não expõe senha em claro no Hive. | Token de sessão biométrico (sem senha). |
+| G05 | Auth / Permissões | **P1 → fechado** | Aluno sem `editAttendance`; aba Presença só própria linha (self-check-in se matrícula casar; senão read-only). | Aluno não adultera chamada da turma. | — |
+| G06 | Backup | **P1 → fechado** | Restore via `file_picker` em web/iOS/desktop; SAF permanece no Android. | Restore cross-platform. | — |
+| G07 | Cloud / Schema drift | **P1 → fechado** | Migration `20260802200000_schema_sync.sql` com `trouxe_biblia`, overrides, custom_groups, engagement. | Sync não perde “Trouxe Bíblia”. | Aplicar no projeto remoto. |
+| G08 | Betel | **P1 → fechado** | Edge `sync-betel` primeiro + leitura `betel_catalog`; fallback scrape; snackbar indica fonte. | Um caminho preferencial com fallback. | — |
 | G09 | Gamificação | **P1** | `GamificationEngine.deviceStudentId` não era passado na UI → pontos/badges de leitura/quiz **nunca** creditavam aluno. **Corrigido 2026-08-02** (match matrícula/nome). | Placar incompleto vs `docs/GAMIFICACAO.md`. | Validar no device: login = aluno com mesma matrícula; jogar quiz e ver pontos. Ainda falta matching robusto se nomes duplicados. |
 | G10 | Bíblia / Licença | **P1** | ARA/RA/SBB/NTLH dependem de API Midvash (+ opcional API.Bible). Embutir no APK exige contrato. Almeida 1819 ok offline. | Offline “completo” das versões modernas só após download; risco de API indisponível. | Contrato SBB **ou** UX clara de “baixar Bíblia completa” + monitoramento Midvash; API.Bible em produção se houver chave. |
 | G11 | Cloud / Storage | **P1** | Bucket `avatars` documentado; app não faz upload; fotos = path local (`FileImage` falha na web). | Fotos não sincronizam; web sem avatar. | Upload Storage + `foto_url`; na web usar NetworkImage/bytes. |
@@ -62,12 +62,20 @@ Fluxo operacional típico (Android, modo local):
 | G17 | Qualidade / UI | **P2** | Portrait lock em `main.dart`; `ScrollableFill`/`ResponsiveShell` em várias telas; painel/algumas listas ainda densas mobile-first. | Overflow residual possível em landscape se lock falhar (tablet/web). | Auditar `DashboardView`/admin em janela baixa; mais `ScrollableFill`. |
 | G18 | Admin / Produto | **P2** | Sem convites, auditoria de ações, dark mode, a11y priorizada. | Operação igreja grande fica manual. | Backlog pós-sync. |
 
-### Fixes mínimos aplicados nesta auditoria
+### Fixes aplicados nesta auditoria + ciclo seguinte
 
-| Fix | Arquivo | Motivo |
+| Fix | Arquivo / artefato | Motivo |
 |---|---|---|
-| Bloquear `createUser` com Supabase | `lib/services/auth_service.dart` | Evita `signUp` derrubar sessão do admin |
-| Ligar `deviceStudentId` no placar | `lib/features/engagement/gamification_tab.dart` | Créditos de quiz/leitura voltam a funcionar |
+| Bloquear `createUser` via `signUp` | (substituído) | Evitava derrubar sessão |
+| Edge `admin-users` + invoke no app | `supabase/functions/admin-users`, `auth_service.dart` | CRUD cloud sem trocar sessão |
+| Ligar `deviceStudentId` no placar | `gamification_tab.dart` | Créditos de quiz/leitura |
+| Presença restrita ao aluno | `permissions.dart`, `attendance_view.dart` | G05 |
+| `CloudSyncService` + UI | `cloud_sync_service.dart`, Backup/Home | G01 mínimo |
+| Schema sync SQL | `20260802200000_schema_sync.sql` | G07 |
+| FCM HTTP v1 / dry-run | `birthday-push/index.ts`, `fcm_service.dart` | G03 |
+| Restore `file_picker` | `drive_backup_service.dart` | G06 |
+| Hash senhas locais | `password_hasher.dart`, `auth_service.dart` | G04 parcial |
+| Betel edge→client | `betel_sync_service.dart` | G08 |
 
 ## O que já está sólido
 
@@ -81,13 +89,13 @@ Fluxo operacional típico (Android, modo local):
 - **Quiz:** `assets/quiz/questions.json` com **1033** questões carregadas por `QuizBank`.
 - **Docs operacionais:** `SETUP_CLOUD`, `BIBLIA`, `PERMISSOES`, `GAMIFICACAO`, `MULTIPLATAFORMA`, `PENDENCIAS` alinhados em grande parte com o código (exceto otimismo implícito de “backend pronto”).
 
-## Recomendação de ordem de ataque (próximos 5 passos)
+## Próximos passos (pós-fechamento no código)
 
-1. **Decidir modo de produção:** continuar offline-first com backup JSON como “sync humano”, **ou** investir em G01 (sync Supabase). Sem essa decisão, cloud vira dívida eterna.
-2. Se cloud: **fechar G02+G07** (admin via service role + colunas `permission_overrides` / `trouxe_biblia`) antes de ligar `.env` real em escala.
-3. **G05** (aluno não edita chamada da turma) — risco operacional imediato mesmo offline.
-4. **G06** restore web/iOS + validar backup v7 round-trip em CI (G16).
-5. **G03** FCM real só depois de tokens estáveis no Android; Betel unificar em um caminho (G08).
+1. **Ops cloud:** `supabase db push` + deploy `admin-users`, `sync-betel`, `birthday-push` + secrets Firebase.
+2. **Validar** createUser cloud, sync alunos/presença/ofertas e push de aniversário em device.
+3. Expandir sync (lessons, delivery_records, engagement) e política de conflito.
+4. Biometria sem senha em claro (G04 restante) + testes smoke auth/backup (G16).
+5. iOS signing / Store quando houver Mac + conta Apple.
 
 ## Referências cruzadas
 

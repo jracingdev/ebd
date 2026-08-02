@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:livro_registro/data/app_state.dart';
+import 'package:livro_registro/data/models.dart';
+import 'package:livro_registro/data/permissions.dart';
+import 'package:livro_registro/data/user_models.dart';
+import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/utils/format.dart';
 import 'package:livro_registro/widgets/common.dart';
@@ -28,9 +32,38 @@ class _AttendanceViewState extends State<AttendanceView> {
     });
   }
 
+  /// Aluno vinculado ao usuário logado (matrícula ou nome).
+  Student? _linkedStudent(AppState state, UserProfile user) {
+    final mat = user.matricula.trim().toLowerCase();
+    final byMat = state.students.where(
+      (s) => (s.matricula ?? '').trim().toLowerCase() == mat,
+    );
+    if (byMat.isNotEmpty) return byMat.first;
+    final nome = user.nome.trim().toLowerCase();
+    final byName = state.students.where(
+      (s) => s.nome.trim().toLowerCase() == nome && s.grupo == user.grupo,
+    );
+    return byName.isEmpty ? null : byName.first;
+  }
+
+  bool _isSelfRow(AttendancePerson p, Student? linked) {
+    if (linked == null) return false;
+    final key = p.alunoId ?? p.id;
+    return key == linked.id ||
+        p.nome.trim().toLowerCase() == linked.nome.trim().toLowerCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final user = context.watch<AuthService>().currentUser;
+    final canEditClass =
+        userHasPermission(user, AppPermission.editAttendance);
+    final isAluno = user?.role == UserRole.aluno;
+    final linked = (user != null && isAluno && !canEditClass)
+        ? _linkedStudent(state, user)
+        : null;
+
     final grupo = state.selectedGroup;
     final data = lastOrThisSunday();
     final sessions = state.attendance
@@ -41,7 +74,10 @@ class _AttendanceViewState extends State<AttendanceView> {
     final session = today.isEmpty ? null : today.first;
     final alunos = state.studentsFor(grupo);
 
-    _ensureSession(state, grupo, data);
+    // Só staff abre/mescla sessão da turma inteira.
+    if (canEditClass) {
+      _ensureSession(state, grupo, data);
+    }
 
     if (alunos.isEmpty) {
       return ScrollableFill(
@@ -56,17 +92,25 @@ class _AttendanceViewState extends State<AttendanceView> {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppColors.muted),
                 ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: () => state.setModeView('alunos'),
-                  child: const Text('Ir para Alunos'),
-                ),
+                if (canEditClass) ...[
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () => state.setModeView('alunos'),
+                    child: const Text('Ir para Alunos'),
+                  ),
+                ],
               ],
             ),
           ),
         ),
       );
     }
+
+    final visiblePeople = session == null
+        ? const <AttendancePerson>[]
+        : canEditClass
+            ? session.pessoas
+            : session.pessoas.where((p) => _isSelfRow(p, linked)).toList();
 
     return ListView(
       children: [
@@ -79,15 +123,32 @@ class _AttendanceViewState extends State<AttendanceView> {
               const SizedBox(height: 8),
               Text(
                 session == null
-                    ? 'Abrindo chamada… ${alunos.length} aluno(s)'
-                    : '${session.presentes} presente(s) / ${session.pessoas.length}',
+                    ? (canEditClass
+                        ? 'Abrindo chamada… ${alunos.length} aluno(s)'
+                        : 'Aguardando o professor abrir a chamada deste domingo.')
+                    : canEditClass
+                        ? '${session.presentes} presente(s) / ${session.pessoas.length}'
+                        : (visiblePeople.isEmpty
+                            ? 'Seu nome ainda não está nesta chamada. Peça ao professor para cadastrá-lo com a mesma matrícula.'
+                            : (visiblePeople.first.presente
+                                ? 'Você está marcado como presente'
+                                : 'Você está marcado como ausente')),
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
+              if (!canEditClass) ...[
+                const SizedBox(height: 6),
+                Text(
+                  linked == null
+                      ? 'Modo aluno: somente visualização da própria presença.'
+                      : 'Você pode confirmar só a sua presença (não a da turma).',
+                  style: const TextStyle(color: AppColors.muted, fontSize: 13),
+                ),
+              ],
             ],
           ),
         ),
         if (session != null)
-          for (final p in session.pessoas)
+          for (final p in visiblePeople)
             Column(
               children: [
                 SwitchListTile(
@@ -95,36 +156,41 @@ class _AttendanceViewState extends State<AttendanceView> {
                   subtitle: Text(p.presente ? 'Presente' : 'Ausente'),
                   value: p.presente,
                   activeThumbColor: AppColors.green,
-                  onChanged: (v) {
-                    final key = p.alunoId ?? p.id;
-                    state.setAttendancePresent(
-                      sessionId: session.id,
-                      alunoId: key,
-                      presente: v,
-                    );
-                  },
+                  onChanged: (!canEditClass && linked == null)
+                      ? null
+                      : (v) {
+                          final key = p.alunoId ?? p.id;
+                          state.setAttendancePresent(
+                            sessionId: session.id,
+                            alunoId: key,
+                            presente: v,
+                          );
+                        },
                 ),
                 if (p.presente)
                   Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 8, bottom: 4),
+                    padding:
+                        const EdgeInsets.only(left: 16, right: 8, bottom: 4),
                     child: SwitchListTile(
                       dense: true,
                       title: const Text('Trouxe Bíblia'),
                       value: p.trouxeBiblia,
                       activeThumbColor: AppColors.gold,
-                      onChanged: (v) {
-                        final key = p.alunoId ?? p.id;
-                        state.setAttendanceBroughtBible(
-                          sessionId: session.id,
-                          alunoId: key,
-                          trouxeBiblia: v,
-                        );
-                      },
+                      onChanged: (!canEditClass && linked == null)
+                          ? null
+                          : (v) {
+                              final key = p.alunoId ?? p.id;
+                              state.setAttendanceBroughtBible(
+                                sessionId: session.id,
+                                alunoId: key,
+                                trouxeBiblia: v,
+                              );
+                            },
                     ),
                   ),
               ],
             )
-        else
+        else if (canEditClass)
           for (final a in alunos)
             SwitchListTile(
               title: Text(a.nome),
@@ -132,8 +198,16 @@ class _AttendanceViewState extends State<AttendanceView> {
               value: false,
               activeThumbColor: AppColors.green,
               onChanged: null,
+            )
+        else
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Quando o professor abrir a chamada, sua presença aparecerá aqui.',
+              style: TextStyle(color: AppColors.muted),
             ),
-        if (sessions.length > 1) ...[
+          ),
+        if (canEditClass && sessions.length > 1) ...[
           const Padding(
             padding: EdgeInsets.all(12),
             child: Text(

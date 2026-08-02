@@ -112,10 +112,20 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
   Future<void> _syncBetel() async {
     setState(() => _busy = true);
     try {
-      final n = await context.read<AppState>().syncBetelCatalog();
+      final state = context.read<AppState>();
+      final n = await state.syncBetelCatalog();
       if (!mounted) return;
+      final src = state.lastBetelSyncSource;
+      final srcLabel = switch (src) {
+        'edge' => 'nuvem (Edge Function)',
+        'client' => 'site Betel (neste aparelho)',
+        'static' => 'catálogo embutido (fallback)',
+        _ => 'desconhecida',
+      };
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Catálogo Betel atualizado ($n itens).')),
+        SnackBar(
+          content: Text('Catálogo Betel: $n itens via $srcLabel.'),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -163,12 +173,19 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (canSync)
+          if (canSync) ...[
             FilledButton.icon(
               onPressed: _busy ? null : _syncBetel,
               icon: const Icon(Icons.cloud_sync),
               label: const Text('Atualizar catálogo Editora Betel'),
             ),
+            const SizedBox(height: 8),
+            const Text(
+              'Com Supabase: tenta a Edge Function sync-betel e lê '
+              'betel_catalog; se falhar, faz scrape no aparelho.',
+              style: TextStyle(color: AppColors.muted, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 16),
           if (state.editions.isEmpty)
             const Text(

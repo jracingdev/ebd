@@ -19,7 +19,7 @@ Em cada usuário é possível editar:
 | **Pastor** | Quase tudo, exceto sync Betel por padrão |
 | **Superintendente** | Gestão completa + sync Betel |
 | **Professor** | Presença, revistas, alunos, sorteio, relatório, backup; sem Ofertas/Painel |
-| **Aluno** | Presença + desafios (quiz/placar/sorteios como participante) |
+| **Aluno** | Desafios (quiz/placar/sorteios); aba Presença só a própria linha (self/read-only), sem `editAttendance` |
 
 Não é possível desativar/rebaixar o **último admin** ativo.
 
@@ -31,7 +31,7 @@ Definidas em `lib/data/permissions.dart`:
 |------|----------|
 | `manageUsers` | Gerenciar perfis/usuários |
 | `seeFinances` | Aba Ofertas |
-| `editAttendance` | Aba Presença |
+| `editAttendance` | Aba Presença (editar chamada da turma; aluno não tem no preset) |
 | `manageMagazines` | Aba Revistas |
 | `seePanel` | Aba Painel |
 | `seeStudents` | Aba Alunos |

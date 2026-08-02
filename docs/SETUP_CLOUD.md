@@ -33,22 +33,25 @@ repositórios públicos.
    O `project-ref` aparece na URL do Dashboard e em **Project Settings >
    General**.
 
-## 2. Aplicar a migration
+## 2. Aplicar as migrations
 
-O arquivo `supabase/migrations/20260727000000_init_ebd.sql` cria `profiles`,
-as roles (`aluno`, `professor`, `superintendente`, `pastor`, `admin`), tabelas
-do EBD, RLS, `fcm_tokens` e o gatilho que cria o perfil ao criar um usuário.
+Arquivos em `supabase/migrations/`:
+
+1. `20260727000000_init_ebd.sql` — `profiles`, roles, tabelas EBD, RLS,
+   `fcm_tokens`, gatilho de perfil.
+2. `20260802200000_schema_sync.sql` — `trouxe_biblia`,
+   `permission_overrides`, `custom_groups`, engagement mínimo, policy de
+   self-check-in na presença.
 
 Escolha uma opção:
 
 **Pelo Dashboard**
 
 1. Abra **SQL Editor > New query**.
-2. Cole todo o conteúdo de
-   `supabase/migrations/20260727000000_init_ebd.sql`.
-3. Clique em **Run** e confirme que não houve erros.
+2. Cole e execute o init; em seguida a migration de schema sync.
+3. Confirme que não houve erros.
 
-**Pelo CLI** (com a migration presente no repositório):
+**Pelo CLI** (com as migrations presentes no repositório):
 
 ```bash
 supabase db push
@@ -157,6 +160,7 @@ Com o projeto vinculado, publique:
 ```bash
 supabase functions deploy sync-betel
 supabase functions deploy birthday-push
+supabase functions deploy admin-users
 ```
 
 As variáveis `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` normalmente são
@@ -169,28 +173,48 @@ supabase secrets set SUPABASE_SERVICE_ROLE_KEY="SUA_SERVICE_ROLE_KEY"
 supabase secrets list
 ```
 
+Também é comum precisar da anon key no runtime da função `admin-users`
+(para validar o JWT do chamador). Se faltar:
+
+```bash
+supabase secrets set SUPABASE_ANON_KEY="SUA_CHAVE_ANON"
+```
+
+### `admin-users`
+
+CRUD de usuários Auth + `profiles` com **service role**, sem trocar a sessão
+do admin no app. O Flutter chama `functions.invoke('admin-users')` com ações
+`list`, `create`, `update`, `reset_password`. Exige que o chamador seja
+`admin`, `pastor` ou `superintendente`.
+
 ### `sync-betel`
 
-Essa função consulta o catálogo público da Editora Betel e atualiza
-`betel_catalog`. Após o deploy, execute-a manualmente pelo Dashboard (**Edge
-Functions > sync-betel > Invoke**) e confira a resposta `upserted`. Depois,
-agende a execução trimestral/semanal pelo agendador do Supabase ou pelo seu
-orquestrador HTTP, autenticando a chamada de acordo com a configuração de JWT
-da função.
+Consulta o catálogo público da Editora Betel e atualiza `betel_catalog`. O
+app tenta invocá-la primeiro e lê a tabela; se falhar, faz scrape no device.
+Após o deploy, teste pelo Dashboard (**Invoke**) e confira `upserted`.
 
-### `birthday-push`: estado atual e agendamento
+### `birthday-push`: FCM HTTP v1 e agendamento
 
-Publique-a pelo comando acima e agende uma chamada diária (por exemplo, pelo
-agendador/cron do Supabase). Porém, **ela ainda não envia notificações**: o
-arquivo atual apenas busca aniversariantes/tokens e registra
-`Would push to ...` no log. Ele não usa secrets `FIREBASE_*` nem implementa a
-autenticação OAuth da API FCM HTTP v1.
+Publique e agende uma chamada diária (cron do Supabase). Com secrets Firebase,
+a função envia push real via FCM HTTP v1. Sem secrets, responde
+`mode: "dry_run"` e só registra no log (não falha o cron).
 
-Portanto, o deploy e o cron validam a seleção de aniversariantes, mas o envio
-real exige implementar a chamada FCM HTTP v1 com uma service account do
-Firebase (e então cadastrar secrets como `FIREBASE_PROJECT_ID` e as
-credenciais da service account). Não considere o push de aniversário pronto
-até essa implementação existir e ser testada em um dispositivo.
+Secrets da service account Firebase (Project settings → Service accounts):
+
+```bash
+supabase secrets set FIREBASE_PROJECT_ID="seu-project-id"
+supabase secrets set FIREBASE_CLIENT_EMAIL="firebase-adminsdk-...@....iam.gserviceaccount.com"
+supabase secrets set FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+Não considere o push pronto em produção até testar em um device com token em
+`fcm_tokens` e secrets válidos.
+
+### Sync EBD no app
+
+Com login Supabase, o menu **Sincronizar nuvem** / tela Backup envia e baixa
+`students`, `attendance` (+ `trouxe_biblia`), `finances` e `editions`. Lições,
+entregas de revista e engagement ainda não entram nesse sync mínimo.
 
 ## 8. Criar o projeto Firebase e habilitar FCM
 
@@ -278,4 +302,5 @@ sincroniza dados e não deve ser tratado como acesso de produção.
 | Reset não chega | Preencha `profiles.email` com e-mail real e configure URLs do Auth; `@ebd.local` é sintético. |
 | Não cria token FCM | Verifique `google-services.json`, `FIREBASE_ENABLED=true`, permissão Android e a tabela `fcm_tokens`. |
 | Função Betel falha | Veja logs em **Edge Functions**, teste a URL da Editora e confirme secrets de runtime. |
-| Push de aniversário não chega | Esperado no código atual: `birthday-push` ainda não chama a API FCM HTTP v1. |
+| Push de aniversário não chega | Confira secrets `FIREBASE_*`, token em `fcm_tokens` e resposta da função (`mode` / `errors`). Sem secrets a função fica em dry-run. |
+| Admin não cria usuário no app | Deploy `admin-users` + migration schema sync; role do chamador deve ser staff gestor. |

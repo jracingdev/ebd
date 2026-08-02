@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:livro_registro/config/app_config.dart';
 import 'package:livro_registro/data/engagement/engagement_store.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/storage.dart';
@@ -364,8 +365,15 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Fonte usada na última sync Betel (`edge`, `client` ou `static`).
+  String? lastBetelSyncSource;
+
   Future<int> syncBetelCatalog() async {
-    final items = await _betelSync.syncCurrentTrimester();
+    final preferEdge = AppConfig.supabaseConfigured;
+    final (items, source) = await _betelSync.syncCurrentTrimester(
+      preferEdgeFunction: preferEdge,
+    );
+    lastBetelSyncSource = source;
     betelItems = items;
     await _storage.saveBetelCatalog(items);
     // Upsert editions sugeridas por grupo (sem sobrescrever se já existe no mesmo tri)
@@ -602,6 +610,52 @@ class AppState extends ChangeNotifier {
       await engagement!.importMap(backup.engagement);
     }
     await load();
+  }
+
+  /// Merge students vindos do Supabase (remoto prevalece no mesmo id).
+  Future<void> applyCloudStudents(List<Student> remote) async {
+    final byId = {for (final s in students) s.id: s};
+    for (final r in remote) {
+      byId[r.id] = r;
+    }
+    students = _normalizeStudents(byId.values.toList());
+    await _storage.saveStudents(students);
+    await _absorbOrphanGroups();
+    notifyListeners();
+  }
+
+  Future<void> applyCloudFinances(List<FinanceEntry> remote) async {
+    final byId = {for (final f in finances) f.id: f};
+    for (final r in remote) {
+      byId[r.id] = r;
+    }
+    finances = byId.values.toList()
+      ..sort((a, b) => b.data.compareTo(a.data));
+    await _storage.saveFinances(finances);
+    notifyListeners();
+  }
+
+  Future<void> applyCloudEditions(List<Edition> remote) async {
+    final byId = {for (final e in editions) e.id: e};
+    for (final r in remote) {
+      byId[r.id] = r;
+    }
+    editions = byId.values.toList()
+      ..sort((a, b) => b.criadoEm.compareTo(a.criadoEm));
+    await _storage.saveEditions(editions);
+    await _absorbOrphanGroups();
+    notifyListeners();
+  }
+
+  Future<void> applyCloudAttendance(List<AttendanceSession> remote) async {
+    final byId = {for (final a in attendance) a.id: a};
+    for (final r in remote) {
+      byId[r.id] = r;
+    }
+    attendance = byId.values.toList()
+      ..sort((a, b) => b.data.compareTo(a.data));
+    await _storage.saveAttendance(attendance);
+    notifyListeners();
   }
 }
 

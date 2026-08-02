@@ -105,8 +105,9 @@ Set<AppPermission> rolePermissionPreset(UserRole role) {
         AppPermission.backup,
       };
     case UserRole.aluno:
+      // Sem editAttendance: não marca chamada da turma.
+      // Aba Presença fica read-only / self-check-in na UI.
       return {
-        AppPermission.editAttendance,
         AppPermission.seeDesafios,
       };
   }

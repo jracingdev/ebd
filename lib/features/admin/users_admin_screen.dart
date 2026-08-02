@@ -25,7 +25,7 @@ class _UsersAdminScreenState extends State<UsersAdminScreen> {
   }
 
   Future<void> _reload() async {
-    final list = await context.read<AuthService>().listLocalUsers();
+    final list = await context.read<AuthService>().listUsers();
     if (!mounted) return;
     setState(() => _users = list);
   }

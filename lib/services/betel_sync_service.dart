@@ -1,8 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:livro_registro/config/app_config.dart';
 import 'package:livro_registro/data/betel_catalog.dart';
 import 'package:livro_registro/data/user_models.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Extrai o máximo possível do site da Editora Betel (HTML público).
+/// Extrai o máximo possível do site da Editora Betel (HTML público)
+/// ou lê/atualiza via Edge Function `sync-betel` quando Supabase está ativo.
 class BetelSyncService {
   static const base = 'https://www.editorabetel.com.br';
 
@@ -13,19 +17,88 @@ class BetelSyncService {
     return (tri, d.year);
   }
 
-  Future<List<BetelCatalogItem>> syncCurrentTrimester() async {
+  /// Retorna itens + fonte: `edge` | `client` | `static`.
+  Future<(List<BetelCatalogItem>, String)> syncCurrentTrimester({
+    bool preferEdgeFunction = true,
+  }) async {
     final (tri, year) = currentTrimester();
-    return syncTrimester(tri, year);
+    return syncTrimester(tri, year, preferEdgeFunction: preferEdgeFunction);
   }
 
-  Future<List<BetelCatalogItem>> syncTrimester(int tri, int year) async {
+  Future<(List<BetelCatalogItem>, String)> syncTrimester(
+    int tri,
+    int year, {
+    bool preferEdgeFunction = true,
+  }) async {
+    if (preferEdgeFunction && AppConfig.supabaseConfigured) {
+      try {
+        final fromEdge = await _syncViaEdgeThenRead(tri, year);
+        if (fromEdge.isNotEmpty) return (fromEdge, 'edge');
+      } catch (e) {
+        debugPrint('Betel edge sync falhou, fallback client: $e');
+      }
+    }
+    final client = await _syncViaClientScrape(tri, year);
+    if (client.isNotEmpty) return (client, 'client');
+    return (_fromStaticCatalog(tri, year), 'static');
+  }
+
+  /// Invoca Edge `sync-betel` e lê `betel_catalog`.
+  Future<List<BetelCatalogItem>> _syncViaEdgeThenRead(int tri, int year) async {
+    final client = Supabase.instance.client;
+    try {
+      await client.functions.invoke('sync-betel');
+    } catch (e) {
+      debugPrint('invoke sync-betel: $e (ainda tenta ler catálogo)');
+    }
+    final triLabel = '$triº Trimestre $year';
+    final rows = await client
+        .from('betel_catalog')
+        .select()
+        .eq('trimestre', triLabel);
+    final items = <BetelCatalogItem>[];
+    for (final row in rows as List) {
+      final m = Map<String, dynamic>.from(row as Map);
+      items.add(
+        BetelCatalogItem(
+          grupo: m['grupo'] as String,
+          trimestre: m['trimestre'] as String,
+          serie: (m['serie'] as String?) ?? '',
+          tema: m['tema'] as String?,
+          sku: m['sku'] as String?,
+          capaUrl: m['capa_url'] as String?,
+          produtoUrl: m['produto_url'] as String?,
+          preco: (m['preco'] as num?)?.toDouble(),
+        ),
+      );
+    }
+    // Adulto → também Varões localmente (como no scrape).
+    final cibe = items.where((i) => i.grupo == 'CIBE').toList();
+    if (cibe.isNotEmpty && !items.any((i) => i.grupo == 'Varões')) {
+      final src = cibe.first;
+      items.add(
+        BetelCatalogItem(
+          grupo: 'Varões',
+          trimestre: src.trimestre,
+          serie: src.serie,
+          tema: src.tema,
+          sku: src.sku,
+          capaUrl: src.capaUrl,
+          produtoUrl: src.produtoUrl,
+          preco: src.preco,
+        ),
+      );
+    }
+    return items;
+  }
+
+  Future<List<BetelCatalogItem>> _syncViaClientScrape(int tri, int year) async {
     final url = Uri.parse('$base/escola-dominical-$tri-trimestre-$year');
     final res = await http.get(url, headers: {
       'User-Agent': 'EBDApp/1.0',
       'Accept': 'text/html',
     });
     if (res.statusCode != 200) {
-      // Fallback para catálogo embutido se o site falhar.
       return _fromStaticCatalog(tri, year);
     }
     final html = res.body;
@@ -52,7 +125,6 @@ class BetelSyncService {
       ));
     }
 
-    // Enriquecer capas/temas via páginas de produto (limitado).
     final enriched = <BetelCatalogItem>[];
     for (final item in items) {
       enriched.add(await _enrichProduct(item));
@@ -132,7 +204,6 @@ class BetelSyncService {
       return 'Jovens';
     }
     if (t.contains('ADULTO') || t.contains('DOMINICAL')) {
-      // Adulto alimenta CIBE e Varões
       return 'CIBE';
     }
     return null;
