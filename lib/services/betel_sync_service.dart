@@ -168,11 +168,12 @@ class BetelSyncService {
   }
 
   List<BetelCatalogItem> _fromStaticCatalog(int tri, int year) {
+    // Sempre usa o trimestre solicitado — o mapa estático só fornece capa/série.
     final triLabel = '$triº Trimestre $year';
     return betelCatalog.entries.map((e) {
       return BetelCatalogItem(
         grupo: e.key,
-        trimestre: e.value['trimestre'] ?? triLabel,
+        trimestre: triLabel,
         serie: e.value['revista'] ?? e.key,
         capaUrl: e.value['capa'],
         tema: e.value['revista'],

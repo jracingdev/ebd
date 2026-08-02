@@ -172,6 +172,31 @@ class Edition extends Equatable {
         'criadoEm': criadoEm.toIso8601String(),
       };
 
+  Edition copyWith({
+    String? id,
+    String? grupo,
+    String? trimestre,
+    String? capa,
+    String? tema,
+    String? serie,
+    String? sku,
+    DateTime? criadoEm,
+    bool clearCapa = false,
+    bool clearTema = false,
+    bool clearSerie = false,
+    bool clearSku = false,
+  }) =>
+      Edition(
+        id: id ?? this.id,
+        grupo: grupo ?? this.grupo,
+        trimestre: trimestre ?? this.trimestre,
+        capa: clearCapa ? null : (capa ?? this.capa),
+        tema: clearTema ? null : (tema ?? this.tema),
+        serie: clearSerie ? null : (serie ?? this.serie),
+        sku: clearSku ? null : (sku ?? this.sku),
+        criadoEm: criadoEm ?? this.criadoEm,
+      );
+
   @override
   List<Object?> get props =>
       [id, grupo, trimestre, capa, tema, serie, sku, criadoEm];

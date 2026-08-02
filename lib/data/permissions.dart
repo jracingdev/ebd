@@ -31,7 +31,7 @@ enum AppPermission {
         AppPermission.backup => 'Backup e restauração',
         AppPermission.seeAllClasses => 'Ver todas as turmas',
         AppPermission.manageGroups => 'Criar / remover turmas',
-        AppPermission.syncBetel => 'Sincronizar catálogo Betel',
+        AppPermission.syncBetel => 'Atualizar catálogo Betel (não apaga dados)',
         AppPermission.seeReport => 'Gerar relatório',
         AppPermission.seeStudents => 'Ver / editar alunos',
         AppPermission.seeDesafios => 'Sorteios, quiz e placar',
@@ -49,7 +49,8 @@ enum AppPermission {
         AppPermission.backup => 'Exportar / restaurar dados do aparelho.',
         AppPermission.seeAllClasses => 'Navegar entre todas as classes.',
         AppPermission.manageGroups => 'Adicionar ou remover turmas extras.',
-        AppPermission.syncBetel => 'Atualizar catálogo de revistas Betel.',
+        AppPermission.syncBetel =>
+          'Baixa capas/temas Betel. Não apaga alunos, presença, ofertas nem entregas.',
         AppPermission.seeReport => 'Botão Relatório / PDF geral.',
         AppPermission.seeStudents => 'Aba Alunos e cadastro por turma.',
         AppPermission.seeDesafios => 'Menu Sorteios, Quiz e Conquistas.',

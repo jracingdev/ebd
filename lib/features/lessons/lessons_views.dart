@@ -110,21 +110,102 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
   }
 
   Future<void> _syncBetel() async {
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Atualizar catálogo Betel'),
+        content: const Text(
+          'Isto atualiza apenas capas, temas e metadados do catálogo Betel.\n\n'
+          'Não apaga alunos, presença, ofertas, entregas de revistas nem lições.\n'
+          'Não troca o trimestre ativo da turma automaticamente.\n\n'
+          'Se o catálogo trouxer um trimestre novo, pediremos confirmação '
+          'antes de criar edições extras.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Atualizar catálogo'),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true || !mounted) return;
+
     setState(() => _busy = true);
     try {
       final state = context.read<AppState>();
-      final n = await state.syncBetelCatalog();
+      // Sempre não destrutivo: não cria edições neste passo.
+      final result = await state.syncBetelCatalog(createMissingEditions: false);
       if (!mounted) return;
-      final src = state.lastBetelSyncSource;
-      final srcLabel = switch (src) {
+      final srcLabel = switch (result.source) {
         'edge' => 'nuvem (Edge Function)',
         'client' => 'site Betel (neste aparelho)',
         'static' => 'catálogo embutido (fallback)',
         _ => 'desconhecida',
       };
+
+      final pending = state.pendingBetelEditions();
+      if (pending.isNotEmpty) {
+        final tri = result.catalogTrimestre ?? pending.first.trimestre;
+        final differs = state.catalogTrimestreDiffersFromActiveEditions;
+        final create = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(
+              differs
+                  ? 'Criar edições do $tri?'
+                  : 'Criar edições ausentes?',
+            ),
+            content: Text(
+              differs
+                  ? 'O catálogo Betel está em "$tri", diferente do trimestre '
+                      'ativo nas turmas.\n\n'
+                      'Podemos cadastrar ${pending.length} edição(ões) novas '
+                      'sem apagar dados e sem mudar o trimestre que você já usa.\n\n'
+                      'As entregas/lições do trimestre atual continuam intactas.'
+                  : 'Há ${pending.length} edição(ões) do catálogo ainda não '
+                      'cadastradas localmente ($tri).\n\n'
+                      'Criar não apaga dados existentes nem troca a edição ativa.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Só catálogo'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Criar edições'),
+              ),
+            ],
+          ),
+        );
+        if (create == true && mounted) {
+          final n = await state.createPendingBetelEditions();
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Catálogo: ${result.catalogItems} itens ($srcLabel). '
+                'Criadas $n edição(ões). Trimestre ativo preservado.',
+              ),
+            ),
+          );
+          return;
+        }
+      }
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Catálogo Betel: $n itens via $srcLabel.'),
+          content: Text(
+            'Catálogo Betel: ${result.catalogItems} itens via $srcLabel. '
+            'Dados operacionais preservados'
+            '${result.editionsUpdated > 0 ? '; ${result.editionsUpdated} edição(ões) atualizada(s)' : ''}.',
+          ),
         ),
       );
     } catch (e) {
@@ -181,8 +262,10 @@ class _LessonsAdminScreenState extends State<LessonsAdminScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Com Supabase: tenta a Edge Function sync-betel e lê '
-              'betel_catalog; se falhar, faz scrape no aparelho.',
+              'Atualiza só o catálogo (capas/temas). Não zera alunos, '
+              'presença, ofertas nem entregas. Não troca o trimestre ativo '
+              'sem a sua confirmação.\n'
+              'Com Supabase: Edge Function sync-betel; se falhar, scrape local.',
               style: TextStyle(color: AppColors.muted, fontSize: 12),
             ),
           ],

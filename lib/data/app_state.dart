@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:livro_registro/config/app_config.dart';
+import 'package:livro_registro/data/betel_sync_safety.dart';
 import 'package:livro_registro/data/engagement/engagement_store.dart';
 import 'package:livro_registro/data/models.dart';
 import 'package:livro_registro/data/storage.dart';
@@ -23,6 +24,9 @@ class AppState extends ChangeNotifier {
   List<Lesson> lessons = [];
   List<BetelCatalogItem> betelItems = [];
   List<String> customGroups = [];
+
+  /// Edição em uso por turma — o sync Betel nunca altera este mapa.
+  Map<String, String> activeEditionByGroup = {};
 
   String selectedGroup = kGroups.first;
   String modeView = 'revistas';
@@ -50,7 +54,9 @@ class AppState extends ChangeNotifier {
     lessons = _storage.loadLessons();
     betelItems = _storage.loadBetelCatalog();
     customGroups = _storage.loadCustomGroups();
+    activeEditionByGroup = _storage.loadActiveEditions();
     await _absorbOrphanGroups();
+    await _sanitizeActiveEditions();
     if (!groups.contains(selectedGroup)) {
       selectedGroup = groups.first;
     }
@@ -58,6 +64,28 @@ class AppState extends ChangeNotifier {
       await _storage.saveStudents(students);
     }
     notifyListeners();
+  }
+
+  Future<void> _sanitizeActiveEditions() async {
+    final validIds = {for (final e in editions) e.id};
+    final cleaned = <String, String>{};
+    for (final e in activeEditionByGroup.entries) {
+      if (validIds.contains(e.value)) cleaned[e.key] = e.value;
+    }
+    // Se turma tem edições mas sem pin, fixa a resolução atual (não a mais nova às cegas).
+    for (final g in groups) {
+      if (cleaned.containsKey(g)) continue;
+      final resolved = resolveCurrentEdition(
+        editions: editions,
+        grupo: g,
+        records: records,
+      );
+      if (resolved != null) cleaned[g] = resolved.id;
+    }
+    if (!mapEquals(cleaned, activeEditionByGroup)) {
+      activeEditionByGroup = cleaned;
+      await _storage.saveActiveEditions(activeEditionByGroup);
+    }
   }
 
   bool _sameStudents(List<Student> a, List<Student> b) {
@@ -189,9 +217,26 @@ class AppState extends ChangeNotifier {
         ..sort((a, b) => a.nome.compareTo(b.nome));
 
   Edition? currentEdition(String grupo) {
-    final eds = editions.where((e) => e.grupo == grupo).toList()
+    return resolveCurrentEdition(
+      editions: editions,
+      grupo: grupo,
+      pinnedEditionId: activeEditionByGroup[grupo],
+      records: records,
+    );
+  }
+
+  Future<void> setActiveEdition(String grupo, String editionId) async {
+    final ed = editions.where((e) => e.id == editionId && e.grupo == grupo);
+    if (ed.isEmpty) return;
+    activeEditionByGroup = {...activeEditionByGroup, grupo: editionId};
+    await _storage.saveActiveEditions(activeEditionByGroup);
+    notifyListeners();
+  }
+
+  List<Edition> editionsForGroup(String grupo) {
+    final list = editions.where((e) => e.grupo == grupo).toList()
       ..sort((a, b) => b.criadoEm.compareTo(a.criadoEm));
-    return eds.isEmpty ? null : eds.first;
+    return list;
   }
 
   Lesson? lessonForGroupOn(String grupo, DateTime day) {
@@ -269,11 +314,13 @@ class AppState extends ChangeNotifier {
     String? tema,
     String? serie,
     String? sku,
+    bool makeActive = true,
   }) async {
+    final id = _uuid.v4().replaceAll('-', '').substring(0, 12);
     editions = [
       ...editions,
       Edition(
-        id: _uuid.v4().replaceAll('-', '').substring(0, 12),
+        id: id,
         grupo: grupo,
         trimestre: trimestre.trim(),
         capa: capa,
@@ -284,6 +331,12 @@ class AppState extends ChangeNotifier {
       ),
     ];
     await _storage.saveEditions(editions);
+    final hasPin = activeEditionByGroup[grupo] != null &&
+        editions.any((e) => e.id == activeEditionByGroup[grupo]);
+    if (makeActive || !hasPin) {
+      activeEditionByGroup = {...activeEditionByGroup, grupo: id};
+      await _storage.saveActiveEditions(activeEditionByGroup);
+    }
     notifyListeners();
   }
 
@@ -367,8 +420,31 @@ class AppState extends ChangeNotifier {
 
   /// Fonte usada na última sync Betel (`edge`, `client` ou `static`).
   String? lastBetelSyncSource;
+  BetelSyncResult? lastBetelSyncResult;
 
-  Future<int> syncBetelCatalog() async {
+  OperationalDataSnapshot _operationalSnapshot() => OperationalDataSnapshot(
+        students: students.length,
+        records: records.length,
+        finances: finances.length,
+        attendance: attendance.length,
+        lessons: lessons.length,
+        editionIds: {for (final e in editions) e.id},
+      );
+
+  /// Sync não destrutivo do catálogo Betel.
+  ///
+  /// Por padrão **só** atualiza metadados do catálogo e capas/tema/sku de
+  /// edições que já existem no mesmo grupo+trimestre.
+  /// Nunca apaga alunos, entregas, ofertas, presença ou lições.
+  /// Nunca troca a edição ativa da turma.
+  ///
+  /// Para criar edições novas do trimestre do catálogo, use
+  /// [createMissingEditions] = true **após confirmação explícita na UI**.
+  Future<BetelSyncResult> syncBetelCatalog({
+    bool createMissingEditions = false,
+  }) async {
+    final before = _operationalSnapshot();
+    final pinsBefore = Map<String, String>.from(activeEditionByGroup);
     final preferEdge = AppConfig.supabaseConfigured;
     final (items, source) = await _betelSync.syncCurrentTrimester(
       preferEdgeFunction: preferEdge,
@@ -376,40 +452,165 @@ class AppState extends ChangeNotifier {
     lastBetelSyncSource = source;
     betelItems = items;
     await _storage.saveBetelCatalog(items);
-    // Upsert editions sugeridas por grupo (sem sobrescrever se já existe no mesmo tri)
-    for (final item in items) {
-      final exists = editions.any(
-        (e) => e.grupo == item.grupo && e.trimestre == item.trimestre,
-      );
-      if (!exists) {
-        await addEdition(
-          grupo: item.grupo,
-          trimestre: item.trimestre,
-          capa: item.capaUrl,
-          tema: item.tema,
-          serie: item.serie,
-          sku: item.sku,
-        );
-      }
-      // Adulto também em Varões
-      if (item.grupo == 'CIBE') {
-        final existsV = editions.any(
-          (e) => e.grupo == 'Varões' && e.trimestre == item.trimestre,
-        );
-        if (!existsV) {
-          await addEdition(
-            grupo: 'Varões',
-            trimestre: item.trimestre,
-            capa: item.capaUrl,
-            tema: item.tema,
-            serie: item.serie,
-            sku: item.sku,
-          );
+
+    var updated = 0;
+    var created = 0;
+
+    // Atualiza metadados Betel em edições já existentes (mesmo grupo+tri).
+    var editionsChanged = false;
+    editions = editions.map((e) {
+      BetelCatalogItem? match;
+      for (final item in items) {
+        if (item.grupo == e.grupo && item.trimestre == e.trimestre) {
+          match = item;
+          break;
         }
       }
+      if (match == null && e.grupo == 'Varões') {
+        for (final item in items) {
+          if (item.grupo == 'CIBE' && item.trimestre == e.trimestre) {
+            match = item;
+            break;
+          }
+        }
+      }
+      if (match == null) return e;
+      final next = e.copyWith(
+        capa: match.capaUrl ?? e.capa,
+        tema: match.tema ?? e.tema,
+        serie: match.serie.isNotEmpty ? match.serie : e.serie,
+        sku: match.sku ?? e.sku,
+      );
+      if (next != e) {
+        updated++;
+        editionsChanged = true;
+      }
+      return next;
+    }).toList();
+    if (editionsChanged) {
+      await _storage.saveEditions(editions);
     }
+
+    if (createMissingEditions) {
+      created = await _createMissingFromCatalog(
+        items,
+        restorePins: pinsBefore,
+      );
+    }
+
+    // Restaura pins — sync nunca muda o trimestre ativo silenciosamente.
+    if (!mapEquals(pinsBefore, activeEditionByGroup)) {
+      activeEditionByGroup = pinsBefore;
+      await _storage.saveActiveEditions(activeEditionByGroup);
+    }
+
+    final after = _operationalSnapshot();
+    final ok = before.preservedBy(after);
+    if (!ok) {
+      debugPrint(
+        'ALERTA Betel sync: dados operacionais mudaram inesperadamente '
+        'students ${before.students}->${after.students} '
+        'records ${before.records}->${after.records} '
+        'finances ${before.finances}->${after.finances} '
+        'attendance ${before.attendance}->${after.attendance} '
+        'lessons ${before.lessons}->${after.lessons}',
+      );
+    }
+
+    final pending = missingEditionsFromCatalog(
+      catalog: items,
+      editions: editions,
+    );
+    final catalogTri = items.isEmpty ? null : items.first.trimestre;
+    final result = BetelSyncResult(
+      catalogItems: items.length,
+      source: source,
+      editionsCreated: created,
+      editionsUpdated: updated,
+      catalogTrimestre: catalogTri,
+      operationalDataUnchanged: ok,
+      pendingNewEditionKeys: [
+        for (final i in pending) '${i.grupo}|${i.trimestre}',
+      ],
+    );
+    lastBetelSyncResult = result;
     notifyListeners();
-    return items.length;
+    return result;
+  }
+
+  Future<int> _createMissingFromCatalog(
+    List<BetelCatalogItem> items, {
+    required Map<String, String> restorePins,
+  }) async {
+    var created = 0;
+    final missing = missingEditionsFromCatalog(
+      catalog: items,
+      editions: editions,
+    );
+    for (final item in missing) {
+      await addEdition(
+        grupo: item.grupo,
+        trimestre: item.trimestre,
+        capa: item.capaUrl,
+        tema: item.tema,
+        serie: item.serie,
+        sku: item.sku,
+        makeActive: false,
+      );
+      created++;
+    }
+    if (!mapEquals(restorePins, activeEditionByGroup)) {
+      activeEditionByGroup = Map<String, String>.from(restorePins);
+      await _storage.saveActiveEditions(activeEditionByGroup);
+    }
+    return created;
+  }
+
+  /// Lista itens do último catálogo que ainda não têm edição local.
+  List<BetelCatalogItem> pendingBetelEditions() => missingEditionsFromCatalog(
+        catalog: betelItems,
+        editions: editions,
+      );
+
+  /// Cria edições ausentes do catálogo já baixado, sem mudar a edição ativa.
+  Future<int> createPendingBetelEditions() async {
+    final before = _operationalSnapshot();
+    final pinsBefore = Map<String, String>.from(activeEditionByGroup);
+    final created = await _createMissingFromCatalog(
+      betelItems,
+      restorePins: pinsBefore,
+    );
+    final after = _operationalSnapshot();
+    if (!before.preservedBy(after)) {
+      debugPrint('ALERTA createPendingBetelEditions: dados operacionais mudaram');
+    }
+    final pending = pendingBetelEditions();
+    lastBetelSyncResult = BetelSyncResult(
+      catalogItems: betelItems.length,
+      source: lastBetelSyncSource ?? 'cache',
+      editionsCreated: created,
+      editionsUpdated: lastBetelSyncResult?.editionsUpdated ?? 0,
+      catalogTrimestre: betelItems.isEmpty ? null : betelItems.first.trimestre,
+      operationalDataUnchanged: before.preservedBy(after),
+      pendingNewEditionKeys: [
+        for (final i in pending) '${i.grupo}|${i.trimestre}',
+      ],
+    );
+    notifyListeners();
+    return created;
+  }
+
+  bool get catalogTrimestreDiffersFromActiveEditions {
+    final tri = lastBetelSyncResult?.catalogTrimestre ??
+        (betelItems.isEmpty ? null : betelItems.first.trimestre);
+    final actives = <Edition>[
+      for (final g in groups)
+        if (currentEdition(g) != null) currentEdition(g)!,
+    ];
+    return catalogTrimestreDiffersFromActive(
+      catalogTrimestre: tri,
+      activeEditions: actives,
+    );
   }
 
   Future<void> ensureAttendanceSession(String grupo, String data) async {

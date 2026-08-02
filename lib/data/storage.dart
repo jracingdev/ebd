@@ -13,6 +13,7 @@ const _keyStudents = 'students';
 const _keyLessons = 'lessons';
 const _keyBetel = 'betel_catalog';
 const _keyCustomGroups = 'custom_groups';
+const _keyActiveEditions = 'active_editions';
 
 class EbdStorage {
   EbdStorage(this._box);
@@ -119,6 +120,25 @@ class EbdStorage {
               .toSet()
               .toList(),
         ),
+      );
+
+  /// Edição ativa por turma (`grupo` → `editionId`). O sync Betel não altera isso.
+  Map<String, String> loadActiveEditions() {
+    final raw = _box.get(_keyActiveEditions);
+    if (raw == null) return {};
+    final decoded = raw is String ? jsonDecode(raw) : raw;
+    if (decoded is! Map) return {};
+    return {
+      for (final e in decoded.entries)
+        if (e.key.toString().trim().isNotEmpty &&
+            e.value.toString().trim().isNotEmpty)
+          e.key.toString(): e.value.toString(),
+    };
+  }
+
+  Future<void> saveActiveEditions(Map<String, String> map) => _box.put(
+        _keyActiveEditions,
+        jsonEncode(map),
       );
 
   AppBackup exportBackup() => AppBackup(

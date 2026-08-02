@@ -42,6 +42,7 @@ class MagazinesView extends StatelessWidget {
       );
     }
 
+    final groupEditions = state.editionsForGroup(grupo);
     final totals = editionTotalsOf(state.records, edition.id);
     return ListView(
       children: [
@@ -49,8 +50,38 @@ class MagazinesView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(edition.trimestre,
-                  style: Theme.of(context).textTheme.titleLarge),
+              if (groupEditions.length > 1) ...[
+                DropdownButtonFormField<String>(
+                  key: ValueKey('ed-${edition.id}'),
+                  initialValue: edition.id,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Trimestre / edição ativa',
+                    border: OutlineInputBorder(),
+                    helperText:
+                        'Trocar aqui só muda a visão — não apaga entregas.',
+                  ),
+                  items: [
+                    for (final e in groupEditions)
+                      DropdownMenuItem(
+                        value: e.id,
+                        child: Text(
+                          e.trimestre,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (id) {
+                    if (id != null) {
+                      state.setActiveEdition(grupo, id);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+              ] else
+                Text(edition.trimestre,
+                    style: Theme.of(context).textTheme.titleLarge),
               if (catalog != null)
                 Text(catalog['revista']!,
                     style: const TextStyle(color: AppColors.muted)),
