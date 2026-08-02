@@ -4,6 +4,7 @@ import 'package:livro_registro/data/bible/bible_catalog.dart';
 import 'package:livro_registro/data/bible/bible_models.dart';
 import 'package:livro_registro/data/bible/sample_texts.dart';
 import 'package:livro_registro/services/bible_repository.dart';
+import 'package:livro_registro/features/bible/bible_chapter_picker.dart';
 import 'package:livro_registro/features/bible/bible_tts_settings_sheet.dart';
 import 'package:livro_registro/services/bible_tts_service.dart';
 import 'package:livro_registro/theme/app_theme.dart';
@@ -230,7 +231,26 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
                     onPressed: _chapter > 1 ? () => _goChapter(-1) : null,
                     icon: const Icon(Icons.chevron_left),
                   ),
-                  Text('Cap. $_chapter'),
+                  TextButton(
+                    onPressed: book == null
+                        ? null
+                        : () async {
+                            final n = await showBibleChapterPicker(
+                              context,
+                              book: book,
+                              currentChapter: _chapter,
+                            );
+                            if (n == null || !mounted) return;
+                            if (n == _chapter) return;
+                            await _tts.stop();
+                            setState(() {
+                              _speaking = false;
+                              _chapter = n;
+                            });
+                            await _load();
+                          },
+                    child: Text('Cap. $_chapter'),
+                  ),
                   IconButton(
                     onPressed: book != null && _chapter < book.chapters
                         ? () => _goChapter(1)

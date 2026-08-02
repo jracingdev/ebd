@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:livro_registro/data/bible/bible_catalog.dart';
 import 'package:livro_registro/data/bible/bible_models.dart';
 import 'package:livro_registro/features/bible/bible_bookmarks_screen.dart';
+import 'package:livro_registro/features/bible/bible_chapter_picker.dart';
 import 'package:livro_registro/features/bible/bible_plans_screen.dart';
 import 'package:livro_registro/features/bible/bible_reader_screen.dart';
 import 'package:livro_registro/features/bible/bible_search_screen.dart';
@@ -734,41 +735,8 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
     );
     if (book == null || !context.mounted) return;
 
-    // Grade canônica 1..N (não limitada a cache/amostra). Scroll obrigatório
-    // para livros longos (ex.: Salmos 150) — Wrap sem scroll cortava chips.
-    final chapter = await showDialog<int>(
-      context: context,
-      builder: (ctx) {
-        final maxH = MediaQuery.sizeOf(ctx).height * 0.62;
-        return AlertDialog(
-          backgroundColor: AppColors.cream,
-          title: Text('${book.name} · ${book.chapters} cap.'),
-          content: SizedBox(
-            width: 320,
-            height: maxH.clamp(220.0, 520.0),
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (var i = 1; i <= book.chapters; i++)
-                    ActionChip(
-                      label: Text('$i'),
-                      onPressed: () => Navigator.pop(ctx, i),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar'),
-            ),
-          ],
-        );
-      },
-    );
+    // Grade canônica 1..N com GridView rolável (Salmos 150, Isaías 66, …).
+    final chapter = await showBibleChapterPicker(context, book: book);
     if (chapter == null || !context.mounted) return;
     _openReader(book.id, chapter);
   }
