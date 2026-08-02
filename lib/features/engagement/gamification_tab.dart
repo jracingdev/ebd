@@ -4,7 +4,9 @@ import 'package:livro_registro/data/app_state.dart';
 import 'package:livro_registro/data/engagement/engagement_store.dart';
 import 'package:livro_registro/data/engagement/gamification_engine.dart';
 import 'package:livro_registro/data/engagement/gamification_rules.dart';
+import 'package:livro_registro/data/user_models.dart';
 import 'package:livro_registro/features/dashboard/dashboard_analytics.dart';
+import 'package:livro_registro/services/auth_service.dart';
 import 'package:livro_registro/services/bible_repository.dart';
 import 'package:livro_registro/theme/app_theme.dart';
 import 'package:livro_registro/utils/format.dart';
@@ -14,15 +16,33 @@ import 'package:livro_registro/widgets/common.dart';
 class GamificationTab extends StatelessWidget {
   const GamificationTab({super.key});
 
+  /// Liga o usuário logado ao cadastro de aluno (matrícula ou nome único).
+  static String? resolveDeviceStudentId(AppState state, UserProfile? user) {
+    if (user == null) return null;
+    final mat = user.matricula.trim();
+    final byMat = state.students
+        .where((s) => (s.matricula ?? '').trim() == mat && mat.isNotEmpty)
+        .toList();
+    if (byMat.isNotEmpty) return byMat.first.id;
+    final nome = user.nome.trim().toLowerCase();
+    final byName = state.students
+        .where((s) => s.nome.trim().toLowerCase() == nome)
+        .toList();
+    if (byName.length == 1) return byName.first.id;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final store = context.watch<EngagementStore>();
     final bible = context.watch<BibleRepository>();
+    final user = context.watch<AuthService>().currentUser;
     final engine = GamificationEngine(
       state: state,
       store: store,
       bible: bible,
+      deviceStudentId: resolveDeviceStudentId(state, user),
     );
     final scores = engine.computeStudentScores(onlyGroup: state.selectedGroup);
     final offers = engine.classOfferRanking();

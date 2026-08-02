@@ -210,45 +210,11 @@ class AuthService extends ChangeNotifier {
   }) async {
     final mat = matricula.trim();
     if (usingSupabase) {
-      final signed = await Supabase.instance.client.auth.signUp(
-        email: email?.isNotEmpty == true
-            ? email!
-            : AppConfig.matriculaToEmail(mat),
-        password: senha,
-        data: {
-          'matricula': mat,
-          'nome': nome,
-          'role': role.name,
-          'grupo': grupo,
-        },
-      );
-      if (signed.user == null) {
-        throw AuthException('Não foi possível criar o usuário.');
-      }
-      await Supabase.instance.client.from('profiles').upsert({
-        'id': signed.user!.id,
-        'matricula': mat,
-        'nome': nome,
-        'role': role.name,
-        'grupo': grupo,
-        'telefone': telefone,
-        'email': email,
-        'aniversario': aniversario?.toIso8601String().split('T').first,
-        'ativo': ativo,
-        if (permissionOverrides != null && permissionOverrides.isNotEmpty)
-          'permission_overrides': permissionOverrides,
-      });
-      return UserProfile(
-        id: signed.user!.id,
-        matricula: mat,
-        nome: nome,
-        role: role,
-        grupo: grupo,
-        telefone: telefone,
-        email: email,
-        aniversario: aniversario,
-        ativo: ativo,
-        permissionOverrides: permissionOverrides,
+      // signUp no client troca a sessão do admin pelo novo usuário.
+      // Cadastro cloud: Dashboard Auth / API Admin (service role), ver SETUP_CLOUD.md.
+      throw AuthException(
+        'Com Supabase ativo, crie usuários pelo Dashboard (Auth → Add user + '
+        'promover em profiles). O cadastro pelo app encerraria a sessão do admin.',
       );
     }
 
